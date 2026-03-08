@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title">
+  <title>LA 5K run note cover</title>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#f2e2b2" />
+      <stop offset="55%" stop-color="#f8efe0" />
+      <stop offset="100%" stop-color="#f5f1ea" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#sky)" />
+  <circle cx="920" cy="156" r="76" fill="#e5b15d" opacity=".95" />
+  <path d="M0 566c92-35 189-32 276 12c89 46 163 47 255 8c94-40 167-41 271 10c101 49 209 58 398-2V800H0z" fill="#d2c0a7" />
+  <path d="M0 620c88-23 175-18 265 18c96 39 171 42 260 8c103-39 176-38 275 12c123 61 244 64 400-10V800H0z" fill="#12395b" opacity=".9" />
+  <path d="M138 646c46-118 121-177 228-177c73 0 142 29 205 86c49 45 98 67 145 67c47 0 95-23 145-69c62-58 131-87 206-87c57 0 111 16 161 47v34c-52-31-105-46-159-46c-66 0-126 27-181 80c-58 56-116 84-173 84s-114-27-172-81c-55-52-115-79-180-79c-93 0-159 50-201 151z" fill="#fff6ea" opacity=".58" />
+  <text x="88" y="124" fill="#12395b" font-family="Iowan Old Style, Baskerville, Georgia, serif" font-size="54">Morning run in Los Angeles</text>
+  <text x="90" y="184" fill="#5e5a55" font-family="LXGW WenKai, Georgia, serif" font-size="28">5 km • cool air • finally found a pace that felt calm</text>
+</svg>

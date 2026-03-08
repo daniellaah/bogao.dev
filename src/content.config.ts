@@ -3,6 +3,7 @@ import { SITE } from "@/config";
 
 export const BLOG_PATH = "src/content/blog";
 export const PROJECTS_PATH = "src/content/projects";
+export const NOTES_PATH = "src/content/notes";
 
 const blog = defineCollection({
   schema: ({ image }) =>
@@ -43,4 +44,23 @@ const projects = defineCollection({
     }),
 });
 
-export const collections = { blog, projects };
+const notes = defineCollection({
+  schema: () =>
+    z.object({
+      title: z.string().optional(),
+      description: z.string(),
+      noteDate: z.coerce.date(),
+      draft: z.boolean().default(false),
+      lang: z.enum(SITE.supportedLangs).default(SITE.lang),
+      kind: z
+        .enum(["memo", "run", "photo", "idea", "travel"])
+        .default("memo"),
+      location: z.string().optional(),
+      mood: z.string().optional(),
+      tags: z.array(z.string()).default([]),
+      photos: z.array(z.string()).default([]),
+      canonicalURL: z.string().optional(),
+    }),
+});
+
+export const collections = { blog, projects, notes };

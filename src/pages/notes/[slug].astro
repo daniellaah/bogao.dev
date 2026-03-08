@@ -1,0 +1,105 @@
+---
+import type { GetStaticPaths } from "astro";
+import { getCollection, render } from "astro:content";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import BackButton from "@/components/BackButton.astro";
+import getSortedNotes from "@/utils/getSortedNotes";
+import { getNotePath } from "@/utils/getNotePath";
+import { SITE } from "@/config";
+
+dayjs.extend(utc);
+
+export const getStaticPaths = (async () => {
+  const notes = getSortedNotes(await getCollection("notes"));
+
+  return notes.map(note => ({
+    params: { slug: getNotePath(note.id).split("/").at(-1) },
+    props: { note },
+  }));
+}) satisfies GetStaticPaths;
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+
+const { title, description, noteDate, lang, location, kind, mood, photos, canonicalURL } =
+  note.data;
+
+const heading = title ?? dayjs.utc(noteDate).format("MMM D, YYYY");
+const kindLabel = kind[0].toUpperCase() + kind.slice(1);
+const heroImage = photos[0];
+const heroImageSrc = heroImage;
+---
+
+<Layout
+  title={`${heading} | Notes | ${SITE.title}`}
+  description={description}
+  lang={lang}
+  canonicalURL={canonicalURL}
+  ogImage={heroImageSrc}
+>
+  <Header />
+  <BackButton />
+  <main id="main-content" class="app-layout pb-12" data-pagefind-body>
+    <section class="grid gap-8 border-b border-border pb-8 lg:grid-cols-[8rem_minmax(0,1fr)]">
+      <div class="rounded-[1.75rem] border border-border bg-muted/20 p-4 text-center">
+        <p class="text-3xl font-semibold text-accent">
+          {dayjs.utc(noteDate).format("DD")}
+        </p>
+        <p class="mt-2 text-xs uppercase tracking-[0.16em] opacity-65">
+          {dayjs.utc(noteDate).format("MMM YYYY")}
+        </p>
+      </div>
+
+      <div>
+        <div class="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] opacity-65">
+          <span>{kindLabel}</span>
+          {location && <span>{location}</span>}
+          {mood && <span>{mood}</span>}
+        </div>
+        <h1 class="mt-4 text-3xl font-semibold text-accent sm:text-4xl">
+          {heading}
+        </h1>
+        <p class="mt-4 max-w-3xl leading-8 opacity-80">{description}</p>
+      </div>
+    </section>
+
+    {
+      heroImageSrc && (
+        <div class="mt-8 overflow-hidden rounded-[2rem] border border-border">
+          <img
+            src={heroImageSrc}
+            alt={heading}
+            class="max-h-[34rem] w-full object-cover"
+          />
+        </div>
+      )
+    }
+
+    <article class="app-prose mt-8 w-full max-w-app">
+      <Content />
+    </article>
+
+    {
+      photos.length > 1 && (
+        <section class="mt-10 border-t border-border pt-8">
+          <h2 class="text-2xl font-semibold">More Photos</h2>
+          <div class="mt-6 grid gap-4 md:grid-cols-2">
+            {photos.slice(1).map(photo => {
+              const src = photo;
+              return (
+                <div class="overflow-hidden rounded-[1.5rem] border border-border">
+                  <img src={src} alt={heading} class="h-72 w-full object-cover" />
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )
+    }
+  </main>
+  <Footer />
+</Layout>

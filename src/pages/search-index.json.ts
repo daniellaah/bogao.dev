@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 import { getPath } from "@/utils/getPath";
 import { getProjectPath } from "@/utils/getProjectPath";
+import { getNotePath } from "@/utils/getNotePath";
 
 const stripMarkdown = (value: string) =>
   value
@@ -18,6 +19,7 @@ const stripMarkdown = (value: string) =>
 export const GET: APIRoute = async () => {
   const posts = await getCollection("blog", ({ data }) => !data.draft);
   const projects = await getCollection("projects", ({ data }) => !data.draft);
+  const notes = await getCollection("notes", ({ data }) => !data.draft);
 
   const records = [
     ...posts.map(post => ({
@@ -41,6 +43,22 @@ export const GET: APIRoute = async () => {
         ...project.data.stack,
       ].join(" "),
       content: stripMarkdown(project.body),
+    })),
+    ...notes.map(note => ({
+      title:
+        note.data.title ??
+        new Date(note.data.noteDate).toISOString().slice(0, 10),
+      description: note.data.description,
+      url: getNotePath(note.id),
+      kind: "Note",
+      lang: note.data.lang,
+      metaText: [
+        note.data.kind,
+        note.data.location ?? "",
+        note.data.mood ?? "",
+        ...note.data.tags,
+      ].join(" "),
+      content: stripMarkdown(note.body),
     })),
   ];
 

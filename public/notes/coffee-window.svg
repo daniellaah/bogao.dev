@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title">
+  <title>Coffee shop memo cover</title>
+  <rect width="1200" height="800" fill="#efe3cf" />
+  <rect x="108" y="78" width="984" height="644" rx="36" fill="#f8f4ee" stroke="#d3c0a6" stroke-width="8" />
+  <rect x="174" y="142" width="410" height="520" rx="22" fill="#d8e0e4" />
+  <rect x="616" y="142" width="410" height="520" rx="22" fill="#fbf1e3" />
+  <circle cx="380" cy="324" r="104" fill="#c8d4d9" />
+  <rect x="690" y="374" width="198" height="108" rx="28" fill="#12395b" />
+  <rect x="858" y="396" width="48" height="60" rx="16" fill="#12395b" />
+  <rect x="716" y="342" width="142" height="38" rx="18" fill="#d2b28c" />
+  <path d="M720 326c0-29 22-52 52-52c19 0 37 10 46 24c8-18 25-30 47-30c30 0 54 24 54 54" fill="none" stroke="#9f7448" stroke-width="12" stroke-linecap="round" />
+  <text x="694" y="220" fill="#12395b" font-family="Iowan Old Style, Baskerville, Georgia, serif" font-size="52">Coffee, window light, slow notes</text>
+  <text x="694" y="270" fill="#5e5a55" font-family="LXGW WenKai, Georgia, serif" font-size="28">Small observations that should stay small</text>
+</svg>

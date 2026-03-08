@@ -7,8 +7,10 @@ import Socials from "@/components/Socials.astro";
 import LinkButton from "@/components/LinkButton.astro";
 import Card from "@/components/Card.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
+import NoteCard from "@/components/NoteCard.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
 import getSortedProjects from "@/utils/getSortedProjects";
+import getSortedNotes from "@/utils/getSortedNotes";
 import IconRss from "@/assets/icons/IconRss.svg";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import { SITE } from "@/config";
@@ -16,12 +18,15 @@ import { SOCIALS } from "@/constants";
 
 const posts = await getCollection("blog");
 const projects = await getCollection("projects");
+const notes = await getCollection("notes");
 
 const sortedPosts = getSortedPosts(posts);
 const sortedProjects = getSortedProjects(projects);
+const sortedNotes = getSortedNotes(notes);
 const featuredPosts = sortedPosts.filter(({ data }) => data.featured);
 const recentPosts = sortedPosts.filter(({ data }) => !data.featured);
 const featuredProjects = sortedProjects.slice(0, 3);
+const recentNotes = sortedNotes.slice(0, 2);
 const focusAreas = [
   {
     title: "Frontend Engineering",
@@ -93,6 +98,12 @@ const principles = [
             View Projects
           </LinkButton>
           <LinkButton
+            href="/notes/"
+            class="rounded-full border border-border px-5 py-2.5 hover:border-accent"
+          >
+            Open Notes
+          </LinkButton>
+          <LinkButton
             href="/posts/"
             class="rounded-full border border-border px-5 py-2.5 hover:border-accent"
           >
@@ -155,6 +166,27 @@ const principles = [
           </div>
           <div class="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
             {featuredProjects.map(project => <ProjectCard {...project} compact />)}
+          </div>
+        </section>
+      )
+    }
+
+    {
+      recentNotes.length > 0 && (
+        <section id="notes" class="border-b border-border py-10">
+          <div class="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <p class="text-sm font-medium tracking-[0.18em] text-accent uppercase">
+                Notes
+              </p>
+              <h2 class="mt-3 text-2xl font-semibold sm:text-3xl">
+                A lighter stream for runs, photos, places, and small thoughts.
+              </h2>
+            </div>
+            <LinkButton href="/notes/">Open all notes</LinkButton>
+          </div>
+          <div class="mt-6">
+            {recentNotes.map(note => <NoteCard {...note} compact />)}
           </div>
         </section>
       )
