@@ -13,7 +13,7 @@ export const SITE = {
   author: "Bo",
   profile: "https://github.com/daniellaah",
   desc: "Bo's blog about frontend engineering, AI workflows, and personal projects.",
-  title: "Bo's Blog",
+  title: "BoGao.Dev",
   ogImage: "astropaper-og.jpg",
   lightAndDarkMode: true,
   postPerIndex: 4,
