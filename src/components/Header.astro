@@ -3,6 +3,7 @@ import IconX from "@/assets/icons/IconX.svg";
 import IconMoon from "@/assets/icons/IconMoon.svg";
 import IconSearch from "@/assets/icons/IconSearch.svg";
 import IconArchive from "@/assets/icons/IconArchive.svg";
+import IconUserCircle from "@/assets/icons/IconUserCircle.svg";
 import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
 import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
 import LinkButton from "./LinkButton.astro";
@@ -94,10 +95,19 @@ const isActive = (path: string) => {
             Tags
           </a>
         </li>
-        <li class="col-span-2">
-          <a href="/about" class:list={{ "active-nav": isActive("/about") }}>
-            About
-          </a>
+        <li class="col-span-1 flex items-center justify-center">
+          <LinkButton
+            href="/about"
+            class:list={[
+              "focus-outline flex p-3 sm:p-1",
+              { "text-accent": isActive("/about") },
+            ]}
+            title="About"
+            aria-label="about"
+          >
+            <IconUserCircle />
+            <span class="sr-only">About</span>
+          </LinkButton>
         </li>
         {
           SITE.showArchives && (
@@ -107,7 +117,7 @@ const isActive = (path: string) => {
                 class:list={[
                   "focus-outline flex justify-center p-3 sm:p-1",
                   {
-                    "active-nav [&>svg]:stroke-accent": isActive("/archives"),
+                    "active-nav text-accent": isActive("/archives"),
                   },
                 ]}
                 title="Archives"
@@ -119,12 +129,13 @@ const isActive = (path: string) => {
             </li>
           )
         }
+
         <li class="col-span-1 flex items-center justify-center">
           <LinkButton
             href="/search"
             class:list={[
               "focus-outline flex p-3 sm:p-1",
-              { "[&>svg]:stroke-accent": isActive("/search") },
+              { "text-accent": isActive("/search") },
             ]}
             title="Search"
             aria-label="search"
@@ -138,7 +149,7 @@ const isActive = (path: string) => {
             <li class="col-span-1 flex items-center justify-center">
               <button
                 id="theme-btn"
-                class="focus-outline relative size-12 p-4 sm:size-8 hover:[&>svg]:stroke-accent"
+                class="focus-outline relative size-12 p-4 sm:size-8 hover:text-accent"
                 title="Toggles light & dark"
                 aria-label="auto"
                 aria-live="polite"
