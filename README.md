@@ -47,6 +47,7 @@ dev.md              开发计划
 - 旧文章已批量清洗旧站内链、空链接、正文 H1、description 和 tags
 - 文章详情页日期统一使用 `YYYY-MM-DD`
 - 已保留 `dev.md` 作为后续实施文档
+- 已补齐 Open Graph / Twitter Card 基础元信息，默认分享图来自 `public/astropaper-og.jpg`
 
 ## 旧文章迁移说明
 
@@ -108,7 +109,30 @@ PUBLIC_SITE_URL=https://your-domain.com
 说明：
 
 - 如果不设置 `PUBLIC_SITE_URL`，生产环境会自动回退到 Vercel 提供的 `VERCEL_PROJECT_PRODUCTION_URL`
+- 当前仓库默认正式域名是 `https://bogao.dev/`
 - 本地开发仍然会回退到当前默认站点地址
+
+## 搜索引擎验证
+
+当前项目支持通过环境变量注入站点验证标签：
+
+```bash
+PUBLIC_GOOGLE_SITE_VERIFICATION=your_google_code
+PUBLIC_BAIDU_SITE_VERIFICATION=your_baidu_code
+```
+
+例如百度给出的：
+
+```html
+<meta name="baidu-site-verification" content="codeva-xxxx" />
+```
+
+在 Vercel 中只需要填写：
+
+```bash
+PUBLIC_BAIDU_SITE_VERIFICATION=codeva-xxxx
+```
+
 
 ## 写作模板
 
@@ -116,3 +140,23 @@ PUBLIC_SITE_URL=https://your-domain.com
 
 - `templates/blog-post.en.md`
 - `templates/blog-post.zh-CN.md`
+
+## Open Graph
+
+当前站点已经配置了基础分享卡片元信息：
+
+- `og:title`
+- `og:description`
+- `og:type`
+- `og:site_name`
+- `og:locale`
+- `og:image`
+- `twitter:card`
+
+默认分享图来自：
+
+```text
+public/astropaper-og.jpg
+```
+
+如果你要替换默认分享图，直接替换这个文件，或者在文章 frontmatter 中单独指定 `ogImage`。

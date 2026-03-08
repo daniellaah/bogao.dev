@@ -1,6 +1,9 @@
 ---
 import { ClientRouter } from "astro:transitions";
-import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
+import {
+  PUBLIC_BAIDU_SITE_VERIFICATION,
+  PUBLIC_GOOGLE_SITE_VERIFICATION,
+} from "astro:env/client";
 import { SITE } from "@/config";
 import "@/styles/global.css";
 import "katex/dist/katex.min.css";
@@ -32,13 +35,17 @@ const {
 } = Astro.props;
 
 const socialImageURL = new URL(ogImage, Astro.url);
+const isArticle = Boolean(pubDatetime);
+const ogType = isArticle ? "article" : "website";
+const ogLocale = lang === "zh-CN" ? "zh_CN" : "en_US";
+const socialImageAlt = `${title} | ${SITE.title}`;
 
 const structuredData = {
   "@context": "https://schema.org",
-  "@type": "BlogPosting",
+  "@type": isArticle ? "BlogPosting" : "WebSite",
   headline: `${title}`,
   image: `${socialImageURL}`,
-  datePublished: `${pubDatetime?.toISOString()}`,
+  ...(pubDatetime && { datePublished: pubDatetime.toISOString() }),
   ...(modDatetime && { dateModified: modDatetime.toISOString() }),
   author: [
     {
@@ -59,7 +66,8 @@ const structuredData = {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.png" sizes="32x32" type="image/png" />
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
     <!-- General Meta Tags -->
@@ -70,10 +78,14 @@ const structuredData = {
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content={SITE.title} />
+    <meta property="og:locale" content={ogLocale} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:image" content={socialImageURL} />
+    <meta property="og:image:alt" content={socialImageAlt} />
 
     <!-- Article Published/Modified time -->
     {
@@ -92,6 +104,9 @@ const structuredData = {
         />
       )
     }
+    {
+      isArticle && <meta property="article:author" content={author} />
+    }
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
@@ -99,6 +114,7 @@ const structuredData = {
     <meta property="twitter:title" content={title} />
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={socialImageURL} />
+    <meta property="twitter:image:alt" content={socialImageAlt} />
 
     <!-- Google JSON-LD Structured data -->
     <script
@@ -126,6 +142,15 @@ const structuredData = {
         <meta
           name="google-site-verification"
           content={PUBLIC_GOOGLE_SITE_VERIFICATION}
+        />
+      )
+    }
+
+    {
+      PUBLIC_BAIDU_SITE_VERIFICATION && (
+        <meta
+          name="baidu-site-verification"
+          content={PUBLIC_BAIDU_SITE_VERIFICATION}
         />
       )
     }

@@ -6,7 +6,7 @@ const normalizeSiteUrl = (value?: string) => {
 const resolvedWebsite =
   normalizeSiteUrl(process.env.PUBLIC_SITE_URL) ??
   normalizeSiteUrl(process.env.VERCEL_PROJECT_PRODUCTION_URL) ??
-  "https://daniellaah.github.io/";
+  "https://bogao.dev/";
 
 export const SITE = {
   website: resolvedWebsite,
