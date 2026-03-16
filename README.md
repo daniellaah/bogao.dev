@@ -25,9 +25,12 @@ npm run format
 
 ```text
 src/content/blog/   博客文章
+src/content/notes/  短笔记 / memo
+src/content/projects/ 项目内容
 src/pages/          页面路由
 src/components/     通用组件
 src/config.ts       站点元信息
+public/images/      站点与内容图片
 templates/          中英文文章模板
 dev.md              开发计划
 ```
@@ -140,6 +143,30 @@ PUBLIC_BAIDU_SITE_VERIFICATION=codeva-xxxx
 
 - `templates/blog-post.en.md`
 - `templates/blog-post.zh-CN.md`
+
+## 图片目录规范
+
+当前项目建议按内容类型拆分图片目录：
+
+- `public/images/posts/`：博客文章配图
+- `public/images/notes/`：notes / memo 照片
+- `public/images/projects/`：项目封面与截图
+- `public/images/site/`：站点级素材，例如 favicon、OG 图、装饰图
+
+命名建议：
+
+- 使用英文小写
+- 使用 `-` 分隔单词
+- 尽量包含日期或主题
+- 避免空格和中文文件名
+
+例如：
+
+```text
+public/images/notes/2026-03-15-la-5k-01.jpg
+public/images/projects/promptlane-dashboard-cover.png
+public/images/posts/sorting-algorithm-merge-sort.png
+```
 
 ## Open Graph
 

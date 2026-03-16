@@ -25,13 +25,15 @@ export const getStaticPaths = (async () => {
 const { note } = Astro.props;
 const { Content } = await render(note);
 
-const { title, description, noteDate, lang, location, kind, mood, photos, canonicalURL } =
+const { title, description, noteDate, modDatetime, lang, location, tags, photos, canonicalURL } =
   note.data;
 
 const heading = title ?? dayjs.utc(noteDate).format("MMM D, YYYY");
-const kindLabel = kind[0].toUpperCase() + kind.slice(1);
 const heroImage = photos[0];
 const heroImageSrc = heroImage;
+const createdDate = dayjs.utc(noteDate).format("YYYY-MM-DD");
+const updatedDate = modDatetime ? dayjs.utc(modDatetime).format("YYYY-MM-DD") : null;
+const showUpdatedDate = Boolean(updatedDate && updatedDate !== createdDate);
 ---
 
 <Layout
@@ -40,26 +42,71 @@ const heroImageSrc = heroImage;
   lang={lang}
   canonicalURL={canonicalURL}
   ogImage={heroImageSrc}
+  pubDatetime={noteDate}
+  modDatetime={modDatetime}
 >
   <Header />
   <BackButton />
   <main id="main-content" class="app-layout pb-12" data-pagefind-body>
-    <section class="grid gap-8 border-b border-border pb-8 lg:grid-cols-[8rem_minmax(0,1fr)]">
-      <div class="rounded-[1.75rem] border border-border bg-muted/20 p-4 text-center">
-        <p class="text-3xl font-semibold text-accent">
-          {dayjs.utc(noteDate).format("DD")}
-        </p>
-        <p class="mt-2 text-xs uppercase tracking-[0.16em] opacity-65">
-          {dayjs.utc(noteDate).format("MMM YYYY")}
-        </p>
+    <section
+      class:list={[
+        "grid gap-8 border-b border-border pb-8 lg:grid-cols-[8rem_minmax(0,1fr)]",
+        showUpdatedDate ? "items-start" : "items-stretch",
+      ]}
+    >
+      <div
+        class:list={[
+          "rounded-[1.75rem] border border-border bg-muted/20 p-4",
+          showUpdatedDate
+            ? "self-start"
+            : "flex items-center justify-center lg:h-full",
+        ]}
+      >
+        {
+          showUpdatedDate ? (
+            <div class="text-left">
+              <p class="text-[0.65rem] font-medium tracking-[0.16em] uppercase opacity-60">
+                Created
+              </p>
+              <p class="mt-1 text-sm font-semibold text-accent sm:text-base">
+                {createdDate}
+              </p>
+              <div class="mt-3 border-t border-border/70 pt-3">
+                <p class="text-[0.6rem] font-medium tracking-[0.16em] uppercase opacity-55">
+                  Updated
+                </p>
+                <p class="mt-1 text-xs font-medium opacity-75 sm:text-sm">
+                  {updatedDate}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div class="text-center">
+              <p class="text-3xl font-semibold text-accent">
+                {dayjs.utc(noteDate).format("DD")}
+              </p>
+              <p class="mt-2 text-xs uppercase tracking-[0.16em] opacity-65">
+                {dayjs.utc(noteDate).format("MMM YYYY")}
+              </p>
+            </div>
+          )
+        }
       </div>
 
       <div>
-        <div class="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] opacity-65">
-          <span>{kindLabel}</span>
-          {location && <span>{location}</span>}
-          {mood && <span>{mood}</span>}
-        </div>
+        {
+          (location || tags.length > 0) && (
+            <div class="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] opacity-65">
+              {location && <span>{location}</span>}
+              {location && tags.length > 0 && (
+                <span aria-hidden="true" class="opacity-40">
+                  •
+                </span>
+              )}
+              {tags.map(tag => <span>{tag}</span>)}
+            </div>
+          )
+        }
         <h1 class="mt-4 text-3xl font-semibold text-accent sm:text-4xl">
           {heading}
         </h1>

@@ -47,16 +47,13 @@ const projects = defineCollection({
 const notes = defineCollection({
   schema: () =>
     z.object({
-      title: z.string().optional(),
-      description: z.string(),
+      title: z.string().trim().min(1).optional(),
+      description: z.string().trim().min(1),
       noteDate: z.coerce.date(),
+      modDatetime: z.coerce.date().optional().nullable(),
       draft: z.boolean().default(false),
       lang: z.enum(SITE.supportedLangs).default(SITE.lang),
-      kind: z
-        .enum(["memo", "run", "photo", "idea", "travel"])
-        .default("memo"),
-      location: z.string().optional(),
-      mood: z.string().optional(),
+      location: z.string().trim().min(1).optional(),
       tags: z.array(z.string()).default([]),
       photos: z.array(z.string()).default([]),
       canonicalURL: z.string().optional(),

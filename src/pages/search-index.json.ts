@@ -52,12 +52,7 @@ export const GET: APIRoute = async () => {
       url: getNotePath(note.id),
       kind: "Note",
       lang: note.data.lang,
-      metaText: [
-        note.data.kind,
-        note.data.location ?? "",
-        note.data.mood ?? "",
-        ...note.data.tags,
-      ].join(" "),
+      metaText: [note.data.location ?? "", ...note.data.tags].join(" "),
       content: stripMarkdown(note.body),
     })),
   ];

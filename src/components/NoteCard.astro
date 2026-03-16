@@ -11,12 +11,11 @@ type Props = CollectionEntry<"notes"> & {
 };
 
 const { id, data, compact = false } = Astro.props;
-const { title, description, noteDate, location, kind, photos } = data;
+const { title, description, noteDate, location, photos } = data;
 const href = getNotePath(id);
 const photo = photos[0];
 const photoSrc = photo;
 const heading = title ?? dayjs.utc(noteDate).format("MMM D, YYYY");
-const kindLabel = kind[0].toUpperCase() + kind.slice(1);
 ---
 
 <article
@@ -39,10 +38,11 @@ const kindLabel = kind[0].toUpperCase() + kind.slice(1);
       { "p-4": compact },
     ]}
   >
-    <div class="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] opacity-65">
-      <span>{kindLabel}</span>
-      {location && <span>{location}</span>}
-    </div>
+    {location && (
+      <div class="text-xs font-medium uppercase tracking-[0.16em] opacity-65">
+        {location}
+      </div>
+    )}
 
     <h2 class="mt-3 text-xl font-semibold text-accent">{heading}</h2>
     <p class="mt-3 leading-7 opacity-80">{description}</p>

@@ -13,10 +13,7 @@ const notes = getSortedNotes(await getCollection("notes"));
 
 <Layout title={`Notes | ${SITE.title}`} description="Short field notes, life logs, photos, and lighter thoughts from Bo.">
   <Header />
-  <Main
-    pageTitle="Notes"
-    pageDesc="A lighter stream for runs, photos, small ideas, and moments that do not need to become full posts."
-  >
+  <Main pageTitle="Notes">
     {
       notes.length > 0 ? (
         <section>
