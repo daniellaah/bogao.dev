@@ -4,50 +4,50 @@ title: "About"
 lang: "zh-CN"
 ---
 
-你好，我是 Bo，一名长期关注产品实现、前端工程、AI 工作流和个人项目构建过程的开发者。
+你好，我是 Bo。这个博客主要用来整理机器学习笔记、LLM workflow，以及一些围绕 AI 工具和个人实验展开的长期记录。
 
-这个博客是我的长期技术记录，不是为了堆砌“知道什么”，而是为了留下“为什么这样做”的判断过程。
+我更关心的是把“学过什么、试过什么、为什么这样判断”留下来，而不只是堆积零散结论。
 
 ## What I Write About
 
-- Frontend engineering, especially maintainable UI architecture and content-heavy websites
-- AI-assisted development workflows that are useful in real projects
-- Side projects from idea to deployment, including tradeoffs and mistakes
-- Writing, tooling, and personal knowledge systems
+- Machine learning notes, especially material worth revisiting after a course ends
+- LLM-assisted workflows that are actually useful in coding, writing, and research
+- Small AI tools, experiments, and systems that help me think more clearly
+- Writing, publishing, and knowledge organization around technical work
 
 ## 我会写什么
 
-- 前端实现、工程化和长期维护上的取舍
-- AI 辅助开发在真实工作流里的用法
-- 个人项目从 0 到上线的过程复盘
-- 工具链、写作方法和知识沉淀
+- 机器学习、深度学习和经典课程笔记的整理
+- LLM、agent、prompt 和 AI coding workflow 的实践记录
+- 和 AI/知识管理相关的小项目与实验
+- 写作、归档、搜索和长期知识沉淀的方法
 
 ## How I Work
 
-我更偏好下面这种工作方式：
+我更偏好的工作方式是：
 
-- 先做一个足够小但能上线的版本
-- 尽量保留简单、稳定、可持续维护的技术决策
-- 记录真实问题和失败，而不是只展示最后结果
-- 把“能复用的经验”沉淀下来，避免下一次重复踩坑
+- 先把内容结构和基本链路跑通，再做持续迭代
+- 能保留原始上下文的地方尽量保留，不把笔记改成失真的“总结”
+- 记录实验失败和错误判断，因为那部分通常比结论更有用
+- 让内容尽量能在半年后重新阅读，而不是只在发布当天成立
 
 ## Why This Blog Exists
 
-写博客对我来说不是内容运营动作，而是工程工作的延伸。
+写博客对我来说不是内容运营动作，而是学习和做实验的一部分。
 
 有些东西如果不写下来，就只会在当下有效；一旦写出来，就可能变成：
 
 - 未来自己的参考答案
-- 能分享给别人的经验
+- 可以复用的实验记录
 - 更清晰的判断标准
 
 ## Current Focus
 
 当前我在重点推进这些事情：
 
-- 把这个博客打造成稳定的个人技术站点
-- 建立更成熟的写作和发布流程
-- 输出前端、AI workflow 和 side project 相关的原创内容
+- 继续清理和整理历史机器学习笔记
+- 持续记录 LLM workflow 和 AI coding 相关实验
+- 让 blog / notes / projects 三种内容形式更明确分工
 
 ## Contact
 
@@ -55,4 +55,4 @@ lang: "zh-CN"
 
 - [github.com/daniellaah](https://github.com/daniellaah)
 
-如果你也在做个人博客、AI coding workflow 或内容型技术站点，欢迎来交流。
+如果你也在做机器学习学习记录、AI coding workflow 或个人技术博客，欢迎来交流。

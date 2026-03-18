@@ -29,22 +29,22 @@ const featuredProjects = sortedProjects.slice(0, 3);
 const recentNotes = sortedNotes.slice(0, 2);
 const focusAreas = [
   {
-    title: "Frontend Engineering",
-    body: "界面实现、设计系统、性能和长期可维护的前端架构。",
+    title: "ML Notes",
+    body: "整理机器学习课程、经典模型和推导过程，把旧笔记沉淀成能反复查阅的内容。",
   },
   {
-    title: "AI Workflow",
-    body: "把 AI 真正接入写代码、写文档和做项目的实际流程，而不是停留在 demo。",
+    title: "LLM Workflow",
+    body: "记录 prompt、评测、agent 协作和 AI coding workflow 在真实项目里的有效用法。",
   },
   {
-    title: "Build in Public",
-    body: "记录项目从想法到交付的判断、取舍、失败和可复用经验。",
+    title: "Experiments",
+    body: "把小型 AI 工具、知识整理系统和个人实验做成可持续迭代的项目记录。",
   },
 ];
 const principles = [
-  "写真实问题，不写空泛总结。",
-  "优先记录取舍和判断，而不是只贴结果。",
-  "让文章保持独立成立，而不是为了形式去重复改写。",
+  "尽量把概念、公式和实现放在同一篇内容里讲清楚。",
+  "优先记录实验结论和失败原因，而不是只贴一个结果。",
+  "让文章和项目都能在半年后重新读懂，而不是只服务当下。",
 ];
 ---
 
@@ -79,16 +79,16 @@ const principles = [
           </a>
         </div>
         <p class="mt-6 max-w-2xl text-lg leading-8">
-          我用这个博客记录前端工程、AI 工作流和个人项目里的真实决策。
-          这里不是模板说明书，而是长期积累自己的技术判断。
+          我用这个博客整理机器学习笔记、LLM workflow 和个人实验。
+          这里更像一个长期积累判断的研究日志，而不是通用模板站。
         </p>
         <p class="mt-3 max-w-2xl text-base leading-7 opacity-80">
-          Focused on concrete problems, reusable patterns, and work that
-          survives beyond a single demo.
+          Focused on models, tooling, and experiments that are worth keeping
+          after the first burst of curiosity is gone.
         </p>
         <div class="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm font-medium">
           <span>Astro + Vercel</span>
-          <span>Frontend + AI + Projects</span>
+          <span>ML + LLM + Experiments</span>
         </div>
         <div class="mt-7 flex flex-wrap gap-4">
           <LinkButton
@@ -121,20 +121,17 @@ const principles = [
 
       <aside class="rounded-3xl border border-border p-5 sm:p-6">
         <p class="text-sm font-medium tracking-[0.18em] text-accent uppercase">
-          Right Now
+          Current Focus
         </p>
         <ul class="mt-4 space-y-4 text-sm leading-7">
           <li>
-            Building a personal blog on top of Astro Paper and reshaping it
-            into a more personal publishing system.
+            把早年的机器学习课程笔记重新整理进统一的内容结构里，清掉历史迁移留下的问题。
           </li>
           <li>
-            Writing about frontend engineering, AI-assisted development, and
-            the tradeoffs behind side projects.
+            用 notes 和 projects 记录 LLM workflow、小工具和实验中的判断，而不是只留下聊天记录。
           </li>
           <li>
-            Keeping the stack simple: Markdown content, GitHub workflow, and
-            Vercel deployment.
+            保持发布链路简单，让博客既能放长文，也能承载短笔记、实验日志和项目页面。
           </li>
         </ul>
         {
@@ -159,7 +156,7 @@ const principles = [
                 Projects
               </p>
               <h2 class="mt-3 text-2xl font-semibold sm:text-3xl">
-                Products and systems I am building alongside the writing.
+                Small systems around ML notes, LLM tools, and experimental workflows.
               </h2>
             </div>
             <LinkButton href="/projects/">Browse all projects</LinkButton>
@@ -212,11 +209,11 @@ const principles = [
           What This Blog Is For
         </p>
         <h2 class="mt-3 text-2xl font-semibold sm:text-3xl">
-          A place to think in public without writing like a changelog.
+          A place to keep models, experiments, and working notes in one durable archive.
         </h2>
         <p class="mt-4 max-w-2xl leading-8 opacity-85">
-          我希望这里保留下来的不是零散笔记，而是经得起回看的工程经验。
-          每篇文章都应该回答一个具体问题，解释一次真实取舍，或者沉淀一种可复用的方法。
+          我希望这里最终沉淀下来的，不只是课程摘要或产品更新，而是自己对模型、工具和工作流的长期理解。
+          每篇文章最好都能回答一个具体问题，或者把一次实验真正讲清楚。
         </p>
       </div>
       <div class="rounded-3xl bg-muted/35 p-5">

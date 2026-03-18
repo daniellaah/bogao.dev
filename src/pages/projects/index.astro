@@ -11,11 +11,11 @@ import { SITE } from "@/config";
 const projects = getSortedProjects(await getCollection("projects"));
 ---
 
-<Layout title={`Projects | ${SITE.title}`} description="Selected projects, experiments, and products built by Bo.">
+<Layout title={`Projects | ${SITE.title}`} description="Selected ML, LLM, and knowledge-tool experiments built by Bo.">
   <Header />
   <Main
     pageTitle="Projects"
-    pageDesc="A focused view of products, experiments, and systems I am building."
+    pageDesc="A focused view of ML tools, LLM workflow experiments, and small systems I am building."
   >
     {
       projects.length > 0 ? (

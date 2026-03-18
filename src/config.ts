@@ -12,7 +12,7 @@ export const SITE = {
   website: resolvedWebsite,
   author: "Bo",
   profile: "https://github.com/daniellaah",
-  desc: "Bo's blog about frontend engineering, AI workflows, and personal projects.",
+  desc: "Bo's blog about machine learning notes, LLM workflows, and personal experiments.",
   title: "BoGao.Dev",
   ogImage: "astropaper-og.jpg",
   lightAndDarkMode: true,

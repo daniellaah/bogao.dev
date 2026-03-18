@@ -1,6 +1,6 @@
 ---
 title: "Quietboard"
-description: "A calm project dashboard for tracking a few meaningful priorities instead of overwhelming yourself with a full task-management system."
+description: "An archived review dashboard for tracking a few important model or dataset checks without turning the workflow into a full operations tool."
 status: "archived"
 order: 6
 featured: false
@@ -16,16 +16,16 @@ repoUrl: "https://github.com/daniellaah/quietboard"
 
 ## What it is
 
-Quietboard explored a simpler alternative to dense productivity apps by focusing on only a handful of active goals at a time.
+Quietboard explored a simpler review surface for small AI projects by focusing on only a handful of active checks at a time.
 
 ## Problem
 
-Most dashboards over-optimize for total feature count and end up creating more cognitive load than clarity.
+Many review dashboards over-optimize for total feature count and end up creating more cognitive load than clarity, especially when the real goal is just to inspect a few outputs carefully.
 
 ## Approach
 
-The interface emphasized large visual blocks, soft hierarchy, and extremely limited daily inputs.
+The interface emphasized large visual blocks, soft hierarchy, and extremely limited inputs so it could work for dataset review, output review, or lightweight experiment tracking.
 
 ## Outcome
 
-The project is archived, but it still informs how I think about focus, pacing, and information density in personal tools.
+The project is archived, but it still informs how I think about focus, pacing, and information density in personal ML tooling.

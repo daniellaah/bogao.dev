@@ -1,6 +1,6 @@
 ---
 title: "PromptLane"
-description: "A small workspace for drafting, versioning, and testing reusable AI prompts across writing, coding, and research tasks."
+description: "A prompt-and-eval workspace for comparing reusable LLM prompts across coding, writing, and research tasks."
 status: "active"
 order: 2
 featured: true
@@ -17,16 +17,16 @@ repoUrl: "https://github.com/daniellaah/promptlane"
 
 ## What it is
 
-PromptLane is a focused tool for collecting prompts that are actually useful in day-to-day work, instead of letting them disappear inside chat history.
+PromptLane is a small workspace for prompts that are useful often enough to deserve versioning, comparison, and evaluation.
 
 ## Problem
 
-When prompts live in scattered notes, they are hard to compare, hard to improve, and almost impossible to reuse across projects.
+When prompts live in scattered chats, it is hard to compare revisions, record context, or understand why one version worked better than another.
 
 ## Approach
 
-The interface is designed around fast iteration: save a prompt, compare revisions, attach context, and keep lightweight notes about what changed the output quality.
+The interface is designed around fast iteration: save a prompt, attach a task context, compare outputs side by side, and keep notes about changes in quality.
 
 ## Outcome
 
-The product is still evolving, but it already serves as a practical system for turning one-off prompt experiments into a reusable working library.
+The project is still evolving, but it already works as a practical bridge between one-off prompt experiments and a reusable working library.
