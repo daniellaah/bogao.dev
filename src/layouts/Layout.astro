@@ -6,7 +6,6 @@ import {
 } from "astro:env/client";
 import { SITE } from "@/config";
 import "@/styles/global.css";
-import "katex/dist/katex.min.css";
 
 type Props = {
   title?: string;
@@ -67,6 +66,20 @@ const structuredData = {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
+    <link
+      rel="preload"
+      href="/fonts/LXGWWenKai-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/Handlee-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
     <link rel="icon" href="/favicon.png" sizes="32x32" type="image/png" />
     <link rel="canonical" href={canonicalURL} />
@@ -105,9 +118,7 @@ const structuredData = {
         />
       )
     }
-    {
-      isArticle && <meta property="article:author" content={author} />
-    }
+    {isArticle && <meta property="article:author" content={author} />}
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
@@ -133,7 +144,30 @@ const structuredData = {
       href={new URL("rss.xml", Astro.site)}
     />
 
-    <meta name="theme-color" content="" />
+    <meta name="theme-color" content="#ffffff" />
+    <script is:inline>
+      (() => {
+        const storedTheme = (() => {
+          try {
+            return localStorage.getItem("theme");
+          } catch {
+            return null;
+          }
+        })();
+        const theme =
+          storedTheme === "light" || storedTheme === "dark"
+            ? storedTheme
+            : window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+        document
+          .querySelector("meta[name='theme-color']")
+          ?.setAttribute("content", theme === "dark" ? "#181817" : "#ffffff");
+      })();
+    </script>
 
     {
       // If PUBLIC_GOOGLE_SITE_VERIFICATION is set in the environment variable,
@@ -157,41 +191,9 @@ const structuredData = {
     }
 
     <ClientRouter />
-
-    <!-- Minimal inline script to prevent FOUC - sets theme immediately -->
-    <script is:inline>
-      (function () {
-        const initialColorScheme = ""; // "light" | "dark"
-        const currentTheme = localStorage.getItem("theme");
-
-        function getPreferTheme() {
-          if (currentTheme) return currentTheme;
-          if (initialColorScheme) return initialColorScheme;
-          return window.matchMedia("(prefers-color-scheme: dark)").matches
-            ? "dark"
-            : "light";
-        }
-
-        const themeValue = getPreferTheme();
-
-        // Set theme immediately to prevent flash
-        document.firstElementChild?.setAttribute("data-theme", themeValue);
-
-        // Export minimal API for external script
-        window.theme = {
-          themeValue: themeValue,
-          getTheme: () => window.theme.themeValue,
-          setTheme: val => {
-            window.theme.themeValue = val;
-          },
-        };
-      })();
-    </script>
   </head>
   <body>
     <slot />
-
-    <!-- Load full theme logic -->
     <script src="../scripts/theme.ts"></script>
   </body>
 </html>

@@ -2,7 +2,6 @@
 import { getCollection } from "astro:content";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
-import Tag from "@/components/Tag.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import getUniqueTags from "@/utils/getUniqueTags";
@@ -17,8 +16,22 @@ let tags = getUniqueTags([...posts, ...notes]);
 <Layout title={`Tags | ${SITE.title}`}>
   <Header />
   <Main pageTitle="Tags" pageDesc="All the tags used across posts and notes.">
-    <ul class="flex flex-wrap gap-6">
-      {tags.map(({ tag, tagName }) => <Tag {tag} {tagName} />)}
+    <ul class="ledger-list--subtle grid gap-x-8 sm:grid-cols-2">
+      {
+        tags.map(({ tag, tagName, count }) => (
+          <li class="ledger-row">
+            <a
+              href={`/tags/${tag}/`}
+              class="hand-underline-trigger flex items-baseline justify-between gap-4"
+            >
+              <span class="hand-underline content-title min-w-0 truncate text-base">
+                #{tagName}
+              </span>
+              <span class="font-code text-xs text-graphite">{count}</span>
+            </a>
+          </li>
+        ))
+      }
     </ul>
   </Main>
   <Footer />

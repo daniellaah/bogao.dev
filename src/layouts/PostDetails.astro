@@ -13,6 +13,7 @@ import { slugifyStr } from "@/utils/slugify";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { SITE } from "@/config";
+import "katex/dist/katex.min.css";
 
 type Props = {
   post: CollectionEntry<"blog">;
@@ -33,7 +34,11 @@ const {
   tags,
 } = post.data;
 
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
+const tocHeadings = headings
+  .filter(heading => heading.depth === 2 || heading.depth === 3)
+  .slice(0, 12);
+const showToc = tocHeadings.length >= 3;
 
 let ogImageUrl: string | undefined;
 
@@ -84,73 +89,140 @@ const nextPost =
 
 <Layout {...layoutProps}>
   <Header />
-  <BackButton />
+  <BackButton layoutClass="post-detail-layout" label="All Posts" />
   <main
     id="main-content"
-    class:list={["app-layout pb-12", { "mt-8": !SITE.showBackButton }]}
-    data-pagefind-body
+    class:list={["post-detail-layout pb-12", { "mt-8": !SITE.showBackButton }]}
   >
-    <h1
-      transition:name={slugifyStr(title.replaceAll(".", "-"))}
-      class="inline-block text-2xl font-bold text-accent sm:text-3xl"
-    >
-      {title}
-    </h1>
-    <div class="my-2 flex flex-wrap items-center gap-2">
-      <Datetime
-        {pubDatetime}
-        {modDatetime}
-        size="lg"
-        showBothDates={true}
-      />
-    </div>
-    <article
-      id="article"
-      class="app-prose mt-8 w-full max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
-    >
-      <Content />
-    </article>
+    <div class="post-detail-grid">
+      <div class="post-content-column">
+        <h1
+          transition:name={slugifyStr(title.replaceAll(".", "-"))}
+          class="post-title inline-block text-3xl leading-tight font-semibold sm:text-4xl"
+        >
+          {title}
+        </h1>
+        <div class="post-meta my-3 flex flex-wrap items-center gap-2">
+          <Datetime
+            {pubDatetime}
+            {modDatetime}
+            size="lg"
+            showBothDates={true}
+          />
+        </div>
+        <hr class="post-header-rule sketch-rule" />
+        <article id="article" class="app-prose reading-column mt-8">
+          {
+            showToc && (
+              <nav
+                aria-label="On this page"
+                class="sketch-box toc-panel post-toc-inline not-prose mb-8 px-5 py-5"
+              >
+                <ol class="space-y-2 text-sm leading-6">
+                  {tocHeadings.map(heading => (
+                    <li class:list={[heading.depth === 3 && "ps-4"]}>
+                      <a
+                        href={`#${heading.slug}`}
+                        class="toc-link ink-link inline-block text-foreground/80 hover:text-foreground"
+                        data-toc-link
+                      >
+                        {heading.text}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            )
+          }
+          <Content />
+        </article>
 
-    <hr class="my-8 border-dashed" />
+        <hr class="sketch-rule my-8" />
 
-    <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8">
-      {tags.map(tag => <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />)}
-    </ul>
+        <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8">
+          {
+            tags.map(tag => (
+              <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />
+            ))
+          }
+        </ul>
 
-    <BackToTopButton />
+        <BackToTopButton />
 
-    <ShareLinks />
+        <ShareLinks />
 
-    <hr class="my-6 border-dashed" />
+        <hr class="sketch-rule my-6" />
 
-    <!-- Previous/Next Post Buttons -->
-    <div data-pagefind-ignore class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <!-- Previous/Next Post Buttons -->
+        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          {
+            prevPost && (
+              <a
+                href={getPath(
+                  prevPost.id,
+                  prevPost.filePath,
+                  true,
+                  prevPost.slug
+                )}
+                class="flex w-full gap-1 hover:opacity-75"
+              >
+                <IconChevronLeft class="inline-block flex-none rtl:rotate-180" />
+                <div>
+                  <span class="notebook-kicker">Previous Post</span>
+                  <div class="ink-link content-title mt-1 text-sm">
+                    {prevPost.title}
+                  </div>
+                </div>
+              </a>
+            )
+          }
+          {
+            nextPost && (
+              <a
+                href={getPath(
+                  nextPost.id,
+                  nextPost.filePath,
+                  true,
+                  nextPost.slug
+                )}
+                class="flex w-full justify-end gap-1 text-end hover:opacity-75 sm:col-start-2"
+              >
+                <div>
+                  <span class="notebook-kicker">Next Post</span>
+                  <div class="ink-link content-title mt-1 text-sm">
+                    {nextPost.title}
+                  </div>
+                </div>
+                <IconChevronRight class="inline-block flex-none rtl:rotate-180" />
+              </a>
+            )
+          }
+        </div>
+      </div>
+
       {
-        prevPost && (
-          <a
-            href={getPath(prevPost.id, prevPost.filePath, true, prevPost.slug)}
-            class="flex w-full gap-1 hover:opacity-75"
-          >
-            <IconChevronLeft class="inline-block flex-none rtl:rotate-180" />
-            <div>
-              <span>Previous Post</span>
-              <div class="text-sm text-accent/85">{prevPost.title}</div>
-            </div>
-          </a>
-        )
-      }
-      {
-        nextPost && (
-          <a
-            href={getPath(nextPost.id, nextPost.filePath, true, nextPost.slug)}
-            class="flex w-full justify-end gap-1 text-end hover:opacity-75 sm:col-start-2"
-          >
-            <div>
-              <span>Next Post</span>
-              <div class="text-sm text-accent/85">{nextPost.title}</div>
-            </div>
-            <IconChevronRight class="inline-block flex-none rtl:rotate-180" />
-          </a>
+        showToc && (
+          <>
+            <div class="post-toc-divider" aria-hidden="true" />
+            <nav
+              aria-label="On this page"
+              class="sketch-box toc-panel post-toc-aside px-4 py-4"
+            >
+              <ol class="space-y-2 text-sm leading-6">
+                {tocHeadings.map(heading => (
+                  <li class:list={[heading.depth === 3 && "ps-4"]}>
+                    <a
+                      href={`#${heading.slug}`}
+                      class="toc-link ink-link inline-block text-foreground/75 hover:text-foreground"
+                      data-toc-link
+                    >
+                      {heading.text}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          </>
         )
       }
     </div>
@@ -162,6 +234,8 @@ const nextPost =
   /** Create a progress indicator
    *  at the top */
   function createProgressBar() {
+    if (document.querySelector(".progress-container")) return;
+
     // Create the main container div
     const progressContainer = document.createElement("div");
     progressContainer.className =
@@ -169,7 +243,7 @@ const nextPost =
 
     // Create the progress bar div
     const progressBar = document.createElement("div");
-    progressBar.className = "progress-bar h-1 w-0 bg-accent";
+    progressBar.className = "progress-bar h-px w-0 bg-foreground";
     progressBar.id = "myBar";
 
     // Append the progress bar to the progress container
@@ -183,6 +257,9 @@ const nextPost =
   /** Update the progress bar
    *  when user scrolls */
   function updateScrollProgress() {
+    if (window.__postScrollProgressAttached) return;
+    window.__postScrollProgressAttached = true;
+
     document.addEventListener("scroll", () => {
       const winScroll =
         document.body.scrollTop || document.documentElement.scrollTop;
@@ -204,9 +281,13 @@ const nextPost =
    *  allowing sharing of sections easily */
   function addHeadingLinks() {
     const headings = Array.from(
-      document.querySelectorAll("h2, h3, h4, h5, h6")
+      document.querySelectorAll(
+        "#article h2, #article h3, #article h4, #article h5, #article h6"
+      )
     );
     for (const heading of headings) {
+      if (!heading.id || heading.querySelector(".heading-link")) continue;
+
       heading.classList.add("group");
       const link = document.createElement("a");
       link.className =
@@ -229,6 +310,8 @@ const nextPost =
     const codeBlocks = Array.from(document.querySelectorAll("pre"));
 
     for (const codeBlock of codeBlocks) {
+      if (codeBlock.querySelector(".copy-code")) continue;
+
       const wrapper = document.createElement("div");
       wrapper.style.position = "relative";
 
@@ -243,7 +326,7 @@ const nextPost =
         : "-top-3";
 
       const copyButton = document.createElement("button");
-      copyButton.className = `copy-code absolute end-3 ${topClass} rounded bg-muted border border-muted px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+      copyButton.className = `copy-code sketch-chip absolute end-3 ${topClass} bg-surface-strong px-2 py-1 text-xs leading-4 text-foreground font-medium`;
       copyButton.innerHTML = copyButtonLabel;
       codeBlock.setAttribute("tabindex", "0");
       codeBlock.appendChild(copyButton);
@@ -272,6 +355,160 @@ const nextPost =
     }
   }
   attachCopyButtons();
+
+  function initTocDivider() {
+    const divider = document.querySelector(".post-toc-divider");
+    const contentColumn = document.querySelector(".post-content-column");
+    const article = document.getElementById("article");
+    const mediaQuery = window.matchMedia("(min-width: 80rem)");
+
+    window.__tocDividerCleanup?.();
+
+    if (!divider || !contentColumn || !article) return;
+
+    let frame = 0;
+
+    const lengthToPx = value => {
+      const trimmed = value.trim();
+      if (trimmed.endsWith("rem")) {
+        return (
+          Number.parseFloat(trimmed) *
+          Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
+        );
+      }
+
+      return Number.parseFloat(trimmed) || 0;
+    };
+
+    const updateDivider = () => {
+      frame = 0;
+
+      if (!mediaQuery.matches) {
+        divider.style.visibility = "hidden";
+        return;
+      }
+
+      const rootStyles = getComputedStyle(document.documentElement);
+      const viewportGap = lengthToPx(
+        rootStyles.getPropertyValue("--post-toc-divider-viewport-gap")
+      );
+      const columnRect = contentColumn.getBoundingClientRect();
+      const articleRect = article.getBoundingClientRect();
+      const top = Math.max(viewportGap, columnRect.top);
+      const bottom = Math.min(
+        window.innerHeight - viewportGap,
+        articleRect.bottom
+      );
+      const height = Math.max(0, bottom - top);
+
+      if (height < 80) {
+        divider.style.visibility = "hidden";
+        divider.style.height = "0px";
+        return;
+      }
+
+      divider.style.visibility = "visible";
+      divider.style.top = `${Math.round(top)}px`;
+      divider.style.height = `${Math.round(height)}px`;
+    };
+
+    const requestDividerUpdate = () => {
+      if (frame) return;
+
+      frame = requestAnimationFrame(updateDivider);
+    };
+
+    window.addEventListener("scroll", requestDividerUpdate, { passive: true });
+    window.addEventListener("resize", requestDividerUpdate);
+    mediaQuery.addEventListener("change", requestDividerUpdate);
+
+    window.__tocDividerCleanup = () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", requestDividerUpdate);
+      window.removeEventListener("resize", requestDividerUpdate);
+      mediaQuery.removeEventListener("change", requestDividerUpdate);
+    };
+
+    requestDividerUpdate();
+  }
+  initTocDivider();
+
+  function initActiveToc() {
+    const links = Array.from(document.querySelectorAll("[data-toc-link]"));
+    const headings = Array.from(
+      document.querySelectorAll("#article h2[id], #article h3[id]")
+    );
+
+    window.__activeTocObserver?.disconnect?.();
+    window.__activeTocCleanup?.();
+
+    if (!links.length || !headings.length) return;
+
+    const setActiveTocLink = id => {
+      for (const link of links) {
+        const isActive = link.getAttribute("href") === `#${id}`;
+        link.classList.toggle("is-active", isActive);
+        if (isActive) {
+          link.setAttribute("aria-current", "true");
+        } else {
+          link.removeAttribute("aria-current");
+        }
+      }
+    };
+
+    let ticking = false;
+
+    const updateActiveTocLink = () => {
+      const activationLine = window.innerHeight * 0.25;
+      let currentHeading = headings[0];
+
+      for (const heading of headings) {
+        if (heading.getBoundingClientRect().top <= activationLine) {
+          currentHeading = heading;
+        } else {
+          break;
+        }
+      }
+
+      if (currentHeading?.id) {
+        setActiveTocLink(currentHeading.id);
+      }
+    };
+
+    const requestActiveTocUpdate = () => {
+      if (ticking) return;
+
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        updateActiveTocLink();
+      });
+    };
+
+    window.addEventListener("scroll", requestActiveTocUpdate, {
+      passive: true,
+    });
+    window.addEventListener("resize", requestActiveTocUpdate);
+    window.__activeTocCleanup = () => {
+      window.removeEventListener("scroll", requestActiveTocUpdate);
+      window.removeEventListener("resize", requestActiveTocUpdate);
+    };
+
+    window.__activeTocObserver = new IntersectionObserver(
+      () => requestActiveTocUpdate(),
+      {
+        rootMargin: "-20% 0px -70% 0px",
+        threshold: 0,
+      }
+    );
+
+    for (const heading of headings) {
+      window.__activeTocObserver.observe(heading);
+    }
+
+    requestActiveTocUpdate();
+  }
+  initActiveToc();
 
   /* Go to page start after page swap */
   document.addEventListener("astro:after-swap", () =>

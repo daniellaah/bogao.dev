@@ -2,10 +2,14 @@
 import IconX from "@/assets/icons/IconX.svg";
 import IconMoon from "@/assets/icons/IconMoon.svg";
 import IconSearch from "@/assets/icons/IconSearch.svg";
-import IconArchive from "@/assets/icons/IconArchive.svg";
-import IconUserCircle from "@/assets/icons/IconUserCircle.svg";
 import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
 import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
+import IconArchive from "@/assets/icons/IconArchive.svg";
+import IconBox from "@/assets/icons/IconBox.svg";
+import IconFileText from "@/assets/icons/IconFileText.svg";
+import IconNotebook from "@/assets/icons/IconNotebook.svg";
+import IconTag from "@/assets/icons/IconTag.svg";
+import IconUserCircle from "@/assets/icons/IconUserCircle.svg";
 import LinkButton from "./LinkButton.astro";
 import { SITE } from "@/config";
 
@@ -21,41 +25,67 @@ const isActive = (path: string) => {
 
   return currentPath === path || currentPathArray[0] === pathArray[0];
 };
+
+const navItems = [
+  { href: "/posts", label: "Posts", Icon: IconFileText },
+  { href: "/projects", label: "Projects", Icon: IconBox },
+  { href: "/notes", label: "Notes", Icon: IconNotebook },
+  { href: "/tags", label: "Tags", Icon: IconTag },
+  { href: "/about", label: "About", Icon: IconUserCircle },
+  ...(SITE.showArchives
+    ? [{ href: "/archives", label: "Archives", Icon: IconArchive }]
+    : []),
+];
 ---
 
 <a
   id="skip-to-content"
   href="#main-content"
-  class="absolute start-16 -top-full z-50 bg-background px-3 py-2 text-accent backdrop-blur-lg transition-all focus:top-4"
+  class="absolute start-16 -top-full z-50 bg-background px-3 py-2 text-foreground transition-all focus:top-4"
 >
   Skip to content
 </a>
 
 <header
-  class="app-layout flex flex-col items-center justify-between sm:flex-row"
+  class="site-header-layout flex flex-col items-center justify-between lg:flex-row"
 >
   <div
     id="top-nav-wrap"
     class:list={[
       "py-4 sm:py-6",
-      "border-b border-border",
       "relative w-full bg-background",
-      "flex items-baseline justify-between sm:items-center",
+      "flex items-center justify-between",
     ]}
   >
     <a
       href="/"
-      class="absolute py-1 text-xl leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-2xl sm:leading-none"
+      class="site-brand site-wordmark absolute py-1 text-xl leading-none font-semibold whitespace-nowrap lg:static lg:my-auto lg:text-2xl"
     >
-      {SITE.title}
+      <span class="site-avatar" aria-hidden="true">
+        <img
+          src="/images/site/avatar.svg"
+          alt=""
+          class="site-avatar__image site-avatar__image--light"
+          width="32"
+          height="32"
+        />
+        <img
+          src="/images/site/avatar-dark.svg"
+          alt=""
+          class="site-avatar__image site-avatar__image--dark"
+          width="32"
+          height="32"
+        />
+      </span>
+      <span>{SITE.title}</span>
     </a>
     <nav
       id="nav-menu"
-      class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:space-x-4 sm:py-0"
+      class="flex w-full flex-col items-center lg:ms-2 lg:flex-row lg:justify-end lg:space-x-2 lg:py-0"
     >
       <button
         id="menu-btn"
-        class="focus-outline self-end p-2 sm:hidden"
+        class="focus-outline min-h-11 min-w-11 self-end p-2 lg:hidden"
         aria-label="Open Menu"
         aria-expanded="false"
         aria-controls="menu-items"
@@ -66,100 +96,82 @@ const isActive = (path: string) => {
       <ul
         id="menu-items"
         class:list={[
-          "mt-4 grid w-44 grid-cols-2 place-content-center gap-2",
-          "[&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium [&>li>a]:hover:text-accent sm:[&>li>a]:px-2 sm:[&>li>a]:py-1",
+          "mt-4 grid w-full max-w-xs grid-cols-2 place-content-center gap-1",
+          "sketch-edge-y sketch-mobile-menu py-3 lg:py-0",
+          "[&>li>a]:flex [&>li>a]:min-h-11 [&>li>a]:items-center [&>li>a]:justify-center [&>li>a]:px-3 [&>li>a]:py-2 [&>li>a]:text-center [&>li>a]:text-base [&>li>a]:font-medium lg:[&>li>a]:min-h-0 lg:[&>li>a]:px-2 lg:[&>li>a]:py-1 lg:[&>li>a]:text-sm",
           "hidden",
-          "sm:mt-0 sm:flex sm:w-auto sm:gap-x-5 sm:gap-y-0",
+          "lg:mt-0 lg:flex lg:w-auto lg:max-w-none lg:gap-x-2 lg:gap-y-0",
         ]}
       >
-        <li class="col-span-2">
-          <a href="/posts" class:list={{ "active-nav": isActive("/posts") }}>
-            Posts
-          </a>
-        </li>
-        <li class="col-span-2">
-          <a
-            href="/projects"
-            class:list={{ "active-nav": isActive("/projects") }}
-          >
-            Projects
-          </a>
-        </li>
-        <li class="col-span-2">
-          <a href="/notes" class:list={{ "active-nav": isActive("/notes") }}>
-            Notes
-          </a>
-        </li>
-        <li class="col-span-2">
-          <a href="/tags" class:list={{ "active-nav": isActive("/tags") }}>
-            Tags
-          </a>
-        </li>
-        <li class="col-span-1 flex items-center justify-center">
-          <LinkButton
-            href="/about"
-            class:list={[
-              "focus-outline flex p-3 sm:p-1",
-              { "text-accent": isActive("/about") },
-            ]}
-            title="About"
-            aria-label="about"
-          >
-            <IconUserCircle />
-            <span class="sr-only">About</span>
-          </LinkButton>
-        </li>
         {
-          SITE.showArchives && (
-            <li class="col-span-2">
-              <LinkButton
-                href="/archives"
-                class:list={[
-                  "focus-outline flex justify-center p-3 sm:p-1",
-                  {
-                    "active-nav text-accent": isActive("/archives"),
-                  },
-                ]}
-                title="Archives"
-                aria-label="archives"
-              >
-                <IconArchive class="hidden sm:inline-block" />
-                <span class="sm:sr-only">Archives</span>
-              </LinkButton>
-            </li>
-          )
+          navItems.map(({ href, label, Icon }) => {
+            const active = isActive(href);
+
+            return (
+              <li>
+                <a
+                  href={href}
+                  class="hand-underline-trigger gap-1.5"
+                  aria-current={active ? "page" : undefined}
+                >
+                  <Icon
+                    class:list={[
+                      "nav-link-icon",
+                      { "nav-link-icon--active": active },
+                    ]}
+                  />
+                  <span
+                    class:list={["hand-underline", { "active-nav": active }]}
+                  >
+                    {label}
+                  </span>
+                </a>
+              </li>
+            );
+          })
         }
 
-        <li class="col-span-1 flex items-center justify-center">
+        <li
+          class="col-span-2 mt-2 grid grid-cols-2 gap-2 border-t border-border pt-2 lg:mt-0 lg:flex lg:items-center lg:gap-1 lg:border-0 lg:pt-0"
+        >
           <LinkButton
             href="/search"
-            class:list={[
-              "focus-outline flex p-3 sm:p-1",
-              { "text-accent": isActive("/search") },
-            ]}
+            class="focus-outline hand-underline-trigger flex min-h-11 items-center justify-center px-2 py-2 lg:min-h-0 lg:p-1"
             title="Search"
-            aria-label="search"
+            aria-label="Search"
           >
-            <IconSearch />
-            <span class="sr-only">Search</span>
+            <IconSearch
+              class:list={[
+                "size-5 lg:size-6",
+                { "active-icon": isActive("/search") },
+              ]}
+            />
+            <span
+              class:list={[
+                "hand-underline ms-1 lg:sr-only",
+                { "active-nav": isActive("/search") },
+              ]}>Search</span
+            >
           </LinkButton>
+
+          <button
+            id="theme-btn"
+            type="button"
+            class="focus-outline flex min-h-11 items-center justify-center px-2 py-2 lg:min-h-0 lg:p-1"
+            aria-label="Switch to dark mode"
+            title="Switch to dark mode"
+          >
+            <span class="relative block size-5 lg:size-6" aria-hidden="true">
+              <IconMoon
+                class="theme-icon theme-icon--moon absolute inset-0 size-full"
+              />
+              <IconSunHigh
+                class="theme-icon theme-icon--sun absolute inset-0 size-full"
+              />
+            </span>
+            <span data-theme-label class="ms-1 lg:sr-only">Dark</span>
+          </button>
         </li>
-        {
-          SITE.lightAndDarkMode && (
-            <li class="col-span-1 flex items-center justify-center">
-              <button
-                id="theme-btn"
-                class="focus-outline relative size-12 p-4 sm:size-8 hover:text-accent"
-                title="Toggles light & dark"
-                aria-label="auto"
-                aria-live="polite"
-              >
-                <IconMoon class="absolute top-[50%] left-[50%] -translate-[50%] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-                <IconSunHigh class="absolute top-[50%] left-[50%] -translate-[50%] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-              </button>
-            </li>
-          )
-        }
       </ul>
     </nav>
   </div>
@@ -167,12 +179,15 @@ const isActive = (path: string) => {
 
 <script>
   function toggleNav() {
-    const menuBtn = document.querySelector("#menu-btn");
-    const menuItems = document.querySelector("#menu-items");
-    const menuIcon = document.querySelector("#menu-icon");
-    const closeIcon = document.querySelector("#close-icon");
+    const menuBtn = document.querySelector<HTMLButtonElement>("#menu-btn");
+    const menuItems = document.querySelector<HTMLElement>("#menu-items");
+    const menuIcon = document.querySelector<HTMLElement>("#menu-icon");
+    const closeIcon = document.querySelector<HTMLElement>("#close-icon");
 
     if (!menuBtn || !menuItems || !menuIcon || !closeIcon) return;
+    if (menuBtn.dataset.navBound === "true") return;
+
+    menuBtn.dataset.navBound = "true";
 
     menuBtn.addEventListener("click", () => {
       const openMenu = menuBtn.getAttribute("aria-expanded") === "true";
@@ -186,8 +201,13 @@ const isActive = (path: string) => {
     });
   }
 
-  toggleNav();
-
-  // Runs on view transitions navigation
+  (
+    window as Window & { __headerNavCleanup?: () => void }
+  ).__headerNavCleanup?.();
   document.addEventListener("astro:after-swap", toggleNav);
+  (window as Window & { __headerNavCleanup?: () => void }).__headerNavCleanup =
+    () => {
+      document.removeEventListener("astro:after-swap", toggleNav);
+    };
+  toggleNav();
 </script>

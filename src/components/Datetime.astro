@@ -30,7 +30,9 @@ const modifiedDate = modifiedDatetime?.format("YYYY-MM-DD");
 const showUpdatedDate = Boolean(modifiedDate && modifiedDate !== publishedDate);
 ---
 
-<div class:list={["flex items-center gap-x-2 opacity-80", className]}>
+<div
+  class:list={["flex items-center gap-x-2 font-code text-graphite", className]}
+>
   <IconCalendar
     class:list={[
       "inline-block size-6 min-w-5.5",
@@ -47,17 +49,19 @@ const showUpdatedDate = Boolean(modifiedDate && modifiedDate !== publishedDate);
         ]}
       >
         <time datetime={publishedDatetime.toISOString()}>{publishedDate}</time>
-        {
-          showUpdatedDate && modifiedDatetime && (
-            <>
-              <span aria-hidden="true" class="opacity-40">•</span>
-              <span class="text-xs font-medium tracking-[0.14em] uppercase opacity-60">
-                updated
-              </span>
-              <time datetime={modifiedDatetime.toISOString()}>{modifiedDate}</time>
-            </>
-          )
-        }
+        {showUpdatedDate && modifiedDatetime && (
+          <>
+            <span aria-hidden="true" class="opacity-50">
+              •
+            </span>
+            <span class="font-code text-xs font-medium tracking-[0.14em] uppercase">
+              updated
+            </span>
+            <time datetime={modifiedDatetime.toISOString()}>
+              {modifiedDate}
+            </time>
+          </>
+        )}
       </div>
     ) : (
       <time

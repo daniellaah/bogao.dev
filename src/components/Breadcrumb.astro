@@ -31,20 +31,20 @@ if (breadcrumbList[0] === "posts" && breadcrumbList[1] === "lang") {
 }
 ---
 
-<nav class="app-layout mt-8 mb-1" aria-label="breadcrumb">
+<nav class="app-layout mt-8 mb-2" aria-label="breadcrumb">
   <ul
-    class="font-light [&>li]:inline [&>li:not(:last-child)>a]:hover:opacity-100"
+    class="font-code text-xs tracking-[0.08em] text-graphite [&>li]:inline [&>li:not(:last-child)>a]:hover:text-foreground"
   >
     <li>
-      <a href="/" class="opacity-80">Home</a>
-      <span aria-hidden="true" class="opacity-80">&raquo;</span>
+      <a href="/">Home</a>
+      <span aria-hidden="true" class="mx-1">/</span>
     </li>
     {
       breadcrumbList.map((breadcrumb, index) =>
         index + 1 === breadcrumbList.length ? (
           <li>
             <span
-              class:list={["capitalize opacity-75", { lowercase: index > 0 }]}
+              class:list={["capitalize", { lowercase: index > 0 }]}
               aria-current="page"
             >
               {/* make the last part lowercase in Home > Tags > some-tag */}
@@ -53,10 +53,12 @@ if (breadcrumbList[0] === "posts" && breadcrumbList[1] === "lang") {
           </li>
         ) : (
           <li>
-            <a href={`/${breadcrumb}/`} class="capitalize opacity-70">
+            <a href={`/${breadcrumb}/`} class="capitalize">
               {breadcrumb}
             </a>
-            <span aria-hidden="true">&raquo;</span>
+            <span aria-hidden="true" class="mx-1">
+              /
+            </span>
           </li>
         )
       )

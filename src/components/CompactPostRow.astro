@@ -1,0 +1,45 @@
+---
+import type { CollectionEntry } from "astro:content";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import { getPath } from "@/utils/getPath";
+import { slugifyStr } from "@/utils/slugify";
+
+type Props = {
+  post: CollectionEntry<"blog">;
+  filterable?: boolean;
+};
+
+const { post, filterable = false } = Astro.props;
+
+dayjs.extend(utc);
+
+const pubDatetime = dayjs.utc(post.data.pubDatetime);
+---
+
+<li
+  class="ledger-row last:border-b-0"
+  data-post-list-item={filterable ? true : undefined}
+  data-post-year={filterable ? pubDatetime.format("YYYY") : undefined}
+  data-post-tags={filterable
+    ? post.data.tags.map(tag => slugifyStr(tag)).join(" ")
+    : undefined}
+>
+  <a
+    href={getPath(post.id, post.filePath, true, post.slug)}
+    class="hand-underline-trigger grid gap-1 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
+  >
+    <span
+      class="block min-w-0 truncate text-base leading-none sm:text-[1.15rem] sm:leading-none"
+      title={post.data.title}
+    >
+      <span class="hand-underline content-title">{post.data.title}</span>
+    </span>
+    <time
+      datetime={post.data.pubDatetime.toISOString()}
+      class="font-code text-xs leading-none tracking-[0.04em] text-graphite sm:text-right"
+    >
+      {pubDatetime.format("D MMM YYYY")}
+    </time>
+  </a>
+</li>

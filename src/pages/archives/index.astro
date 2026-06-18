@@ -4,8 +4,8 @@ import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import Card from "@/components/Card.astro";
-import getPostsByGroupCondition from "@/utils/getPostsByGroupCondition";
+import CompactPostRow from "@/components/CompactPostRow.astro";
+import getSortedPosts from "@/utils/getSortedPosts";
 import { SITE } from "@/config";
 
 // Redirect to 404 page if `showArchives` config is false
@@ -13,7 +13,9 @@ if (!SITE.showArchives) {
   return Astro.redirect("/404");
 }
 
-const posts = await getCollection("blog", ({ data }) => !data.draft);
+const posts = getSortedPosts(
+  await getCollection("blog", ({ data }) => !data.draft)
+);
 
 const months = [
   "January",
@@ -29,54 +31,68 @@ const months = [
   "November",
   "December",
 ];
+
+const groupedPosts = posts.reduce(
+  (groups, post) => {
+    const year = String(post.data.pubDatetime.getUTCFullYear());
+    const month = String(post.data.pubDatetime.getUTCMonth() + 1).padStart(
+      2,
+      "0"
+    );
+
+    groups[year] ??= {};
+    groups[year][month] ??= [];
+    groups[year][month].push(post);
+
+    return groups;
+  },
+  {} as Record<string, Record<string, typeof posts>>
+);
 ---
 
 <Layout title={`Archives | ${SITE.title}`}>
   <Header />
-  <Main pageTitle="Archives" pageDesc="All the articles I've archived.">
+  <Main
+    pageTitle="Archives"
+    pageDesc="A chronological index of published posts."
+  >
     {
-      Object.entries(
-        getPostsByGroupCondition(posts, post =>
-          post.data.pubDatetime.getUTCFullYear()
-        )
-      )
+      Object.entries(groupedPosts)
         .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
-        .map(([year, yearGroup]) => (
-          <div>
-            <span class="text-2xl font-bold">{year}</span>
-            <sup class="text-sm">{yearGroup.length}</sup>
-            {Object.entries(
-              getPostsByGroupCondition(
-                yearGroup,
-                post => post.data.pubDatetime.getUTCMonth() + 1
-              )
-            )
-              .sort(([monthA], [monthB]) => Number(monthB) - Number(monthA))
-              .map(([month, monthGroup]) => (
-                <div class="flex flex-col sm:flex-row">
-                  <div class="mt-6 min-w-36 text-lg sm:my-6">
-                    <span class="font-bold">{months[Number(month) - 1]}</span>
-                    <sup class="text-xs">{monthGroup.length}</sup>
-                  </div>
-                  <ul>
-                    {monthGroup
-                      .sort(
-                        (a, b) =>
-                          Math.floor(
-                            new Date(b.data.pubDatetime).getTime() / 1000
-                          ) -
-                          Math.floor(
-                            new Date(a.data.pubDatetime).getTime() / 1000
-                          )
-                      )
-                      .map(data => (
-                        <Card {...data} />
-                      ))}
-                  </ul>
-                </div>
-              ))}
-          </div>
-        ))
+        .map(([year, monthGroups]) => {
+          const yearCount = Object.values(monthGroups).flat().length;
+
+          return (
+            <section class="sketch-edge-top sketch-section py-8 first:pt-0">
+              <h2 class="font-code text-2xl font-semibold">
+                {year}
+                <sup class="ms-1 text-xs font-medium text-graphite">
+                  {yearCount}
+                </sup>
+              </h2>
+
+              <div class="mt-4 space-y-8">
+                {Object.entries(monthGroups)
+                  .sort(([monthA], [monthB]) => Number(monthB) - Number(monthA))
+                  .map(([month, monthGroup]) => (
+                    <div class="sketch-timeline grid gap-3 ps-4 sm:grid-cols-[8rem_minmax(0,1fr)] sm:ps-0">
+                      <div class="notebook-kicker pt-4 sm:pt-0">
+                        {months[Number(month) - 1]}
+                        <sup class="ms-1 text-xs font-medium">
+                          {monthGroup.length}
+                        </sup>
+                      </div>
+                      <ul class="ledger-list--subtle">
+                        {monthGroup.map(post => (
+                          <CompactPostRow {post} />
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+              </div>
+            </section>
+          );
+        })
     }
   </Main>
   <Footer />

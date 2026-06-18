@@ -1,0 +1,219 @@
+---
+import type { CollectionEntry } from "astro:content";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import { SITE } from "@/config";
+import { slugifyStr } from "@/utils/slugify";
+
+type Props = {
+  posts: CollectionEntry<"blog">[];
+};
+
+const { posts } = Astro.props;
+
+dayjs.extend(utc);
+
+const years = Array.from(
+  new Set(posts.map(post => dayjs.utc(post.data.pubDatetime).format("YYYY")))
+).sort((a, b) => Number(b) - Number(a));
+
+const availableTags = new Map(
+  posts.flatMap(post =>
+    post.data.tags.map(tag => [slugifyStr(tag), tag] as const)
+  )
+);
+
+const tags = SITE.postFilterTags.flatMap(configuredTag => {
+  const slug = slugifyStr(configuredTag);
+  const tagName = availableTags.get(slug);
+  return tagName ? [{ slug, tagName }] : [];
+});
+
+const filterButtonClass =
+  "sketch-chip ui-text inline-flex items-center px-2.5 py-1 text-sm font-medium text-graphite transition hover:bg-muted/70 hover:text-foreground";
+---
+
+{
+  posts.length > 0 && (
+    <section class="mt-2 space-y-2" data-post-filters aria-label="Filter posts">
+      <div class="grid gap-2 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:items-start">
+        <span class="notebook-kicker pt-1">Year</span>
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            data-filter-year="all"
+            class={filterButtonClass}
+            data-active
+            aria-pressed="true"
+          >
+            All
+          </button>
+          {years.map(year => (
+            <button
+              type="button"
+              data-filter-year={year}
+              class={filterButtonClass}
+              aria-pressed="false"
+            >
+              {year}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {tags.length > 0 && (
+        <div class="grid gap-2 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:items-start">
+          <span class="notebook-kicker pt-1">Tag</span>
+          <div class="flex flex-wrap gap-2">
+            <button
+              type="button"
+              data-filter-tag="all"
+              class={filterButtonClass}
+              data-active
+              aria-pressed="true"
+            >
+              All
+            </button>
+            {tags.map(tag => (
+              <button
+                type="button"
+                data-filter-tag={tag.slug}
+                class={filterButtonClass}
+                aria-pressed="false"
+              >
+                {tag.tagName}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <p class="font-code text-xs text-graphite" data-filter-status>
+        Showing all posts.
+      </p>
+    </section>
+  )
+}
+
+<script>
+  function initPostFilters() {
+    const root = document.querySelector<HTMLElement>("[data-post-filters]");
+    if (!root || root.dataset.initialized === "true") return;
+
+    const posts = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-post-list-item]")
+    );
+    const status = root.querySelector<HTMLElement>("[data-filter-status]");
+    const yearButtons = Array.from(
+      root.querySelectorAll<HTMLButtonElement>("[data-filter-year]")
+    );
+    const tagButtons = Array.from(
+      root.querySelectorAll<HTMLButtonElement>("[data-filter-tag]")
+    );
+    const validTags = new Set([
+      "all",
+      ...tagButtons.map(button => button.dataset.filterTag ?? "all"),
+    ]);
+
+    root.dataset.initialized = "true";
+
+    const getParams = () => new URLSearchParams(window.location.search);
+
+    const getFilter = () => {
+      const params = getParams();
+      const requestedTag = params.get("tag") || "all";
+      return {
+        year: params.get("year") || "all",
+        tag: validTags.has(requestedTag) ? requestedTag : "all",
+        invalidTag: !validTags.has(requestedTag),
+      };
+    };
+
+    const setActiveButton = (
+      buttons: HTMLButtonElement[],
+      key: string,
+      value: string
+    ) => {
+      for (const button of buttons) {
+        const isActive = button.dataset[key] === value;
+        button.toggleAttribute("data-active", isActive);
+        button.setAttribute("aria-pressed", String(isActive));
+      }
+    };
+
+    const updateUrl = (year: string, tag: string) => {
+      const params = getParams();
+      if (year === "all") params.delete("year");
+      else params.set("year", year);
+      if (tag === "all") params.delete("tag");
+      else params.set("tag", tag);
+
+      const suffix = params.toString();
+      history.replaceState(
+        history.state,
+        "",
+        suffix
+          ? `${window.location.pathname}?${suffix}`
+          : window.location.pathname
+      );
+    };
+
+    const applyFilter = () => {
+      const { year, tag, invalidTag } = getFilter();
+      let visibleCount = 0;
+
+      if (invalidTag) updateUrl(year, tag);
+
+      for (const post of posts) {
+        const yearMatches = year === "all" || post.dataset.postYear === year;
+        const tagMatches =
+          tag === "all" ||
+          (post.dataset.postTags ?? "").split(" ").includes(tag);
+        const visible = yearMatches && tagMatches;
+
+        post.hidden = !visible;
+        if (visible) visibleCount += 1;
+      }
+
+      setActiveButton(yearButtons, "filterYear", year);
+      setActiveButton(tagButtons, "filterTag", tag);
+
+      if (status) {
+        status.textContent =
+          year === "all" && tag === "all"
+            ? "Showing all posts."
+            : `Showing ${visibleCount} post${visibleCount === 1 ? "" : "s"}.`;
+      }
+    };
+
+    for (const button of yearButtons) {
+      button.addEventListener("click", () => {
+        const { tag } = getFilter();
+        updateUrl(button.dataset.filterYear ?? "all", tag);
+        applyFilter();
+      });
+    }
+
+    for (const button of tagButtons) {
+      button.addEventListener("click", () => {
+        const { year } = getFilter();
+        updateUrl(year, button.dataset.filterTag ?? "all");
+        applyFilter();
+      });
+    }
+
+    applyFilter();
+  }
+
+  (
+    window as Window & { __postFiltersCleanup?: () => void }
+  ).__postFiltersCleanup?.();
+  document.addEventListener("astro:page-load", initPostFilters);
+  document.addEventListener("astro:after-swap", initPostFilters);
+  (
+    window as Window & { __postFiltersCleanup?: () => void }
+  ).__postFiltersCleanup = () => {
+    document.removeEventListener("astro:page-load", initPostFilters);
+    document.removeEventListener("astro:after-swap", initPostFilters);
+  };
+</script>

@@ -16,7 +16,12 @@ const { frontmatter } = Astro.props;
   <Breadcrumb />
   <main id="main-content" class="app-layout">
     <section id="about" class="app-prose mb-28 max-w-app prose-img:border-0">
-      <h1 class="text-2xl tracking-wider sm:text-3xl">{frontmatter.title}</h1>
+      <div class="page-heading mb-8 inline-flex max-w-full flex-col">
+        <h1 class="text-3xl font-semibold sm:text-4xl">
+          {frontmatter.title}
+        </h1>
+        <div class="sketch-divider mt-3 w-full" aria-hidden="true"></div>
+      </div>
       <slot />
     </section>
   </main>

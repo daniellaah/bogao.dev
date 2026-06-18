@@ -9,24 +9,29 @@ const { currentHref } = Astro.props;
 const items = getLanguageNavigation();
 ---
 
-<nav aria-label="Language filters" class="mb-8 flex flex-wrap gap-3">
-  {
-    items.map(item => {
-      const isActive = currentHref === item.href;
+<nav
+  aria-label="Language filters"
+  class="grid gap-2 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:items-start"
+>
+  <span class="notebook-kicker pt-1">Lang</span>
+  <div class="flex flex-wrap gap-2">
+    {
+      items.map(item => {
+        const isActive = currentHref === item.href;
 
-      return (
-        <a
-          href={item.href}
-          class:list={[
-            "rounded-full border px-4 py-2 text-sm transition-colors",
-            isActive
-              ? "border-accent bg-accent text-background"
-              : "border-border hover:border-accent hover:text-accent",
-          ]}
-        >
-          {item.shortLabel}
-        </a>
-      );
-    })
-  }
+        return (
+          <a
+            href={item.href}
+            aria-current={isActive ? "page" : undefined}
+            class:list={[
+              "sketch-chip ui-text inline-flex items-center px-3 py-1 text-sm transition-colors",
+              { "hover:bg-muted/70": !isActive },
+            ]}
+          >
+            {item.shortLabel}
+          </a>
+        );
+      })
+    }
+  </div>
 </nav>

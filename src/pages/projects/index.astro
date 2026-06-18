@@ -11,19 +11,21 @@ import { SITE } from "@/config";
 const projects = getSortedProjects(await getCollection("projects"));
 ---
 
-<Layout title={`Projects | ${SITE.title}`} description="Selected ML, LLM, and knowledge-tool experiments built by Bo.">
+<Layout
+  title={`Projects | ${SITE.title}`}
+  description="Selected ML, LLM, and knowledge-tool experiments built by Bo."
+>
   <Header />
-  <Main
-    pageTitle="Projects"
-    pageDesc="Let's build something..."
-  >
+  <Main pageTitle="Projects" pageDesc="Let's build something...">
     {
       projects.length > 0 ? (
-        <section class="divide-y divide-border border-t border-border">
-          {projects.map(project => <ProjectCard {...project} />)}
+        <section class="sketch-edge-top">
+          {projects.map(project => (
+            <ProjectCard {...project} />
+          ))}
         </section>
       ) : (
-        <section class="rounded-[2rem] border border-border bg-muted/20 p-8">
+        <section class="sketch-box p-8">
           <h2 class="text-2xl font-semibold">No projects published yet.</h2>
           <p class="mt-3 max-w-2xl leading-8 opacity-80">
             Add Markdown files under <code>src/content/projects</code> to

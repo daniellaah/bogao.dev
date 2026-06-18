@@ -1,87 +1,131 @@
 ---
 import { getCollection } from "astro:content";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import PostsList from "@/components/PostsList.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
-import getSortedProjects from "@/utils/getSortedProjects";
 import { getProjectPath } from "@/utils/getProjectPath";
+
+dayjs.extend(utc);
 
 const posts = await getCollection("blog");
 const projects = await getCollection("projects");
 const sortedPosts = getSortedPosts(posts);
-const sortedProjects = getSortedProjects(projects);
 const latestPosts = sortedPosts.slice(0, 10);
-const latestProjects = sortedProjects.slice(0, 4);
+const latestProjects = projects
+  .filter(({ data }) => !data.draft)
+  .sort(
+    (a, b) =>
+      (b.data.startDate?.getTime() ?? 0) - (a.data.startDate?.getTime() ?? 0)
+  )
+  .slice(0, 4);
 ---
 
 <Layout lang="en">
   <Header />
   <main id="main-content" data-layout="index" class="app-layout">
-    <section id="hero" class="pt-12 pb-8 sm:pt-16">
+    <section id="hero" class="pt-12 pb-10 sm:pt-16">
       <div class="mx-auto max-w-4xl">
-        <img
-          src="/images/site/avatar.jpg"
-          alt="Portrait of Bo"
-          class="mx-auto h-28 w-28 rounded-full border border-border object-cover sm:h-32 sm:w-32"
-        />
+        <div class="hero-avatar mx-auto h-36 w-36 sm:h-40 sm:w-40">
+          <img
+            src="/images/site/avatar.svg"
+            alt="Portrait of Bo"
+            width="1254"
+            height="1254"
+            decoding="async"
+            class="hero-avatar__image hero-avatar__image--light h-full w-full rounded-full object-cover"
+          />
+          <img
+            src="/images/site/avatar-dark.svg"
+            alt="Portrait of Bo"
+            width="1254"
+            height="1254"
+            decoding="async"
+            class="hero-avatar__image hero-avatar__image--dark h-full w-full rounded-full object-cover"
+          />
+        </div>
 
-        <h1 class="mt-6 text-center text-3xl font-bold leading-tight sm:text-4xl">
+        <p class="notebook-kicker mt-7 text-center">Personal notebook</p>
+
+        <h1
+          class="hero-title mt-2 text-center text-3xl leading-tight font-bold sm:text-4xl"
+        >
           BoGao.Dev
         </h1>
 
-        <div class="mx-auto mt-6 max-w-3xl space-y-4 text-center text-base leading-7 opacity-85 sm:text-[1.15rem] sm:leading-7">
+        <div
+          class="mx-auto mt-5 max-w-2xl space-y-3 text-center text-base leading-7 text-graphite sm:text-[1.15rem] sm:leading-7"
+        >
           <p>
             I write about learning, life and love.
             <br />
             I share my thoughts, experiences, and insights.
           </p>
-          <!-- <p>
-            I share my thoughts, experiences, and insights.
-          </p> -->
         </div>
-
       </div>
     </section>
 
     <section class="pb-8">
-      <div class="mx-auto max-w-4xl border-t border-border pt-10">
+      <div class="mx-auto max-w-4xl">
+        <div class="sketch-divider" aria-hidden="true"></div>
         <div class="flex items-end justify-between gap-4">
-          <h2 class="text-3xl font-semibold sm:text-4xl">Latest Projects</h2>
-          <a href="/projects/" class="text-sm opacity-70 hover:text-accent hover:opacity-100">
+          <div>
+            <p class="notebook-kicker">01 / Build log</p>
+            <h2 class="mt-1 text-2xl font-semibold sm:text-3xl">
+              Latest Projects
+            </h2>
+          </div>
+          <a
+            href="/projects/"
+            class="ink-link font-code text-xs text-graphite hover:text-foreground"
+          >
             View all
           </a>
         </div>
 
-        <ul class="mt-6">
-          {latestProjects.map(project => (
-            <li class="border-b border-border/70 pt-4 pb-0 last:border-b-0">
-              <a
-                href={getProjectPath(project.id)}
-                class="grid gap-1 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
-              >
-                <span class="min-w-0 text-base leading-none transition-colors hover:text-accent sm:text-[1.15rem] sm:leading-none">
-                  {project.data.title}
-                </span>
-                <time class="text-sm leading-none tracking-[0.05em] opacity-65 sm:text-right">
-                  {project.data.startDate
-                    ? dayjs(project.data.startDate).format("D MMM YYYY")
-                    : String(project.data.year ?? "")}
-                </time>
-              </a>
-            </li>
-          ))}
+        <ul class="ledger-list--subtle mt-5">
+          {
+            latestProjects.map(project => (
+              <li class="ledger-row last:border-b-0">
+                <a
+                  href={getProjectPath(project.id)}
+                  class="hand-underline-trigger grid gap-1 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
+                >
+                  <span class="min-w-0 text-base leading-none sm:text-[1.15rem] sm:leading-none">
+                    <span class="hand-underline content-title">
+                      {project.data.title}
+                    </span>
+                  </span>
+                  <time class="font-code text-xs leading-none tracking-[0.04em] text-graphite sm:text-right">
+                    {project.data.startDate
+                      ? dayjs.utc(project.data.startDate).format("D MMM YYYY")
+                      : String(project.data.year ?? "")}
+                  </time>
+                </a>
+              </li>
+            ))
+          }
         </ul>
       </div>
     </section>
 
     <section class="pb-8">
-      <div class="mx-auto max-w-4xl border-t border-border pt-10">
+      <div class="mx-auto max-w-4xl">
+        <div class="sketch-divider" aria-hidden="true"></div>
         <div class="flex items-end justify-between gap-4">
-          <h2 class="text-3xl font-semibold sm:text-4xl">Latest Posts</h2>
-          <a href="/posts/" class="text-sm opacity-70 hover:text-accent hover:opacity-100">
+          <div>
+            <p class="notebook-kicker">02 / Field notes</p>
+            <h2 class="mt-1 text-2xl font-semibold sm:text-3xl">
+              Latest Posts
+            </h2>
+          </div>
+          <a
+            href="/posts/"
+            class="ink-link font-code text-xs text-graphite hover:text-foreground"
+          >
             View all
           </a>
         </div>
@@ -94,11 +138,22 @@ const latestProjects = sortedProjects.slice(0, 4);
 </Layout>
 
 <script>
-  document.addEventListener("astro:page-load", () => {
+  function storeHomeBackUrl() {
     const indexLayout = (document.querySelector("#main-content") as HTMLElement)
       ?.dataset?.layout;
     if (indexLayout) {
       sessionStorage.setItem("backUrl", "/");
     }
-  });
+  }
+
+  (
+    window as Window & { __homeBackUrlCleanup?: () => void }
+  ).__homeBackUrlCleanup?.();
+  document.addEventListener("astro:page-load", storeHomeBackUrl);
+  (
+    window as Window & { __homeBackUrlCleanup?: () => void }
+  ).__homeBackUrlCleanup = () => {
+    document.removeEventListener("astro:page-load", storeHomeBackUrl);
+  };
+  storeHomeBackUrl();
 </script>

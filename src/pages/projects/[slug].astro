@@ -62,46 +62,39 @@ const relatedProjects = projects
   <Header />
   <BackButton />
   <main id="main-content" class="app-layout pb-12">
-    <section class="border-b border-border pb-8">
+    <section class="sketch-edge-bottom pb-8">
       <div>
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
           <ProjectStatusBadge status={status} />
-          {year && <span class="text-sm opacity-65">{year}</span>}
+          {year && <span class="font-code text-xs text-graphite">{year}</span>}
+          {
+            stack.length > 0 && (
+              <span
+                class="min-w-0 truncate text-sm text-graphite"
+                title={stack.join(" · ")}
+              >
+                {stack.join(" · ")}
+              </span>
+            )
+          }
         </div>
-        <h1 class="mt-5 text-3xl font-semibold text-accent sm:text-4xl">
+        <h1 class="mt-5 text-3xl font-semibold sm:text-4xl">
           {title}
         </h1>
-        {
-          stack.length > 0 && (
-            <ul class="mt-4 flex flex-wrap gap-2">
-              {stack.map(item => (
-                <li class="rounded-full bg-muted/55 px-3 py-1 text-xs font-medium">
-                  {item}
-                </li>
-              ))}
-            </ul>
-          )
-        }
-        <p class="mt-4 max-w-3xl text-base leading-8 opacity-85">
+        <p class="mt-4 max-w-3xl text-base leading-8 text-graphite">
           {description}
         </p>
         <div class="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
           {
             demoUrl && (
-              <a
-                href={demoUrl}
-                class="text-accent hover:underline decoration-dashed underline-offset-4"
-              >
+              <a href={demoUrl} class="ink-link underline decoration-dashed">
                 Demo
               </a>
             )
           }
           {
             repoUrl && (
-              <a
-                href={repoUrl}
-                class="text-accent hover:underline decoration-dashed underline-offset-4"
-              >
+              <a href={repoUrl} class="ink-link underline decoration-dashed">
                 GitHub
               </a>
             )
@@ -110,23 +103,17 @@ const relatedProjects = projects
       </div>
     </section>
 
-    <article
-      class="app-prose mt-8 w-full max-w-app prose-pre:bg-(--shiki-light-bg) dark:prose-pre:bg-(--shiki-dark-bg)"
-      data-pagefind-body
-    >
+    <article class="app-prose reading-column mt-8">
       <Content />
     </article>
 
     {
       relatedProjects.length > 0 && (
-        <section class="mt-12 border-t border-border pt-8">
+        <section class="sketch-edge-top mt-12 pt-8">
           <h2 class="text-2xl font-semibold">More Projects</h2>
-          <div class="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div class="mt-6 grid gap-4 md:grid-cols-2">
             {relatedProjects.map(item => (
-              <a
-                href={getProjectPath(item.id)}
-                class="text-accent hover:underline decoration-dashed underline-offset-4"
-              >
+              <a href={getProjectPath(item.id)} class="ink-link pb-2">
                 {item.data.title}
               </a>
             ))}

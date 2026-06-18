@@ -2,25 +2,32 @@
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import LinkButton from "./LinkButton.astro";
 import { SITE } from "@/config";
+
+type Props = {
+  layoutClass?: string;
+  label?: string;
+};
+
+const { layoutClass = "app-layout", label = "Go back" } = Astro.props;
 ---
 
 {
   SITE.showBackButton && (
-    <div class="app-layout flex items-center justify-start">
+    <div class:list={[layoutClass, "flex items-center justify-start"]}>
       <LinkButton
         id="back-button"
         href="/"
         class="focus-outline -ms-2 mt-8 mb-2 hover:text-foreground/75"
       >
         <IconChevronLeft class="inline-block size-6 rtl:rotate-180" />
-        <span>Go back</span>
+        <span>{label}</span>
       </LinkButton>
     </div>
   )
 }
 
 <script>
-  /* Update Search Praam */
+  /* Update back link after ClientRouter navigation. */
   function updateGoBackUrl() {
     const backButton: HTMLAnchorElement | null =
       document.querySelector("#back-button");
@@ -32,6 +39,14 @@ import { SITE } from "@/config";
     }
   }
 
+  (
+    window as Window & { __backButtonCleanup?: () => void }
+  ).__backButtonCleanup?.();
   document.addEventListener("astro:page-load", updateGoBackUrl);
+  (
+    window as Window & { __backButtonCleanup?: () => void }
+  ).__backButtonCleanup = () => {
+    document.removeEventListener("astro:page-load", updateGoBackUrl);
+  };
   updateGoBackUrl();
 </script>

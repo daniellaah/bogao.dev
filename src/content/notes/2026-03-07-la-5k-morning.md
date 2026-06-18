@@ -11,9 +11,8 @@ tags:
   - marathon
   - LA
 photos:
-  - "/images/notes/2026-03-07-la-marathon-5k.jpeg"
+  - "/images/notes/2026-03-07-la-marathon-5k.webp"
 ---
-
 
 今天参加了洛杉矶马拉松 5K, 令人意外的是 5K 比赛竟然都有 6 千多人参加. 我们慢悠悠地跑最后跑了个倒数.
 

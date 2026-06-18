@@ -3,6 +3,7 @@ import { slugifyStr } from "./slugify";
 interface Tag {
   tag: string;
   tagName: string;
+  count: number;
 }
 
 type TaggedEntry = {
@@ -13,16 +14,26 @@ type TaggedEntry = {
 };
 
 const getUniqueTags = <T extends TaggedEntry>(entries: T[]) => {
-  const tags: Tag[] = entries
-    .filter(({ data }) => !data.draft)
-    .flatMap(entry => entry.data.tags)
-    .map(tag => ({ tag: slugifyStr(tag), tagName: tag }))
-    .filter(
-      (value, index, self) =>
-        self.findIndex(tag => tag.tag === value.tag) === index
-    )
-    .sort((tagA, tagB) => tagA.tag.localeCompare(tagB.tag));
-  return tags;
+  const tagMap = new Map<string, Tag>();
+
+  for (const entry of entries.filter(({ data }) => !data.draft)) {
+    const entryTags = new Map(
+      entry.data.tags.map(tagName => [slugifyStr(tagName), tagName])
+    );
+
+    for (const [tag, tagName] of entryTags) {
+      const current = tagMap.get(tag);
+      tagMap.set(tag, {
+        tag,
+        tagName: current?.tagName ?? tagName,
+        count: (current?.count ?? 0) + 1,
+      });
+    }
+  }
+
+  return Array.from(tagMap.values()).sort((tagA, tagB) =>
+    tagA.tag.localeCompare(tagB.tag)
+  );
 };
 
 export default getUniqueTags;

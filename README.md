@@ -17,6 +17,10 @@ npm run dev
 npm run dev
 npm run build
 npm run preview
+npm run content:check
+npm run new:post -- "Post title"
+npm run new:note -- "Note title"
+npm run new:project -- "Project title"
 npm run lint
 npm run format
 ```
@@ -41,9 +45,10 @@ dev.md              开发计划
 - 已切换博客内容目录到 `src/content/blog`
 - 已支持 `en` / `zh-CN` 语言元信息，且文章必须显式声明 `lang`
 - `Posts` 页面支持按语言筛选
-- `Posts` 页面当前每页显示 `8` 篇文章
-- 已自托管 `LXGW WenKai` 字体并应用到正文、标题和代码区
+- `Posts` 页面当前每页最多显示 `100` 篇文章，并支持年份 / 标签轻量筛选
+- 已自托管 `LXGW WenKai` WOFF2 字体并应用到正文和标题
 - 文章页已切换到 KaTeX 编译期数学公式渲染
+- 站内搜索使用自定义 `/search-index.json`，覆盖 posts、notes 和 projects
 - 已写入基础站点信息与首页文案
 - 已导入一批旧博客文章
 - 旧文章已统一迁移到新的 `pubDatetime` / `modDatetime`
@@ -136,13 +141,37 @@ PUBLIC_BAIDU_SITE_VERIFICATION=your_baidu_code
 PUBLIC_BAIDU_SITE_VERIFICATION=codeva-xxxx
 ```
 
-
 ## 写作模板
 
-仓库里提供了双语文章模板：
+仓库里提供了双语文章模板和内容创建命令：
 
 - `templates/blog-post.en.md`
 - `templates/blog-post.zh-CN.md`
+- `templates/note.md`
+- `templates/project.md`
+
+常用写作命令：
+
+```bash
+npm run new:post -- "My new post" --lang en --tags machine-learning,notes
+npm run new:note -- "LA 5K morning" --location "Los Angeles" --tags running,life
+npm run new:project -- "My project" --stack Python,Astro --repoUrl https://github.com/yourname/project
+```
+
+说明：
+
+- 新内容默认 `draft: true`
+- 日期默认使用当天，格式为 `YYYY-MM-DD`
+- 新内容会写入显式 `slug`，后续修改标题或文件名不会改变 URL
+- 如果标题生成的 slug 不理想，可以用 `--slug your-custom-slug` 指定
+
+发布或提交前建议运行：
+
+```bash
+npm run content:check
+npm run format:check
+npm run build
+```
 
 ## 图片目录规范
 

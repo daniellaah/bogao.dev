@@ -10,31 +10,51 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
 
 <Layout title={`Search | ${SITE.title}`}>
   <Header />
-  <Main pageTitle="Search" pageDesc="Search posts and projects.">
+  <Main pageTitle="Search" pageDesc="Search posts, notes, and projects.">
     <section class="space-y-5" data-backurl={backUrl}>
-      <div class="relative">
+      <div class="sketch-box search-box relative">
         <label class="sr-only" for="search-input">Search</label>
         <input
           id="search-input"
           type="search"
-          placeholder="Search posts and projects"
-          class="w-full rounded-2xl border border-border bg-background px-5 py-4 pe-24 text-lg outline-hidden transition focus:border-accent"
+          placeholder="Search posts, notes, and projects"
+          class="w-full border-0 bg-transparent px-5 py-4 pe-24 text-lg outline-hidden placeholder:text-graphite/75"
           autocomplete="off"
         />
         <button
           id="search-clear"
           type="button"
-          class="absolute top-1/2 right-4 -translate-y-1/2 text-sm font-medium opacity-70 hover:opacity-100"
+          class="ink-link absolute top-1/2 right-4 -translate-y-1/2 font-code text-xs text-graphite hover:text-foreground"
         >
           Clear
         </button>
       </div>
 
-      <p id="search-status" class="text-sm opacity-75">
-        Type a keyword to search across posts and projects.
+      <div
+        id="search-kind-filters"
+        class="flex flex-wrap gap-2"
+        aria-label="Filter search results by type"
+      >
+        {
+          ["All", "Posts", "Notes", "Projects"].map(kind => (
+            <button
+              type="button"
+              data-search-kind={kind.toLowerCase()}
+              class="sketch-chip ui-text inline-flex items-center px-3 py-1 text-sm font-medium text-graphite transition hover:bg-muted/70 hover:text-foreground"
+              aria-pressed={kind === "All" ? "true" : "false"}
+              data-active={kind === "All" ? true : undefined}
+            >
+              {kind}
+            </button>
+          ))
+        }
+      </div>
+
+      <p id="search-status" class="font-code text-xs text-graphite">
+        Type a keyword to search across posts, notes, and projects.
       </p>
 
-      <ul id="search-results" class="divide-y divide-border"></ul>
+      <ul id="search-results"></ul>
     </section>
   </Main>
   <Footer />
@@ -52,14 +72,25 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
   };
 
   type RankedSearchRecord = SearchRecord & { score: number };
+  type SearchKind = "all" | "posts" | "notes" | "projects";
+
+  const SEARCH_KIND_TO_RECORD_KIND: Record<SearchKind, string | null> = {
+    all: null,
+    posts: "Post",
+    notes: "Note",
+    projects: "Project",
+  };
 
   function initSearchPage() {
     const input = document.querySelector<HTMLInputElement>("#search-input");
-    const clearButton = document.querySelector<HTMLButtonElement>(
-      "#search-clear"
-    );
-    const status = document.querySelector<HTMLParagraphElement>("#search-status");
+    const clearButton =
+      document.querySelector<HTMLButtonElement>("#search-clear");
+    const status =
+      document.querySelector<HTMLParagraphElement>("#search-status");
     const results = document.querySelector<HTMLUListElement>("#search-results");
+    const kindButtons = Array.from(
+      document.querySelectorAll<HTMLButtonElement>("[data-search-kind]")
+    );
 
     if (!input || !clearButton || !status || !results) return;
     if (input.dataset.initialized === "true") return;
@@ -99,16 +130,50 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
       return `${prefix}${content.slice(start, end).trim()}${suffix}`;
     };
 
-    const renderResults = (records: SearchRecord[], query: string) => {
+    const getSearchKind = () => {
+      const rawKind = new URLSearchParams(window.location.search).get("type");
+      return rawKind &&
+        Object.prototype.hasOwnProperty.call(
+          SEARCH_KIND_TO_RECORD_KIND,
+          rawKind
+        )
+        ? (rawKind as SearchKind)
+        : "all";
+    };
+
+    const setSearchKind = (kind: SearchKind) => {
+      for (const button of kindButtons) {
+        const isActive = button.dataset.searchKind === kind;
+        button.toggleAttribute("data-active", isActive);
+        button.setAttribute("aria-pressed", String(isActive));
+      }
+    };
+
+    const getVisibleRecords = (records: SearchRecord[], kind: SearchKind) => {
+      const recordKind = SEARCH_KIND_TO_RECORD_KIND[kind];
+      return recordKind
+        ? records.filter(record => record.kind === recordKind)
+        : records;
+    };
+
+    const getScopeText = (kind: SearchKind) =>
+      kind === "all" ? "posts, notes, and projects" : kind;
+
+    const renderResults = (
+      records: SearchRecord[],
+      query: string,
+      kind: SearchKind
+    ) => {
       const terms = splitTerms(query);
+      const visibleRecords = getVisibleRecords(records, kind);
 
       if (!terms.length) {
-        status.textContent = "Type a keyword to search across posts and projects.";
+        status.textContent = `Type a keyword to search across ${getScopeText(kind)}.`;
         results.innerHTML = "";
         return;
       }
 
-      const ranked = records
+      const ranked = visibleRecords
         .map((record: SearchRecord) => {
           const title = normalize(record.title);
           const description = normalize(record.description);
@@ -136,46 +201,51 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
         .slice(0, 20);
 
       if (!sorted.length) {
-        status.textContent = `No results for ${query}`;
+        status.textContent = `No results for ${query} in ${getScopeText(kind)}`;
         results.innerHTML = "";
         return;
       }
 
-      status.textContent = `${sorted.length} result${sorted.length > 1 ? "s" : ""} for ${query}`;
+      status.textContent = `${sorted.length} result${sorted.length > 1 ? "s" : ""} for ${query} in ${getScopeText(kind)}`;
 
       results.innerHTML = sorted
         .map((record: RankedSearchRecord) => {
-          const excerpt = buildExcerpt(record.content || record.description, terms);
+          const excerpt = buildExcerpt(
+            record.content || record.description,
+            terms
+          );
           return `
-            <li class="py-6">
-              <div class="mb-2 flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.16em] opacity-65">
-                <span>${escapeHtml(record.kind)}</span>
-                ${record.lang ? `<span>${escapeHtml(record.lang)}</span>` : ""}
-              </div>
-              <a
-                href="${record.url}"
-                class="text-xl font-semibold text-accent decoration-dashed underline-offset-4 hover:underline"
-              >
-                ${escapeHtml(record.title)}
+            <li class="sketch-list-row py-5">
+              <a href="${record.url}" class="hand-underline-trigger block">
+                <div class="flex items-baseline justify-between gap-4">
+                  <span class="hand-underline content-title min-w-0 text-lg font-medium">
+                    ${escapeHtml(record.title)}
+                  </span>
+                  <span class="notebook-kicker shrink-0">${escapeHtml(record.kind)}</span>
+                </div>
+                <p class="mt-2 text-sm leading-6 text-graphite">${escapeHtml(record.description)}</p>
+                <p class="mt-2 text-sm leading-6 text-graphite/80">${escapeHtml(excerpt)}</p>
               </a>
-              <p class="mt-2 text-sm leading-7 opacity-80">${escapeHtml(record.description)}</p>
-              <p class="mt-3 text-sm leading-7 opacity-70">${escapeHtml(excerpt)}</p>
             </li>
           `;
         })
         .join("");
     };
 
-    const updateUrl = (query: string) => {
+    const updateUrl = (query: string, kind: SearchKind) => {
       const params = new URLSearchParams(window.location.search);
       if (query.trim()) params.set("q", query);
       else params.delete("q");
+      if (kind === "all") params.delete("type");
+      else params.set("type", kind);
 
       const suffix = params.toString();
       history.replaceState(
         history.state,
         "",
-        suffix ? `${window.location.pathname}?${suffix}` : window.location.pathname
+        suffix
+          ? `${window.location.pathname}?${suffix}`
+          : window.location.pathname
       );
     };
 
@@ -185,21 +255,35 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
       try {
         const response = await fetch("/search-index.json");
         const records = (await response.json()) as SearchRecord[];
-        const initialQuery = new URLSearchParams(window.location.search).get("q") ?? "";
+        const initialQuery =
+          new URLSearchParams(window.location.search).get("q") ?? "";
+        const initialKind = getSearchKind();
 
         input.value = initialQuery;
-        renderResults(records, initialQuery);
+        setSearchKind(initialKind);
+        renderResults(records, initialQuery, initialKind);
 
         input.addEventListener("input", (event: Event) => {
           const query = (event.currentTarget as HTMLInputElement).value;
-          updateUrl(query);
-          renderResults(records, query);
+          const kind = getSearchKind();
+          updateUrl(query, kind);
+          renderResults(records, query, kind);
         });
+
+        for (const button of kindButtons) {
+          button.addEventListener("click", () => {
+            const kind = (button.dataset.searchKind ?? "all") as SearchKind;
+            setSearchKind(kind);
+            updateUrl(input.value, kind);
+            renderResults(records, input.value, kind);
+          });
+        }
 
         clearButton.addEventListener("click", () => {
           input.value = "";
-          updateUrl("");
-          renderResults(records, "");
+          const kind = getSearchKind();
+          updateUrl("", kind);
+          renderResults(records, "", kind);
           input.focus();
         });
       } catch {
@@ -210,6 +294,15 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
     bootstrap();
   }
 
+  (
+    window as Window & { __searchPageCleanup?: () => void }
+  ).__searchPageCleanup?.();
   document.addEventListener("astro:page-load", initSearchPage);
   document.addEventListener("astro:after-swap", initSearchPage);
+  (
+    window as Window & { __searchPageCleanup?: () => void }
+  ).__searchPageCleanup = () => {
+    document.removeEventListener("astro:page-load", initSearchPage);
+    document.removeEventListener("astro:after-swap", initSearchPage);
+  };
 </script>

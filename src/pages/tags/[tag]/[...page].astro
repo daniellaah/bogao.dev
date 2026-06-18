@@ -77,32 +77,32 @@ const { page, tagName } = Astro.props;
   >
     <h1 slot="title" transition:name={tag}>{`Tag:${tag}`}</h1>
     <ul class="mt-6">
-      {page.data.map(item => (
-        <li class="border-b border-border/70 pt-4 pb-0 last:border-b-0">
-          <a
-            href={item.href}
-            class="grid gap-1 sm:grid-cols-[5.5rem_minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
-          >
-            <span class="text-xs font-medium uppercase tracking-[0.16em] opacity-55">
-              {item.kind}
-            </span>
-            <span class="min-w-0 text-base leading-none transition-colors hover:text-accent sm:text-[1.15rem] sm:leading-none">
-              {item.title}
-            </span>
-            <time
-              datetime={item.date.toISOString()}
-              class="text-sm leading-none tracking-[0.05em] opacity-65 sm:text-right"
+      {
+        page.data.map(item => (
+          <li class="ledger-row last:border-b-0">
+            <a
+              href={item.href}
+              class="hand-underline-trigger grid gap-1 sm:grid-cols-[5.5rem_minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
             >
-              {new Intl.DateTimeFormat("en-US", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-                timeZone: "UTC",
-              }).format(item.date)}
-            </time>
-          </a>
-        </li>
-      ))}
+              <span class="notebook-kicker">{item.kind}</span>
+              <span class="min-w-0 text-base leading-none sm:text-[1.15rem] sm:leading-none">
+                <span class="hand-underline content-title">{item.title}</span>
+              </span>
+              <time
+                datetime={item.date.toISOString()}
+                class="font-code text-xs leading-none tracking-[0.04em] text-graphite sm:text-right"
+              >
+                {new Intl.DateTimeFormat("en-US", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                  timeZone: "UTC",
+                }).format(item.date)}
+              </time>
+            </a>
+          </li>
+        ))
+      }
     </ul>
   </Main>
 

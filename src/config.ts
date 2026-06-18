@@ -15,9 +15,15 @@ export const SITE = {
   desc: "Bo's blog about machine learning notes, LLM workflows, and personal experiments.",
   title: "BoGao.Dev",
   ogImage: "astropaper-og.jpg",
-  lightAndDarkMode: true,
   postPerIndex: 4,
   postPerPage: 100,
+  postFilterTags: [
+    "Machine Learning",
+    "Deep Learning",
+    "CS229",
+    "SVM",
+    "Recommender Systems",
+  ],
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
   showArchives: true,
   showBackButton: true, // show back button in post detail

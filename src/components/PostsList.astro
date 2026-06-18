@@ -1,42 +1,24 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import { getPath } from "@/utils/getPath";
+import CompactPostRow from "@/components/CompactPostRow.astro";
 
 type Props = {
   posts: CollectionEntry<"blog">[];
+  filterable?: boolean;
 };
 
-const { posts } = Astro.props;
-
-dayjs.extend(utc);
+const { posts, filterable = false } = Astro.props;
 ---
 
 {
   posts.length > 0 ? (
-    <ul class="mt-6">
+    <ul class="ledger-list--subtle mt-6">
       {posts.map(post => (
-        <li class="border-b border-border/70 pt-4 pb-0 last:border-b-0">
-          <a
-            href={getPath(post.id, post.filePath, true, post.slug)}
-            class="grid gap-1 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
-          >
-            <span class="min-w-0 text-base leading-none transition-colors hover:text-accent sm:text-[1.15rem] sm:leading-none">
-              {post.data.title}
-            </span>
-            <time
-              datetime={post.data.pubDatetime.toISOString()}
-              class="text-sm leading-none tracking-[0.05em] opacity-65 sm:text-right"
-            >
-              {dayjs.utc(post.data.pubDatetime).format("D MMM YYYY")}
-            </time>
-          </a>
-        </li>
+        <CompactPostRow {post} {filterable} />
       ))}
     </ul>
   ) : (
-    <div class="rounded-3xl border border-border bg-muted/25 px-5 py-8">
+    <div class="sketch-box px-5 py-8">
       <p class="text-lg font-medium">No posts here yet.</p>
       <p class="mt-2 text-sm leading-7 opacity-75">
         This filtered view is ready, but there are no published articles here
