@@ -136,16 +136,15 @@ const navItems = [
         >
           <LinkButton
             href="/search"
-            class="focus-outline hand-underline-trigger flex min-h-11 items-center justify-center px-2 py-2 lg:min-h-0 lg:p-1"
+            class="search-nav-link hand-underline-trigger flex min-h-11 items-center justify-center px-2 py-2 lg:min-h-0 lg:p-1"
             title="Search"
             aria-label="Search"
+            aria-current={isActive("/search") ? "page" : undefined}
+            disableHoverOpacity
           >
-            <IconSearch
-              class:list={[
-                "size-5 lg:size-6",
-                { "active-icon": isActive("/search") },
-              ]}
-            />
+            <span class="search-nav-mark" aria-hidden="true">
+              <IconSearch class="search-nav-icon size-5 lg:size-6" />
+            </span>
             <span
               class:list={[
                 "hand-underline ms-1 lg:sr-only",

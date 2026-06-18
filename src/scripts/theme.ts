@@ -65,6 +65,12 @@ function bindThemeToggle() {
     const nextTheme =
       getCurrentTheme() === LIGHT_THEME ? DARK_THEME : LIGHT_THEME;
 
+    button.classList.remove("is-switching");
+    window.requestAnimationFrame(() => {
+      button.classList.add("is-switching");
+      window.setTimeout(() => button.classList.remove("is-switching"), 280);
+    });
+
     storeTheme(nextTheme);
     applyTheme(nextTheme);
   });

@@ -98,7 +98,7 @@ const nextPost =
       <div class="post-content-column">
         <h1
           transition:name={slugifyStr(title.replaceAll(".", "-"))}
-          class="post-title inline-block text-3xl leading-tight font-semibold sm:text-4xl"
+          class="post-title inline-block text-2xl leading-tight font-semibold sm:text-3xl"
         >
           {title}
         </h1>
@@ -123,7 +123,7 @@ const nextPost =
                     <li class:list={[heading.depth === 3 && "ps-4"]}>
                       <a
                         href={`#${heading.slug}`}
-                        class="toc-link ink-link inline-block text-foreground/80 hover:text-foreground"
+                        class="toc-link ink-link text-foreground/80 hover:text-foreground"
                         data-toc-link
                       >
                         {heading.text}
@@ -213,7 +213,7 @@ const nextPost =
                   <li class:list={[heading.depth === 3 && "ps-4"]}>
                     <a
                       href={`#${heading.slug}`}
-                      class="toc-link ink-link inline-block text-foreground/75 hover:text-foreground"
+                      class="toc-link ink-link text-foreground/75 hover:text-foreground"
                       data-toc-link
                     >
                       {heading.text}
@@ -457,10 +457,63 @@ const nextPost =
     };
 
     let ticking = false;
+    let pendingTocId = "";
+    let pendingTocTimer = 0;
+
+    const getIdFromHash = hash => {
+      const rawId = hash.startsWith("#") ? hash.slice(1) : hash;
+      try {
+        return decodeURIComponent(rawId);
+      } catch {
+        return rawId;
+      }
+    };
+
+    const clearPendingToc = () => {
+      pendingTocId = "";
+      if (pendingTocTimer) window.clearTimeout(pendingTocTimer);
+      pendingTocTimer = 0;
+      requestActiveTocUpdate();
+    };
+
+    const holdPendingToc = id => {
+      pendingTocId = id;
+      setActiveTocLink(id);
+      if (pendingTocTimer) window.clearTimeout(pendingTocTimer);
+      pendingTocTimer = window.setTimeout(clearPendingToc, 3500);
+    };
+
+    const handleTocClick = event => {
+      const hash = event.currentTarget.getAttribute("href");
+      if (hash?.startsWith("#")) holdPendingToc(getIdFromHash(hash));
+    };
 
     const updateActiveTocLink = () => {
+      if (pendingTocId) {
+        setActiveTocLink(pendingTocId);
+        return;
+      }
+
       const activationLine = window.innerHeight * 0.25;
+      const scrollBottom = window.scrollY + window.innerHeight;
+      const documentBottom = document.documentElement.scrollHeight;
+      const hashId = getIdFromHash(window.location.hash);
+      const hashHeading = headings.find(heading => heading.id === hashId);
       let currentHeading = headings[0];
+
+      if (hashHeading) {
+        const hashHeadingTop = hashHeading.getBoundingClientRect().top;
+        if (hashHeadingTop >= 0 && hashHeadingTop <= window.innerHeight) {
+          setActiveTocLink(hashHeading.id);
+          return;
+        }
+      }
+
+      if (documentBottom - scrollBottom <= 8) {
+        currentHeading = headings[headings.length - 1];
+        setActiveTocLink(currentHeading.id);
+        return;
+      }
 
       for (const heading of headings) {
         if (heading.getBoundingClientRect().top <= activationLine) {
@@ -489,9 +542,16 @@ const nextPost =
       passive: true,
     });
     window.addEventListener("resize", requestActiveTocUpdate);
+    for (const link of links) {
+      link.addEventListener("click", handleTocClick);
+    }
     window.__activeTocCleanup = () => {
+      if (pendingTocTimer) window.clearTimeout(pendingTocTimer);
       window.removeEventListener("scroll", requestActiveTocUpdate);
       window.removeEventListener("resize", requestActiveTocUpdate);
+      for (const link of links) {
+        link.removeEventListener("click", handleTocClick);
+      }
     };
 
     window.__activeTocObserver = new IntersectionObserver(
@@ -504,6 +564,10 @@ const nextPost =
 
     for (const heading of headings) {
       window.__activeTocObserver.observe(heading);
+    }
+
+    if (window.location.hash) {
+      holdPendingToc(getIdFromHash(window.location.hash));
     }
 
     requestActiveTocUpdate();

@@ -185,6 +185,12 @@ html[data-theme="dark"] {
   overflow-y: auto;
 }
 
+.toc-link {
+  display: inline;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
 .toc-link[aria-current="true"],
 .toc-link.is-active {
   color: var(--foreground);
@@ -307,14 +313,21 @@ html[data-theme="dark"] {
   max-width: var(--reading-measure);
 }
 
-.active-icon {
-  border: 1px solid var(--foreground);
-  border-radius: 48% 52% 45% 55% / 54% 45% 55% 46%;
-  background: var(--muted);
+.theme-icon {
+  transform-origin: center;
+  transition:
+    opacity 180ms ease,
+    transform 220ms ease;
+}
+
+.theme-icon--moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
 }
 
 .theme-icon--sun {
-  display: none;
+  opacity: 0;
+  transform: rotate(-65deg) scale(0.55);
 }
 
 #top-nav-wrap::after {
@@ -332,11 +345,31 @@ html[data-theme="dark"] {
 }
 
 html[data-theme="dark"] .theme-icon--moon {
-  display: none;
+  opacity: 0;
+  transform: rotate(65deg) scale(0.55);
 }
 
 html[data-theme="dark"] .theme-icon--sun {
-  display: block;
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+#theme-btn.is-switching .theme-icon {
+  animation: theme-toggle-pop 260ms ease both;
+}
+
+@keyframes theme-toggle-pop {
+  0% {
+    transform: rotate(-8deg) scale(0.82);
+  }
+
+  55% {
+    transform: rotate(8deg) scale(1.12);
+  }
+
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
 }
 
 .site-avatar {
@@ -382,6 +415,49 @@ html[data-theme="dark"] .site-avatar__image--dark {
   opacity: 1;
 }
 
+.search-nav-link {
+  position: relative;
+  outline: 0;
+}
+
+.search-nav-link:focus-visible {
+  outline: 0;
+}
+
+.search-nav-mark {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+}
+
+.search-nav-mark::before {
+  position: absolute;
+  right: 8%;
+  bottom: -0.2rem;
+  left: 8%;
+  height: 5px;
+  background-image: var(--hand-underline);
+  background-position: left bottom;
+  background-repeat: repeat-x;
+  background-size: 96px 5px;
+  opacity: 0;
+  content: "";
+}
+
+.search-nav-icon {
+  transform-origin: 68% 68%;
+}
+
+.search-nav-link:is(:focus-visible, [aria-current="page"])
+  .search-nav-mark::before {
+  opacity: 1;
+}
+
+.search-nav-link:is(:hover, :focus-visible, :active) .search-nav-icon {
+  animation: search-lens-pop 360ms ease both;
+}
+
 .hand-underline,
 .ink-link {
   background-position: left bottom;
@@ -398,6 +474,24 @@ html[data-theme="dark"] .site-avatar__image--dark {
 .active-nav {
   background-image: var(--hand-underline);
   text-decoration: none;
+}
+
+@keyframes search-lens-pop {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+
+  35% {
+    transform: rotate(-8deg) scale(1.12);
+  }
+
+  65% {
+    transform: rotate(7deg) scale(1.12);
+  }
+
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
 }
 
 .sketch-divider {
