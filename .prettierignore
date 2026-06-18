@@ -6,6 +6,7 @@
 !/public
 !/.github
 !/scripts
+!/templates
 !tsconfig.json
 !astro.config.ts
 !.prettierrc.mjs
@@ -13,6 +14,8 @@
 !.prettierrc
 !eslint.config.js
 !README.md
+!vercel.json
+!.gitignore
 
 # Historical posts contain migrated Markdown and math formulas; content:check
 # validates frontmatter without rewriting article bodies.

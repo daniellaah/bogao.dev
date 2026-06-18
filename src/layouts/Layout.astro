@@ -61,7 +61,7 @@ const structuredData = {
 <html
   dir={SITE.dir}
   lang={htmlLang}
-  class={`${scrollSmooth && "scroll-smooth"}`}
+  class:list={[{ "scroll-smooth": scrollSmooth }]}
 >
   <head>
     <meta charset="UTF-8" />
@@ -80,8 +80,8 @@ const structuredData = {
       type="font/woff2"
       crossorigin
     />
-    <link rel="icon" href="/favicon.svg" sizes="any" type="image/svg+xml" />
-    <link rel="icon" href="/favicon.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
     <!-- General Meta Tags -->

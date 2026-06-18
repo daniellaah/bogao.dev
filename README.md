@@ -36,7 +36,6 @@ src/components/     通用组件
 src/config.ts       站点元信息
 public/images/      站点与内容图片
 templates/          中英文文章模板
-dev.md              开发计划
 ```
 
 ## 当前状态
@@ -54,8 +53,7 @@ dev.md              开发计划
 - 旧文章已统一迁移到新的 `pubDatetime` / `modDatetime`
 - 旧文章已批量清洗旧站内链、空链接、正文 H1、description 和 tags
 - 文章详情页日期统一使用 `YYYY-MM-DD`
-- 已保留 `dev.md` 作为后续实施文档
-- 已补齐 Open Graph / Twitter Card 基础元信息，默认分享图来自 `public/astropaper-og.jpg`
+- 已补齐 Open Graph / Twitter Card 基础元信息，默认分享图来自 `public/og.png`
 
 ## 旧文章迁移说明
 
@@ -83,8 +81,7 @@ dev.md              开发计划
 ## 下一步建议
 
 - 人工处理旧文章图片资源
-- 替换默认 OG 图、favicon 和个人资料素材
-- 接入 GitHub 与 Vercel 发布流程
+- 按需替换默认 OG 图、favicon 和个人资料素材
 - 发布新的正式文章
 
 ## GitHub + Vercel 部署
@@ -94,6 +91,7 @@ dev.md              开发计划
 - Vercel 构建命令固定为 `npm run build`
 - 输出目录为 `dist`
 - `dev.md` 和 `.vercel/` 已加入 `.gitignore`
+- Docker 部署配置不再维护；当前只支持 npm + Vercel 工作流
 - 站点 `site` / canonical URL 会优先读取：
   - `PUBLIC_SITE_URL`
   - `VERCEL_PROJECT_PRODUCTION_URL`
@@ -212,7 +210,7 @@ public/images/posts/sorting-algorithm-merge-sort.png
 默认分享图来自：
 
 ```text
-public/astropaper-og.jpg
+public/og.png
 ```
 
 如果你要替换默认分享图，直接替换这个文件，或者在文章 frontmatter 中单独指定 `ogImage`。

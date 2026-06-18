@@ -3,6 +3,7 @@ import { getCollection } from "astro:content";
 import { getPath } from "@/utils/getPath";
 import { getProjectPath } from "@/utils/getProjectPath";
 import { getNotePath } from "@/utils/getNotePath";
+import getSortedPosts from "@/utils/getSortedPosts";
 
 const stripMarkdown = (value: string) =>
   value
@@ -17,7 +18,7 @@ const stripMarkdown = (value: string) =>
     .trim();
 
 export const GET: APIRoute = async () => {
-  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  const posts = getSortedPosts(await getCollection("blog"));
   const projects = await getCollection("projects", ({ data }) => !data.draft);
   const notes = await getCollection("notes", ({ data }) => !data.draft);
 

@@ -19,5 +19,3 @@ export const slugifyStr = (str: string): string => {
   // Handle Latin strings with better number/acronym handling
   return slugify(str, { lower: true });
 };
-
-export const slugifyAll = (arr: string[]) => arr.map(str => slugifyStr(str));

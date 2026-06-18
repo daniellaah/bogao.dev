@@ -5,9 +5,10 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import getUniqueTags from "@/utils/getUniqueTags";
+import getSortedPosts from "@/utils/getSortedPosts";
 import { SITE } from "@/config";
 
-const posts = await getCollection("blog");
+const posts = getSortedPosts(await getCollection("blog"));
 const notes = await getCollection("notes");
 
 let tags = getUniqueTags([...posts, ...notes]);

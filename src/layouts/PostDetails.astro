@@ -49,11 +49,6 @@ if (typeof initOgImage === "string") {
   ogImageUrl = initOgImage.src; // Local asset
 }
 
-// Use dynamic OG image if enabled and no remote|local ogImage
-if (!ogImageUrl && SITE.dynamicOgImage) {
-  ogImageUrl = `${getPath(post.id, post.filePath, true, post.slug)}/index.png`;
-}
-
 // Resolve OG image URL (or fallback to SITE.ogImage / default `og.png`)
 const ogImage = ogImageUrl
   ? new URL(ogImageUrl, Astro.url.origin).href
@@ -231,6 +226,26 @@ const nextPost =
 </Layout>
 
 <script is:inline data-astro-rerun>
+  window.__postPageCleanup?.();
+
+  const postPageCleanups = [];
+  const addPostPageCleanup = cleanup => postPageCleanups.push(cleanup);
+  const cleanupPostPage = () => {
+    while (postPageCleanups.length) {
+      postPageCleanups.pop()?.();
+    }
+    document.querySelector(".progress-container")?.remove();
+    window.__postPageCleanup = undefined;
+  };
+
+  window.__postPageCleanup = cleanupPostPage;
+  document.addEventListener("astro:before-swap", cleanupPostPage, {
+    once: true,
+  });
+  addPostPageCleanup(() =>
+    document.removeEventListener("astro:before-swap", cleanupPostPage)
+  );
+
   /** Create a progress indicator
    *  at the top */
   function createProgressBar() {
@@ -257,10 +272,7 @@ const nextPost =
   /** Update the progress bar
    *  when user scrolls */
   function updateScrollProgress() {
-    if (window.__postScrollProgressAttached) return;
-    window.__postScrollProgressAttached = true;
-
-    document.addEventListener("scroll", () => {
+    const updateProgress = () => {
       const winScroll =
         document.body.scrollTop || document.documentElement.scrollTop;
       const height =
@@ -273,7 +285,13 @@ const nextPost =
           myBar.style.width = scrolled + "%";
         }
       }
-    });
+    };
+
+    document.addEventListener("scroll", updateProgress, { passive: true });
+    addPostPageCleanup(() =>
+      document.removeEventListener("scroll", updateProgress)
+    );
+    updateProgress();
   }
   updateScrollProgress();
 
@@ -362,8 +380,6 @@ const nextPost =
     const article = document.getElementById("article");
     const mediaQuery = window.matchMedia("(min-width: 80rem)");
 
-    window.__tocDividerCleanup?.();
-
     if (!divider || !contentColumn || !article) return;
 
     let frame = 0;
@@ -422,12 +438,12 @@ const nextPost =
     window.addEventListener("resize", requestDividerUpdate);
     mediaQuery.addEventListener("change", requestDividerUpdate);
 
-    window.__tocDividerCleanup = () => {
+    addPostPageCleanup(() => {
       if (frame) cancelAnimationFrame(frame);
       window.removeEventListener("scroll", requestDividerUpdate);
       window.removeEventListener("resize", requestDividerUpdate);
       mediaQuery.removeEventListener("change", requestDividerUpdate);
-    };
+    });
 
     requestDividerUpdate();
   }
@@ -438,9 +454,6 @@ const nextPost =
     const headings = Array.from(
       document.querySelectorAll("#article h2[id], #article h3[id]")
     );
-
-    window.__activeTocObserver?.disconnect?.();
-    window.__activeTocCleanup?.();
 
     if (!links.length || !headings.length) return;
 
@@ -545,16 +558,8 @@ const nextPost =
     for (const link of links) {
       link.addEventListener("click", handleTocClick);
     }
-    window.__activeTocCleanup = () => {
-      if (pendingTocTimer) window.clearTimeout(pendingTocTimer);
-      window.removeEventListener("scroll", requestActiveTocUpdate);
-      window.removeEventListener("resize", requestActiveTocUpdate);
-      for (const link of links) {
-        link.removeEventListener("click", handleTocClick);
-      }
-    };
 
-    window.__activeTocObserver = new IntersectionObserver(
+    const activeTocObserver = new IntersectionObserver(
       () => requestActiveTocUpdate(),
       {
         rootMargin: "-20% 0px -70% 0px",
@@ -562,8 +567,18 @@ const nextPost =
       }
     );
 
+    addPostPageCleanup(() => {
+      if (pendingTocTimer) window.clearTimeout(pendingTocTimer);
+      window.removeEventListener("scroll", requestActiveTocUpdate);
+      window.removeEventListener("resize", requestActiveTocUpdate);
+      for (const link of links) {
+        link.removeEventListener("click", handleTocClick);
+      }
+      activeTocObserver.disconnect();
+    });
+
     for (const heading of headings) {
-      window.__activeTocObserver.observe(heading);
+      activeTocObserver.observe(heading);
     }
 
     if (window.location.hash) {
@@ -575,7 +590,17 @@ const nextPost =
   initActiveToc();
 
   /* Go to page start after page swap */
-  document.addEventListener("astro:after-swap", () =>
-    window.scrollTo({ left: 0, top: 0, behavior: "instant" })
-  );
+  if (window.__postAfterSwapScroll) {
+    document.removeEventListener(
+      "astro:after-swap",
+      window.__postAfterSwapScroll
+    );
+  }
+  window.__postAfterSwapScroll = () => {
+    window.scrollTo({ left: 0, top: 0, behavior: "instant" });
+    window.__postAfterSwapScroll = undefined;
+  };
+  document.addEventListener("astro:after-swap", window.__postAfterSwapScroll, {
+    once: true,
+  });
 </script>

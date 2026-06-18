@@ -14,7 +14,7 @@ export const SITE = {
   profile: "https://github.com/daniellaah",
   desc: "Bo's blog about machine learning notes, LLM workflows, and personal experiments.",
   title: "BoGao.Dev",
-  ogImage: "astropaper-og.jpg",
+  ogImage: "og.png",
   postPerIndex: 4,
   postPerPage: 100,
   postFilterTags: [
@@ -27,7 +27,6 @@ export const SITE = {
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
   showArchives: true,
   showBackButton: true, // show back button in post detail
-  dynamicOgImage: false,
   dir: "ltr", // "rtl" | "auto"
   lang: "en", // default html lang code
   supportedLangs: ["en", "zh-CN"],

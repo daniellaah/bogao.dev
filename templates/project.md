@@ -2,6 +2,7 @@
 title: "Project Name"
 description: "One clear sentence about what this project does and why it matters."
 status: "active"
+draft: true
 order: 10
 startDate: 2026-04-01
 featured: false

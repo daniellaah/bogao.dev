@@ -12,5 +12,3 @@ export const getResolvedSlug = (id: string, explicitSlug?: string) => {
   const rawSlug = explicitSlug?.trim() || getEntryFileSlug(id);
   return slugifyStr(stripMarkdownExt(rawSlug));
 };
-
-export const getLegacySlug = (id: string) => slugifyStr(getEntryFileSlug(id));

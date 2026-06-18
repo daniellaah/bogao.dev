@@ -10,19 +10,18 @@ import getUniqueTags from "@/utils/getUniqueTags";
 import { getPath } from "@/utils/getPath";
 import { getNotePath } from "@/utils/getNotePath";
 import { slugifyStr } from "@/utils/slugify";
+import getSortedPosts from "@/utils/getSortedPosts";
 import { SITE } from "@/config";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-  const posts = await getCollection("blog");
+  const posts = getSortedPosts(await getCollection("blog"));
   const notes = await getCollection("notes");
   const tags = getUniqueTags([...posts, ...notes]);
 
   return tags.flatMap(({ tag, tagName }) => {
     const taggedPosts = posts
-      .filter(
-        post =>
-          !post.data.draft &&
-          post.data.tags.some(postTag => slugifyStr(postTag) === tag)
+      .filter(post =>
+        post.data.tags.some(postTag => slugifyStr(postTag) === tag)
       )
       .map(post => ({
         kind: "post" as const,

@@ -79,7 +79,16 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
     window.__backToTopCleanup = () => {
       backToTopBtn.removeEventListener("click", scrollToTop);
       document.removeEventListener("scroll", requestScrollUpdate);
+      document.removeEventListener(
+        "astro:before-swap",
+        window.__backToTopCleanup
+      );
+      delete backToTopBtn.dataset.backToTopBound;
+      window.__backToTopCleanup = undefined;
     };
+    document.addEventListener("astro:before-swap", window.__backToTopCleanup, {
+      once: true,
+    });
   }
   backToTop();
 </script>
