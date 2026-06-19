@@ -3,6 +3,7 @@ import type { CollectionEntry } from "astro:content";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { getNotePath } from "@/utils/getNotePath";
+import { getPublicImageDimensions } from "@/utils/imageDimensions";
 
 dayjs.extend(utc);
 
@@ -15,6 +16,7 @@ const { title, description, noteDate, location, photos } = data;
 const href = getNotePath(id, slug);
 const photo = photos[0];
 const photoSrc = photo;
+const photoDimensions = getPublicImageDimensions(photoSrc);
 const heading = title ?? dayjs.utc(noteDate).format("MMM D, YYYY");
 ---
 
@@ -48,6 +50,8 @@ const heading = title ?? dayjs.utc(noteDate).format("MMM D, YYYY");
           <img
             src={photoSrc}
             alt={heading}
+            width={photoDimensions?.width}
+            height={photoDimensions?.height}
             class="h-52 w-full object-cover"
             loading="lazy"
             decoding="async"

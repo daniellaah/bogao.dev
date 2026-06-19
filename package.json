@@ -12,6 +12,7 @@
     "new:note": "node scripts/new-content.mjs note",
     "new:project": "node scripts/new-content.mjs project",
     "content:check": "node scripts/check-content.mjs",
+    "test": "node --test tests/*.test.mjs",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
     "lint": "eslint ."

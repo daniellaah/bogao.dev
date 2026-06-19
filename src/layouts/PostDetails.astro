@@ -258,7 +258,8 @@ const nextPost =
 
     // Create the progress bar div
     const progressBar = document.createElement("div");
-    progressBar.className = "progress-bar h-px w-0 bg-foreground";
+    progressBar.className =
+      "progress-bar h-px w-full origin-left scale-x-0 bg-foreground";
     progressBar.id = "myBar";
 
     // Append the progress bar to the progress container
@@ -278,11 +279,11 @@ const nextPost =
       const height =
         document.documentElement.scrollHeight -
         document.documentElement.clientHeight;
-      const scrolled = (winScroll / height) * 100;
+      const scrolled = height > 0 ? winScroll / height : 0;
       if (document) {
         const myBar = document.getElementById("myBar");
         if (myBar) {
-          myBar.style.width = scrolled + "%";
+          myBar.style.transform = `scaleX(${Math.min(Math.max(scrolled, 0), 1)})`;
         }
       }
     };

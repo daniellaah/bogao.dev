@@ -4,6 +4,17 @@ import { getPath } from "@/utils/getPath";
 import { getProjectPath } from "@/utils/getProjectPath";
 import { getNotePath } from "@/utils/getNotePath";
 import getSortedPosts from "@/utils/getSortedPosts";
+import searchKinds from "@/data/search-kinds.json";
+
+const SEARCH_RECORD_KINDS = Object.fromEntries(
+  searchKinds
+    .filter(kind => kind.recordKind)
+    .map(kind => [kind.filter, kind.recordKind])
+) as {
+  posts: "Post";
+  projects: "Project";
+  notes: "Note";
+};
 
 const stripMarkdown = (value: string) =>
   value
@@ -27,7 +38,7 @@ export const GET: APIRoute = async () => {
       title: post.data.title,
       description: post.data.description,
       url: getPath(post.id, post.filePath, true, post.slug),
-      kind: "Post",
+      kind: SEARCH_RECORD_KINDS.posts,
       lang: post.data.lang,
       metaText: post.data.tags.join(" "),
       content: stripMarkdown(post.body),
@@ -36,7 +47,7 @@ export const GET: APIRoute = async () => {
       title: project.data.title,
       description: project.data.description,
       url: getProjectPath(project.id),
-      kind: "Project",
+      kind: SEARCH_RECORD_KINDS.projects,
       lang: project.data.lang,
       metaText: [
         project.data.status,
@@ -51,7 +62,7 @@ export const GET: APIRoute = async () => {
         new Date(note.data.noteDate).toISOString().slice(0, 10),
       description: note.data.description,
       url: getNotePath(note.id, note.slug),
-      kind: "Note",
+      kind: SEARCH_RECORD_KINDS.notes,
       lang: note.data.lang,
       metaText: [note.data.location ?? "", ...note.data.tags].join(" "),
       content: stripMarkdown(note.body),

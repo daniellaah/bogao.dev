@@ -4,6 +4,8 @@
 
 ## 本地开发
 
+建议使用 Node.js 22（见 `.nvmrc`）。
+
 ```bash
 npm install
 npm run dev
@@ -21,6 +23,7 @@ npm run content:check
 npm run new:post -- "Post title"
 npm run new:note -- "Note title"
 npm run new:project -- "Project title"
+npm test
 npm run lint
 npm run format
 ```
@@ -162,11 +165,13 @@ npm run new:project -- "My project" --stack Python,Astro --repoUrl https://githu
 - 日期默认使用当天，格式为 `YYYY-MM-DD`
 - 新内容会写入显式 `slug`，后续修改标题或文件名不会改变 URL
 - 如果标题生成的 slug 不理想，可以用 `--slug your-custom-slug` 指定
+- Project URL 固定由文件名生成；`new:project --slug` 只用于控制生成的文件名，不会写入 frontmatter `slug`
 
 发布或提交前建议运行：
 
 ```bash
 npm run content:check
+npm test
 npm run format:check
 npm run build
 ```
@@ -194,6 +199,14 @@ public/images/notes/2026-03-15-la-5k-01.jpg
 public/images/projects/promptlane-dashboard-cover.png
 public/images/posts/sorting-algorithm-merge-sort.png
 ```
+
+Notes 中的本地照片还需要在下面的文件里登记尺寸，避免页面加载时发生布局抖动：
+
+```text
+src/data/public-image-dimensions.json
+```
+
+`npm run content:check` 会检查 note 照片是否存在，以及本地照片是否已登记 `width` / `height`。
 
 ## Open Graph
 

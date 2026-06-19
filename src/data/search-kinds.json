@@ -1,0 +1,26 @@
+[
+  {
+    "filter": "all",
+    "label": "All",
+    "recordKind": null,
+    "scope": "posts, notes, and projects"
+  },
+  {
+    "filter": "posts",
+    "label": "Posts",
+    "recordKind": "Post",
+    "scope": "posts"
+  },
+  {
+    "filter": "notes",
+    "label": "Notes",
+    "recordKind": "Note",
+    "scope": "notes"
+  },
+  {
+    "filter": "projects",
+    "label": "Projects",
+    "recordKind": "Project",
+    "scope": "projects"
+  }
+]

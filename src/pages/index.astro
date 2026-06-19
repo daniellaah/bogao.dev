@@ -6,6 +6,7 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import PostsList from "@/components/PostsList.astro";
+import getLatestProjects from "@/utils/getLatestProjects";
 import getSortedPosts from "@/utils/getSortedPosts";
 import { getProjectPath } from "@/utils/getProjectPath";
 
@@ -15,13 +16,7 @@ const posts = await getCollection("blog");
 const projects = await getCollection("projects");
 const sortedPosts = getSortedPosts(posts);
 const latestPosts = sortedPosts.slice(0, 10);
-const latestProjects = projects
-  .filter(({ data }) => !data.draft)
-  .sort(
-    (a, b) =>
-      (b.data.startDate?.getTime() ?? 0) - (a.data.startDate?.getTime() ?? 0)
-  )
-  .slice(0, 4);
+const latestProjects = getLatestProjects(projects, 4);
 ---
 
 <Layout lang="en">

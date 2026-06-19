@@ -41,11 +41,3 @@ export function getLanguageNavigation() {
     })),
   ];
 }
-
-export function resolveLanguageFromPath(pathLang: string): SiteLanguage | null {
-  const match = Object.entries(LANGUAGE_META).find(
-    ([, meta]) => meta.path === pathLang
-  );
-
-  return (match?.[0] as SiteLanguage | undefined) ?? null;
-}

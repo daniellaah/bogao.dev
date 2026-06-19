@@ -14,6 +14,12 @@ const COLLECTIONS = [
 const SUPPORTED_LANGS = ["en", "zh-CN"];
 const PROJECT_STATUSES = ["active", "shipping", "archived", "lab"];
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+const PUBLIC_IMAGE_DIMENSIONS = JSON.parse(
+  fs.readFileSync(
+    path.join(ROOT, "src/data/public-image-dimensions.json"),
+    "utf8"
+  )
+);
 
 const errors = [];
 const warnings = [];
@@ -135,9 +141,9 @@ const validateStringArray = (file, data, field, required = false) => {
   return value.filter(isPresent).map(String);
 };
 
-const addSlug = (seenSlugs, collection, file, data) => {
+const addSlug = (seenSlugs, collection, file, explicitSlug) => {
   const fileSlug = stripMarkdownExt(path.basename(file));
-  const slug = slugifyForContent(data.slug || fileSlug);
+  const slug = slugifyForContent(explicitSlug || fileSlug);
   const duplicate = seenSlugs.get(slug);
 
   if (duplicate) {
@@ -172,6 +178,25 @@ const validatePhotoPaths = (file, photos) => {
     if (!fs.existsSync(publicFile)) {
       errors.push(`${file}: note photo does not exist: ${photo}`);
     }
+
+    const dimensions = PUBLIC_IMAGE_DIMENSIONS[photo];
+    if (!dimensions) {
+      errors.push(
+        `${file}: note photo needs dimensions in src/data/public-image-dimensions.json: ${photo}`
+      );
+      continue;
+    }
+
+    if (
+      !Number.isInteger(dimensions.width) ||
+      !Number.isInteger(dimensions.height) ||
+      dimensions.width <= 0 ||
+      dimensions.height <= 0
+    ) {
+      errors.push(
+        `${file}: note photo dimensions must be positive integers: ${photo}`
+      );
+    }
   }
 };
 
@@ -181,7 +206,7 @@ const validateBlog = (file, data, raw, seenSlugs) => {
   validateDate(file, raw, "modDatetime");
   validateLang(file, data.lang);
   validateStringArray(file, data, "tags", true);
-  addSlug(seenSlugs, "blog", file, data);
+  addSlug(seenSlugs, "blog", file, data.slug);
 
   if (!isPresent(data.slug)) {
     warnings.push(`${file}: add an explicit slug to keep the URL stable`);
@@ -195,7 +220,7 @@ const validateNote = (file, data, raw, seenSlugs) => {
   validateLang(file, data.lang);
   validateStringArray(file, data, "tags");
   validatePhotoPaths(file, validateStringArray(file, data, "photos"));
-  addSlug(seenSlugs, "note", file, data);
+  addSlug(seenSlugs, "note", file, data.slug);
 
   if (!isPresent(data.slug)) {
     warnings.push(`${file}: add an explicit slug to keep the URL stable`);
@@ -215,7 +240,11 @@ const validateProject = (file, data, raw, seenSlugs) => {
   validateStringArray(file, data, "stack");
   validateUrl(file, data, "demoUrl");
   validateUrl(file, data, "repoUrl");
-  addSlug(seenSlugs, "project", file, data);
+  addSlug(seenSlugs, "project", file);
+
+  if (isPresent(data.slug)) {
+    errors.push(`${file}: project slug is derived from the filename`);
+  }
 
   if (!PROJECT_STATUSES.includes(data.status)) {
     errors.push(

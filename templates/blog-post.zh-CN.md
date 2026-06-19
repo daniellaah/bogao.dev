@@ -4,7 +4,6 @@ pubDatetime: 2026-03-06
 modDatetime: 2026-03-06
 title: 替换成文章标题
 # slug: "custom-post-url"
-featured: false
 draft: true
 tags:
   - frontend

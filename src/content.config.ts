@@ -2,8 +2,6 @@ import { defineCollection, z } from "astro:content";
 import { SITE } from "@/config";
 
 export const BLOG_PATH = "src/content/blog";
-export const PROJECTS_PATH = "src/content/projects";
-export const NOTES_PATH = "src/content/notes";
 
 const blog = defineCollection({
   schema: ({ image }) =>
@@ -13,14 +11,12 @@ const blog = defineCollection({
       modDatetime: z.coerce.date().optional().nullable(),
       title: z.string(),
       slug: z.string().trim().min(1).optional(),
-      featured: z.boolean().optional(),
       draft: z.boolean().optional(),
       tags: z.array(z.string()).default(["others"]),
       lang: z.enum(SITE.supportedLangs),
       ogImage: image().or(z.string()).optional(),
       description: z.string(),
       canonicalURL: z.string().optional(),
-      timezone: z.string().optional(),
     }),
 });
 

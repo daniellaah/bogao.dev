@@ -3,6 +3,7 @@ import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
+import searchKinds from "@/data/search-kinds.json";
 import { SITE } from "@/config";
 
 const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
@@ -36,19 +37,26 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
         aria-label="Filter search results by type"
       >
         {
-          ["All", "Posts", "Notes", "Projects"].map(kind => (
+          searchKinds.map(kind => (
             <button
               type="button"
-              data-search-kind={kind.toLowerCase()}
+              data-search-kind={kind.filter}
               class="sketch-chip ui-text inline-flex items-center px-3 py-1 text-sm font-medium text-graphite transition hover:bg-muted/70 hover:text-foreground"
-              aria-pressed={kind === "All" ? "true" : "false"}
-              data-active={kind === "All" ? true : undefined}
+              aria-pressed={kind.filter === "all" ? "true" : "false"}
+              data-active={kind.filter === "all" ? true : undefined}
             >
-              {kind}
+              {kind.label}
             </button>
           ))
         }
       </div>
+
+      <script
+        id="search-kind-data"
+        is:inline
+        type="application/json"
+        set:html={JSON.stringify(searchKinds)}
+      />
 
       <p id="search-status" class="font-code text-xs text-graphite">
         Type a keyword to search across posts, notes, and projects.
@@ -61,11 +69,13 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
 </Layout>
 
 <script>
+  type SearchRecordKind = "Post" | "Note" | "Project";
+
   type SearchRecord = {
     title: string;
     description: string;
     url: string;
-    kind: string;
+    kind: SearchRecordKind;
     lang: string;
     metaText: string;
     content: string;
@@ -73,12 +83,11 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
 
   type RankedSearchRecord = SearchRecord & { score: number };
   type SearchKind = "all" | "posts" | "notes" | "projects";
-
-  const SEARCH_KIND_TO_RECORD_KIND: Record<SearchKind, string | null> = {
-    all: null,
-    posts: "Post",
-    notes: "Note",
-    projects: "Project",
+  type SearchKindEntry = {
+    filter: SearchKind;
+    label: string;
+    recordKind: SearchRecordKind | null;
+    scope: string;
   };
 
   function initSearchPage() {
@@ -91,11 +100,22 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
     const kindButtons = Array.from(
       document.querySelectorAll<HTMLButtonElement>("[data-search-kind]")
     );
+    const kindData =
+      document.querySelector<HTMLScriptElement>("#search-kind-data");
 
-    if (!input || !clearButton || !status || !results) return;
+    if (!input || !clearButton || !status || !results || !kindData) return;
     if (input.dataset.initialized === "true") return;
 
     input.dataset.initialized = "true";
+    const searchKindEntries = JSON.parse(
+      kindData.textContent ?? "[]"
+    ) as SearchKindEntry[];
+    const searchKindToRecordKind = Object.fromEntries(
+      searchKindEntries.map(kind => [kind.filter, kind.recordKind])
+    ) as Record<SearchKind, SearchRecordKind | null>;
+    const searchKindToScope = Object.fromEntries(
+      searchKindEntries.map(kind => [kind.filter, kind.scope])
+    ) as Record<SearchKind, string>;
 
     const escapeHtml = (value: string) =>
       value
@@ -133,10 +153,7 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
     const getSearchKind = () => {
       const rawKind = new URLSearchParams(window.location.search).get("type");
       return rawKind &&
-        Object.prototype.hasOwnProperty.call(
-          SEARCH_KIND_TO_RECORD_KIND,
-          rawKind
-        )
+        Object.prototype.hasOwnProperty.call(searchKindToRecordKind, rawKind)
         ? (rawKind as SearchKind)
         : "all";
     };
@@ -150,14 +167,13 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
     };
 
     const getVisibleRecords = (records: SearchRecord[], kind: SearchKind) => {
-      const recordKind = SEARCH_KIND_TO_RECORD_KIND[kind];
+      const recordKind = searchKindToRecordKind[kind];
       return recordKind
         ? records.filter(record => record.kind === recordKind)
         : records;
     };
 
-    const getScopeText = (kind: SearchKind) =>
-      kind === "all" ? "posts, notes, and projects" : kind;
+    const getScopeText = (kind: SearchKind) => searchKindToScope[kind];
 
     const renderResults = (
       records: SearchRecord[],
@@ -216,7 +232,7 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
           );
           return `
             <li class="sketch-list-row py-5">
-              <a href="${record.url}" class="hand-underline-trigger block">
+              <a href="${escapeHtml(record.url)}" class="hand-underline-trigger block">
                 <div class="flex items-baseline justify-between gap-4">
                   <span class="hand-underline content-title min-w-0 text-lg font-medium">
                     ${escapeHtml(record.title)}
@@ -249,49 +265,89 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
       );
     };
 
-    const bootstrap = async () => {
-      status.textContent = "Loading search index...";
+    let loadedRecords: SearchRecord[] | null = null;
+    let recordsPromise: Promise<SearchRecord[]> | null = null;
+
+    const loadRecords = async (showLoading = false) => {
+      if (loadedRecords) return loadedRecords;
+      if (showLoading) status.textContent = "Loading search index...";
+
+      recordsPromise ??= fetch("/search-index.json").then(response => {
+        if (!response.ok) throw new Error("Search index request failed.");
+        return response.json() as Promise<SearchRecord[]>;
+      });
 
       try {
-        const response = await fetch("/search-index.json");
-        const records = (await response.json()) as SearchRecord[];
-        const initialQuery =
-          new URLSearchParams(window.location.search).get("q") ?? "";
-        const initialKind = getSearchKind();
+        loadedRecords = await recordsPromise;
+        return loadedRecords;
+      } catch (error) {
+        recordsPromise = null;
+        throw error;
+      }
+    };
 
-        input.value = initialQuery;
-        setSearchKind(initialKind);
-        renderResults(records, initialQuery, initialKind);
+    const renderEmptyPrompt = (kind: SearchKind) => {
+      status.textContent = `Type a keyword to search across ${getScopeText(kind)}.`;
+      results.innerHTML = "";
+    };
 
-        input.addEventListener("input", (event: Event) => {
-          const query = (event.currentTarget as HTMLInputElement).value;
-          const kind = getSearchKind();
-          updateUrl(query, kind);
-          renderResults(records, query, kind);
-        });
+    const runSearch = async (query: string, kind: SearchKind) => {
+      if (!splitTerms(query).length) {
+        renderEmptyPrompt(kind);
+        return;
+      }
 
-        for (const button of kindButtons) {
-          button.addEventListener("click", () => {
-            const kind = (button.dataset.searchKind ?? "all") as SearchKind;
-            setSearchKind(kind);
-            updateUrl(input.value, kind);
-            renderResults(records, input.value, kind);
-          });
-        }
-
-        clearButton.addEventListener("click", () => {
-          input.value = "";
-          const kind = getSearchKind();
-          updateUrl("", kind);
-          renderResults(records, "", kind);
-          input.focus();
-        });
+      try {
+        const records = await loadRecords(true);
+        renderResults(records, input.value, getSearchKind());
       } catch {
         status.textContent = "Search failed to load.";
       }
     };
 
-    bootstrap();
+    const initialQuery =
+      new URLSearchParams(window.location.search).get("q") ?? "";
+    const initialKind = getSearchKind();
+
+    input.value = initialQuery;
+    setSearchKind(initialKind);
+
+    input.addEventListener(
+      "focus",
+      () => {
+        void loadRecords().catch(() => {
+          recordsPromise = null;
+        });
+      },
+      { once: true }
+    );
+
+    input.addEventListener("input", (event: Event) => {
+      const query = (event.currentTarget as HTMLInputElement).value;
+      const kind = getSearchKind();
+      updateUrl(query, kind);
+      void runSearch(query, kind);
+    });
+
+    for (const button of kindButtons) {
+      button.addEventListener("click", () => {
+        const kind = (button.dataset.searchKind ?? "all") as SearchKind;
+        setSearchKind(kind);
+        updateUrl(input.value, kind);
+        void runSearch(input.value, kind);
+      });
+    }
+
+    clearButton.addEventListener("click", () => {
+      input.value = "";
+      const kind = getSearchKind();
+      updateUrl("", kind);
+      renderEmptyPrompt(kind);
+      input.focus();
+    });
+
+    if (initialQuery.trim()) void runSearch(initialQuery, initialKind);
+    else renderEmptyPrompt(initialKind);
   }
 
   (

@@ -15,7 +15,6 @@ export const SITE = {
   desc: "Bo's blog about machine learning notes, LLM workflows, and personal experiments.",
   title: "BoGao.Dev",
   ogImage: "og.png",
-  postPerIndex: 4,
   postPerPage: 100,
   postFilterTags: [
     "Machine Learning",
@@ -30,5 +29,4 @@ export const SITE = {
   dir: "ltr", // "rtl" | "auto"
   lang: "en", // default html lang code
   supportedLangs: ["en", "zh-CN"],
-  timezone: "America/Los_Angeles", // Default global timezone (IANA format) https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 } as const;

@@ -75,7 +75,7 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
         ticking = true;
       }
     };
-    document.addEventListener("scroll", requestScrollUpdate);
+    document.addEventListener("scroll", requestScrollUpdate, { passive: true });
     window.__backToTopCleanup = () => {
       backToTopBtn.removeEventListener("click", scrollToTop);
       document.removeEventListener("scroll", requestScrollUpdate);

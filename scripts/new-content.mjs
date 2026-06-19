@@ -48,6 +48,17 @@ const asList = value =>
     .map(item => item.trim())
     .filter(Boolean);
 
+const normalizeLang = value => {
+  const lang = value ?? "en";
+  if (!SUPPORTED_LANGS.includes(lang)) {
+    throw new Error(
+      `Unsupported lang "${lang}". Use ${SUPPORTED_LANGS.join(", ")}.`
+    );
+  }
+
+  return lang;
+};
+
 const parseArgs = argv => {
   const values = {};
   const positional = [];
@@ -112,13 +123,7 @@ const yamlArrayField = (key, items) =>
   items.length > 0 ? `${key}:\n${yamlList(items)}` : `${key}: []`;
 
 const makePost = options => {
-  const lang = options.lang ?? "en";
-  if (!SUPPORTED_LANGS.includes(lang)) {
-    throw new Error(
-      `Unsupported lang "${lang}". Use ${SUPPORTED_LANGS.join(", ")}.`
-    );
-  }
-
+  const lang = normalizeLang(options.lang);
   const date = options.date ?? today();
   const slug = slugifyForContent(options.slug ?? options.title);
   const filename = `${date}-${slug}.md`;
@@ -133,7 +138,6 @@ pubDatetime: ${date}
 modDatetime: ${date}
 title: ${quoteYaml(options.title)}
 slug: ${quoteYaml(slug)}
-featured: false
 draft: true
 ${yamlArrayField("tags", tags)}
 lang: ${quoteYaml(lang)}
@@ -146,6 +150,7 @@ ${templateBody}
 };
 
 const makeNote = options => {
+  const lang = normalizeLang(options.lang);
   const date = options.date ?? today();
   const slug = slugifyForContent(options.slug ?? `${date}-${options.title}`);
   const filename = `${slug}.md`;
@@ -162,7 +167,7 @@ description: ${quoteYaml(options.description ?? `Draft note about ${options.titl
 noteDate: ${date}
 modDatetime:
 draft: true
-lang: ${quoteYaml(options.lang ?? "en")}
+lang: ${quoteYaml(lang)}
 ${options.location ? `location: ${quoteYaml(options.location)}\n` : ""}${yamlArrayField("tags", tags)}
 ${yamlArrayField("photos", photos)}
 ---
@@ -173,6 +178,7 @@ ${templateBody}
 };
 
 const makeProject = options => {
+  const lang = normalizeLang(options.lang);
   const status = options.status ?? "active";
   if (!PROJECT_STATUSES.includes(status)) {
     throw new Error(
@@ -196,7 +202,7 @@ order: -1
 startDate: ${startDate}
 featured: false
 draft: true
-lang: ${quoteYaml(options.lang ?? "en")}
+lang: ${quoteYaml(lang)}
 year: ${year}
 ${yamlArrayField("stack", stack)}
 ${options.demoUrl ? `demoUrl: ${quoteYaml(options.demoUrl)}\n` : ""}${options.repoUrl ? `repoUrl: ${quoteYaml(options.repoUrl)}\n` : ""}---
