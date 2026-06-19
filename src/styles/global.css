@@ -550,10 +550,45 @@ html[data-theme="dark"] .site-avatar__image--dark {
   background: var(--surface);
 }
 
-.toc-panel,
-.search-box {
+.toc-panel {
   border-color: var(--border);
   border-radius: 6px 10px 7px 9px / 9px 6px 10px 7px;
+}
+
+.search-box {
+  border-width: 2px;
+  border-color: var(--foreground);
+  border-radius: 10px 15px 9px 13px / 13px 9px 15px 10px;
+  background: var(--background);
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease;
+}
+
+.search-box::before {
+  content: none;
+}
+
+.search-box:focus-within {
+  border-color: var(--foreground);
+  background: var(--background);
+}
+
+.search-input {
+  font-family: var(--font-display);
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-input::-webkit-search-decoration,
+.search-input::-webkit-search-cancel-button,
+.search-input::-webkit-search-results-button,
+.search-input::-webkit-search-results-decoration {
+  display: none;
+}
+
+.search-clear {
+  line-height: 1;
 }
 
 .sketch-box::after {

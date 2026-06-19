@@ -18,13 +18,13 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
           id="search-input"
           type="search"
           placeholder="Search posts, notes, and projects"
-          class="w-full border-0 bg-transparent px-5 py-4 pe-24 text-lg outline-hidden placeholder:text-graphite/75"
+          class="search-input w-full border-0 bg-transparent px-5 py-4 pe-24 text-lg outline-hidden placeholder:text-graphite/75"
           autocomplete="off"
         />
         <button
           id="search-clear"
           type="button"
-          class="ink-link absolute top-1/2 right-4 -translate-y-1/2 font-code text-xs text-graphite hover:text-foreground"
+          class="search-clear ink-link absolute top-1/2 right-4 -translate-y-1/2 font-code text-xs text-graphite hover:text-foreground"
         >
           Clear
         </button>
