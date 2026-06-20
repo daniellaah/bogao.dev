@@ -135,6 +135,7 @@ const latestProjects = getLatestProjects(projects, 4);
 <script>
   type HomeWindow = Window & {
     __homeBackUrlCleanup?: () => void;
+    __homeAvatarHoverCleanup?: () => void;
     __homeAvatarLastReplayAt?: number;
   };
 
@@ -176,15 +177,36 @@ const latestProjects = getLatestProjects(projects, 4);
       });
   }
 
+  function bindHeroAvatarReplay() {
+    const homeWindow = window as HomeWindow;
+    homeWindow.__homeAvatarHoverCleanup?.();
+    homeWindow.__homeAvatarHoverCleanup = undefined;
+
+    const indexLayout = (document.querySelector("#main-content") as HTMLElement)
+      ?.dataset?.layout;
+    if (indexLayout !== "index") return;
+
+    const avatar = document.querySelector<HTMLElement>(".hero-avatar");
+    if (!avatar) return;
+
+    avatar.addEventListener("pointerenter", replayHeroAvatarAnimation);
+    homeWindow.__homeAvatarHoverCleanup = () => {
+      avatar.removeEventListener("pointerenter", replayHeroAvatarAnimation);
+    };
+  }
+
   function initHomePage() {
     storeHomeBackUrl();
     replayHeroAvatarAnimation();
+    bindHeroAvatarReplay();
   }
 
   (window as HomeWindow).__homeBackUrlCleanup?.();
   document.addEventListener("astro:page-load", initHomePage);
   (window as HomeWindow).__homeBackUrlCleanup = () => {
     document.removeEventListener("astro:page-load", initHomePage);
+    (window as HomeWindow).__homeAvatarHoverCleanup?.();
+    (window as HomeWindow).__homeAvatarHoverCleanup = undefined;
   };
   initHomePage();
 </script>

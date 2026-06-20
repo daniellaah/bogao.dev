@@ -347,6 +347,7 @@ const nextPost =
       const copyButton = document.createElement("button");
       copyButton.className = `copy-code sketch-chip absolute end-3 ${topClass} bg-surface-strong px-2 py-1 text-xs leading-4 text-foreground font-medium`;
       copyButton.innerHTML = copyButtonLabel;
+      copyButton.setAttribute("aria-label", "Copy code");
       codeBlock.setAttribute("tabindex", "0");
       codeBlock.appendChild(copyButton);
 
@@ -367,9 +368,13 @@ const nextPost =
 
       // visual feedback that task is completed
       button.innerText = "Copied";
+      button.dataset.copied = "true";
+      button.setAttribute("aria-label", "Code copied");
 
       setTimeout(() => {
         button.innerText = copyButtonLabel;
+        delete button.dataset.copied;
+        button.setAttribute("aria-label", "Copy code");
       }, 700);
     }
   }

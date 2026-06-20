@@ -4,6 +4,7 @@ import {
   PUBLIC_BAIDU_SITE_VERIFICATION,
   PUBLIC_GOOGLE_SITE_VERIFICATION,
 } from "astro:env/client";
+import CommandPalette from "@/components/CommandPalette.astro";
 import { SITE } from "@/config";
 import "@/styles/global.css";
 
@@ -188,6 +189,7 @@ const structuredData = {
   </head>
   <body>
     <slot />
+    <CommandPalette />
     <script src="../scripts/theme.ts"></script>
   </body>
 </html>

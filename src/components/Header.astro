@@ -111,6 +111,7 @@ const navItems = [
               <li>
                 <a
                   href={href}
+                  data-nav-item={label}
                   class="hand-underline-trigger gap-1.5"
                   aria-current={active ? "page" : undefined}
                 >
@@ -136,9 +137,10 @@ const navItems = [
         >
           <LinkButton
             href="/search"
+            data-command-open
             class="search-nav-link hand-underline-trigger flex min-h-11 items-center justify-center px-2 py-2 lg:min-h-0 lg:p-1"
             title="Search"
-            aria-label="Search"
+            aria-label="Search. Press Command K to open quick search."
             aria-current={isActive("/search") ? "page" : undefined}
             disableHoverOpacity
           >

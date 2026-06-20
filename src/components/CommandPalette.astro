@@ -1,0 +1,481 @@
+---
+import IconSearch from "@/assets/icons/IconSearch.svg";
+---
+
+<div
+  id="command-palette"
+  class="command-palette hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="command-palette-title"
+>
+  <button
+    type="button"
+    class="command-palette__backdrop"
+    data-command-close
+    aria-label="Close search"
+    tabindex="-1"
+  >
+  </button>
+  <div
+    class="command-palette__panel sketch-box"
+    role="document"
+    style="--command-top: 0px; --command-left: 0px; --command-width: min(42rem, calc(100vw - 2rem)); --command-collapsed-scale: 0.1;"
+  >
+    <div class="command-palette__intro flex items-center justify-between gap-4">
+      <div>
+        <p class="notebook-kicker">Command search</p>
+        <h2 id="command-palette-title" class="mt-1 text-xl font-semibold">
+          Search anything
+        </h2>
+      </div>
+      <button
+        type="button"
+        class="command-palette__close sketch-chip px-2 py-1 font-code text-xs"
+        data-command-close
+      >
+        Esc
+      </button>
+    </div>
+
+    <div class="command-palette__input-wrap">
+      <label class="sr-only" for="command-palette-input">Search</label>
+      <IconSearch class="command-palette__icon" aria-hidden="true" />
+      <input
+        id="command-palette-input"
+        type="search"
+        placeholder="Search posts, notes, and projects"
+        autocomplete="off"
+        class="command-palette__input"
+      />
+      <span
+        id="command-palette-thinking"
+        class="thinking-dots"
+        aria-hidden="true"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+      <button
+        type="button"
+        class="command-palette__inline-close"
+        data-command-close
+        aria-label="Close search"
+      >
+        <span aria-hidden="true">×</span>
+      </button>
+    </div>
+
+    <div
+      id="command-palette-results-panel"
+      class="command-palette__results-panel"
+      data-empty
+    >
+      <p
+        id="command-palette-status"
+        class="command-palette__status font-code text-xs text-graphite"
+      >
+      </p>
+      <ul id="command-palette-results" class="command-palette__results-list">
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  type SearchRecordKind = "Post" | "Note" | "Project";
+
+  type SearchRecord = {
+    title: string;
+    description: string;
+    url: string;
+    kind: SearchRecordKind;
+    lang: string;
+    metaText: string;
+    content: string;
+  };
+
+  type RankedSearchRecord = SearchRecord & { score: number };
+  type CommandWindow = Window & {
+    __commandPaletteBindingCleanup?: () => void;
+    __commandPaletteLifecycleCleanup?: () => void;
+  };
+
+  function initCommandPalette() {
+    (window as CommandWindow).__commandPaletteBindingCleanup?.();
+
+    const root = document.querySelector<HTMLElement>("#command-palette");
+    const panel = document.querySelector<HTMLElement>(
+      ".command-palette__panel"
+    );
+    const input = document.querySelector<HTMLInputElement>(
+      "#command-palette-input"
+    );
+    const status = document.querySelector<HTMLElement>(
+      "#command-palette-status"
+    );
+    const results = document.querySelector<HTMLUListElement>(
+      "#command-palette-results"
+    );
+    const resultsPanel = document.querySelector<HTMLElement>(
+      "#command-palette-results-panel"
+    );
+    const thinking = document.querySelector<HTMLElement>(
+      "#command-palette-thinking"
+    );
+    const closeButtons = Array.from(
+      document.querySelectorAll<HTMLButtonElement>("[data-command-close]")
+    );
+    const openButtons = Array.from(
+      document.querySelectorAll<HTMLAnchorElement>("[data-command-open]")
+    );
+
+    if (
+      !root ||
+      !panel ||
+      !input ||
+      !status ||
+      !results ||
+      !resultsPanel ||
+      !thinking
+    )
+      return;
+
+    let loadedRecords: SearchRecord[] | null = null;
+    let recordsPromise: Promise<SearchRecord[]> | null = null;
+    let previousActiveElement: Element | null = null;
+    let closeTimer: number | undefined;
+    let searchRunId = 0;
+    let searchTrigger: HTMLElement | null = null;
+
+    const escapeHtml = (value: string) =>
+      value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+
+    const normalize = (value: string) =>
+      value.toLowerCase().replace(/\s+/g, " ").trim();
+    const isCjk = (value: string) => /[\u3400-\u9fff]/.test(value);
+    const splitTerms = (value: string) => {
+      const normalized = normalize(value);
+      if (!normalized) return [];
+      return isCjk(normalized) && !normalized.includes(" ")
+        ? [normalized]
+        : normalized.split(" ").filter(Boolean);
+    };
+
+    const setThinking = (active: boolean) => {
+      thinking.classList.toggle("is-active", active);
+    };
+
+    const setResultsPanelVisible = (visible: boolean) => {
+      resultsPanel.toggleAttribute("data-empty", !visible);
+    };
+
+    const clearCloseTimer = () => {
+      if (closeTimer) {
+        window.clearTimeout(closeTimer);
+        closeTimer = undefined;
+      }
+    };
+
+    const shouldAnimateClose = () =>
+      window.matchMedia("(min-width: 64rem)").matches &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const setNavSearchActive = (active: boolean) => {
+      searchTrigger?.toggleAttribute("data-command-active", active);
+    };
+
+    const loadRecords = async () => {
+      if (loadedRecords) return loadedRecords;
+      recordsPromise ??= fetch("/search-index.json").then(response => {
+        if (!response.ok) throw new Error("Search index request failed.");
+        return response.json() as Promise<SearchRecord[]>;
+      });
+
+      loadedRecords = await recordsPromise;
+      return loadedRecords;
+    };
+
+    const scoreRecord = (record: SearchRecord, terms: string[]) => {
+      const title = normalize(record.title);
+      const description = normalize(record.description);
+      const meta = normalize(record.metaText);
+      const content = normalize(record.content);
+
+      let score = 0;
+      for (const term of terms) {
+        if (title.includes(term)) score += 12;
+        else if (description.includes(term)) score += 8;
+        else if (meta.includes(term)) score += 5;
+        else if (content.includes(term)) score += 3;
+        else return null;
+      }
+
+      return { ...record, score };
+    };
+
+    const renderResults = (records: SearchRecord[], query: string) => {
+      const terms = splitTerms(query);
+      if (!terms.length) {
+        status.textContent = "";
+        results.innerHTML = "";
+        setResultsPanelVisible(false);
+        setThinking(false);
+        return;
+      }
+
+      setResultsPanelVisible(true);
+
+      const sorted = records
+        .map(record => scoreRecord(record, terms))
+        .filter((record): record is RankedSearchRecord => Boolean(record))
+        .sort((a: RankedSearchRecord, b: RankedSearchRecord) => {
+          if (b.score !== a.score) return b.score - a.score;
+          return a.title.localeCompare(b.title);
+        })
+        .slice(0, 8);
+
+      setThinking(false);
+
+      if (!sorted.length) {
+        status.textContent = `No results for ${query}`;
+        results.innerHTML = "";
+        return;
+      }
+
+      status.textContent = `${sorted.length} result${sorted.length > 1 ? "s" : ""} for ${query}`;
+      results.innerHTML = sorted
+        .map(
+          record => `
+            <li class="command-palette__result">
+              <a href="${escapeHtml(record.url)}" class="hand-underline-trigger block">
+                <div class="flex items-baseline justify-between gap-4">
+                  <span class="hand-underline content-title min-w-0 truncate text-base font-medium">
+                    ${escapeHtml(record.title)}
+                  </span>
+                  <span class="notebook-kicker shrink-0">${escapeHtml(record.kind)}</span>
+                </div>
+                <p class="mt-1 truncate text-sm text-graphite">${escapeHtml(record.description || record.metaText)}</p>
+              </a>
+            </li>
+          `
+        )
+        .join("");
+    };
+
+    const runSearch = async () => {
+      const query = input.value.trim();
+      const currentRunId = ++searchRunId;
+      if (!splitTerms(query).length) {
+        renderResults([], "");
+        return;
+      }
+
+      setThinking(true);
+      setResultsPanelVisible(true);
+      status.textContent = "Thinking through the notebook...";
+
+      try {
+        const records = await loadRecords();
+        if (
+          currentRunId !== searchRunId ||
+          root.classList.contains("hidden") ||
+          root.classList.contains("command-palette--closing")
+        ) {
+          return;
+        }
+
+        renderResults(records, query);
+      } catch {
+        if (currentRunId !== searchRunId) return;
+        setThinking(false);
+        status.textContent = "Search failed to load.";
+      }
+    };
+
+    const finishClose = () => {
+      closeTimer = undefined;
+      root.classList.add("hidden");
+      root.classList.remove(
+        "command-palette--expanded",
+        "command-palette--closing"
+      );
+      setNavSearchActive(false);
+      input.value = "";
+      renderResults([], "");
+      if (previousActiveElement instanceof HTMLElement) {
+        previousActiveElement.focus();
+      }
+    };
+
+    const closePalette = () => {
+      if (root.classList.contains("hidden")) return;
+
+      clearCloseTimer();
+      searchRunId += 1;
+      input.blur();
+      setThinking(false);
+
+      if (!shouldAnimateClose()) {
+        finishClose();
+        return;
+      }
+
+      root.classList.add("command-palette--closing");
+      window.requestAnimationFrame(() => {
+        root.classList.remove("command-palette--expanded");
+      });
+      closeTimer = window.setTimeout(finishClose, 220);
+    };
+
+    const positionPalette = () => {
+      const navWrap = document.querySelector<HTMLElement>("#top-nav-wrap");
+      const siteBrand = document.querySelector<HTMLElement>(".site-brand");
+      const firstNavItem =
+        document.querySelector<HTMLElement>("[data-nav-item]");
+      searchTrigger = document.querySelector<HTMLElement>(
+        "[data-command-open]"
+      );
+
+      if (!navWrap || !firstNavItem || !searchTrigger) return;
+
+      const navRect = navWrap.getBoundingClientRect();
+      const brandRect = siteBrand?.getBoundingClientRect();
+      const firstNavRect = firstNavItem.getBoundingClientRect();
+      const searchRect = searchTrigger.getBoundingClientRect();
+      const searchMarkRect = searchTrigger
+        .querySelector<HTMLElement>(".search-nav-mark")
+        ?.getBoundingClientRect();
+      const brandGap = 24;
+      const minWidth = 280;
+      const targetLeft = brandRect
+        ? brandRect.right + brandGap
+        : firstNavRect.left;
+      const minLeft = navRect.left + 12;
+      const maxLeft = searchRect.right - minWidth;
+      const left = Math.max(minLeft, Math.min(targetLeft, maxLeft));
+      const width = searchRect.right - left;
+      const inputHeight = 40;
+      const top = searchRect.top + (searchRect.height - inputHeight) / 2;
+
+      panel.style.setProperty("--command-top", `${Math.round(top)}px`);
+      panel.style.setProperty("--command-left", `${Math.round(left)}px`);
+      panel.style.setProperty("--command-width", `${Math.round(width)}px`);
+      panel.style.setProperty(
+        "--command-collapsed-scale",
+        `${Math.min(1, (searchMarkRect?.width ?? searchRect.width) / width).toFixed(4)}`
+      );
+    };
+
+    const openPalette = () => {
+      clearCloseTimer();
+      searchRunId += 1;
+      previousActiveElement = document.activeElement;
+      searchTrigger = document.querySelector<HTMLElement>(
+        "[data-command-open]"
+      );
+      setNavSearchActive(true);
+      root.classList.remove("hidden");
+      root.classList.remove(
+        "command-palette--expanded",
+        "command-palette--closing"
+      );
+      positionPalette();
+      window.requestAnimationFrame(() => {
+        root.classList.add("command-palette--expanded");
+        input.focus();
+      });
+      void loadRecords().catch(() => {
+        recordsPromise = null;
+      });
+    };
+
+    const handleKeydown = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase();
+      if ((event.metaKey || event.ctrlKey) && key === "k") {
+        event.preventDefault();
+        openPalette();
+        return;
+      }
+
+      if (event.key === "Escape" && !root.classList.contains("hidden")) {
+        event.preventDefault();
+        closePalette();
+      }
+
+      if (event.key === "Tab" && !root.classList.contains("hidden")) {
+        const focusable = Array.from(
+          root.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+          )
+        ).filter(
+          element => element.offsetParent !== null && element.tabIndex >= 0
+        );
+
+        if (!focusable.length) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    const handleResize = () => {
+      if (!root.classList.contains("hidden")) positionPalette();
+    };
+
+    const handleInput = () => {
+      void runSearch();
+    };
+
+    const handleOpenClick = (event: MouseEvent) => {
+      event.preventDefault();
+      openPalette();
+    };
+
+    document.addEventListener("keydown", handleKeydown);
+    window.addEventListener("resize", handleResize);
+    input.addEventListener("input", handleInput);
+    closeButtons.forEach(button =>
+      button.addEventListener("click", closePalette)
+    );
+    openButtons.forEach(button =>
+      button.addEventListener("click", handleOpenClick)
+    );
+
+    (window as CommandWindow).__commandPaletteBindingCleanup = () => {
+      document.removeEventListener("keydown", handleKeydown);
+      window.removeEventListener("resize", handleResize);
+      input.removeEventListener("input", handleInput);
+      closeButtons.forEach(button =>
+        button.removeEventListener("click", closePalette)
+      );
+      openButtons.forEach(button =>
+        button.removeEventListener("click", handleOpenClick)
+      );
+      clearCloseTimer();
+      setNavSearchActive(false);
+    };
+  }
+
+  (window as CommandWindow).__commandPaletteLifecycleCleanup?.();
+  document.addEventListener("astro:page-load", initCommandPalette);
+  (window as CommandWindow).__commandPaletteLifecycleCleanup = () => {
+    document.removeEventListener("astro:page-load", initCommandPalette);
+    (window as CommandWindow).__commandPaletteBindingCleanup?.();
+    (window as CommandWindow).__commandPaletteBindingCleanup = undefined;
+  };
+  initCommandPalette();
+</script>
