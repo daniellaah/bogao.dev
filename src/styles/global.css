@@ -317,8 +317,9 @@ html[data-theme="dark"] {
 .theme-icon {
   transform-origin: center;
   transition:
-    opacity 180ms ease,
-    transform 220ms ease;
+    opacity 340ms ease,
+    transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
 }
 
 .theme-icon--moon {
@@ -328,7 +329,7 @@ html[data-theme="dark"] {
 
 .theme-icon--sun {
   opacity: 0;
-  transform: rotate(-65deg) scale(0.55);
+  transform: rotate(-80deg) scale(0.72);
 }
 
 #top-nav-wrap::after {
@@ -347,30 +348,12 @@ html[data-theme="dark"] {
 
 html[data-theme="dark"] .theme-icon--moon {
   opacity: 0;
-  transform: rotate(65deg) scale(0.55);
+  transform: rotate(80deg) scale(0.72);
 }
 
 html[data-theme="dark"] .theme-icon--sun {
   opacity: 1;
   transform: rotate(0deg) scale(1);
-}
-
-#theme-btn.is-switching .theme-icon {
-  animation: theme-toggle-pop 260ms ease both;
-}
-
-@keyframes theme-toggle-pop {
-  0% {
-    transform: rotate(-8deg) scale(0.82);
-  }
-
-  55% {
-    transform: rotate(8deg) scale(1.12);
-  }
-
-  100% {
-    transform: rotate(0deg) scale(1);
-  }
 }
 
 .site-avatar {
@@ -455,10 +438,6 @@ html[data-theme="dark"] .site-avatar__image--dark {
 .search-nav-link:is(:focus-visible, [aria-current="page"])
   .search-nav-mark::before {
   opacity: 1;
-}
-
-.search-nav-link:is(:hover, :focus-visible, :active) .search-nav-icon {
-  transform: scale(1.12);
 }
 
 .search-nav-link:active .search-nav-mark {
@@ -613,10 +592,6 @@ html[data-theme="dark"] .site-avatar__image--dark {
 
 .search-nav-link[data-command-active] {
   z-index: 70;
-}
-
-.search-nav-link[data-command-active] .search-nav-icon {
-  transform: scale(1.08);
 }
 
 .search-nav-link[data-command-active]:active .search-nav-mark {
