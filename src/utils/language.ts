@@ -31,13 +31,3 @@ export function getLanguagePosts(
 ) {
   return posts.filter(post => post.data.lang === lang);
 }
-
-export function getLanguageNavigation() {
-  return [
-    { href: "/posts/", ...LANGUAGE_META.en, label: "All", shortLabel: "All" },
-    ...SITE.supportedLangs.map(lang => ({
-      href: `/posts/lang/${LANGUAGE_META[lang].path}/`,
-      ...LANGUAGE_META[lang],
-    })),
-  ];
-}

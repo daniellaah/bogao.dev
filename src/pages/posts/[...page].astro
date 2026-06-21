@@ -8,7 +8,6 @@ import Footer from "@/components/Footer.astro";
 import Pagination from "@/components/Pagination.astro";
 import PostFilters from "@/components/PostFilters.astro";
 import PostsList from "@/components/PostsList.astro";
-import LanguageNav from "@/components/LanguageNav.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
 import { SITE } from "@/config";
 
@@ -22,9 +21,8 @@ const { page } = Astro.props;
 
 <Layout title={`Posts | ${SITE.title}`}>
   <Header />
-  <Main pageTitle="Posts" pageDesc="Browse posts by language, year, and tag.">
+  <Main pageTitle="Posts">
     <section class="filter-panel">
-      <LanguageNav currentHref="/posts/" />
       <PostFilters posts={page.data} />
     </section>
     <PostsList posts={page.data} filterable />

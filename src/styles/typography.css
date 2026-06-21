@@ -74,7 +74,7 @@
     hr {
       @apply border-0;
       height: 5px;
-      background-image: var(--hand-rule-strong);
+      background-image: var(--line-section-strong);
       background-position: left center;
       background-repeat: repeat-x;
       background-size: 160px 5px;

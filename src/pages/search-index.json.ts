@@ -4,6 +4,7 @@ import { getPath } from "@/utils/getPath";
 import { getProjectPath } from "@/utils/getProjectPath";
 import { getNotePath } from "@/utils/getNotePath";
 import getSortedPosts from "@/utils/getSortedPosts";
+import getUniqueTags from "@/utils/getUniqueTags";
 import searchKinds from "@/data/search-kinds.json";
 
 const SEARCH_RECORD_KINDS = Object.fromEntries(
@@ -14,6 +15,7 @@ const SEARCH_RECORD_KINDS = Object.fromEntries(
   posts: "Post";
   projects: "Project";
   notes: "Note";
+  tags: "Tag";
 };
 
 const stripMarkdown = (value: string) =>
@@ -32,6 +34,7 @@ export const GET: APIRoute = async () => {
   const posts = getSortedPosts(await getCollection("blog"));
   const projects = await getCollection("projects", ({ data }) => !data.draft);
   const notes = await getCollection("notes", ({ data }) => !data.draft);
+  const tags = getUniqueTags([...posts, ...notes]);
 
   const records = [
     ...posts.map(post => ({
@@ -66,6 +69,15 @@ export const GET: APIRoute = async () => {
       lang: note.data.lang,
       metaText: [note.data.location ?? "", ...note.data.tags].join(" "),
       content: stripMarkdown(note.body),
+    })),
+    ...tags.map(tag => ({
+      title: `#${tag.tagName}`,
+      description: `${tag.count} item${tag.count === 1 ? "" : "s"} tagged with #${tag.tagName}`,
+      url: `/tags/${tag.tag}/`,
+      kind: SEARCH_RECORD_KINDS.tags,
+      lang: "",
+      metaText: `${tag.tagName} ${tag.tag}`,
+      content: tag.tagName,
     })),
   ];
 

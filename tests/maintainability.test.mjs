@@ -48,13 +48,13 @@ test("search kind contract stays explicit and shared", () => {
 
   assert.deepEqual(
     searchKinds.map(kind => kind.filter),
-    ["all", "posts", "notes", "projects"]
+    ["all", "posts", "notes", "projects", "tags"]
   );
   assert.deepEqual(
     searchKinds.map(kind => kind.recordKind),
-    [null, "Post", "Note", "Project"]
+    [null, "Post", "Note", "Project", "Tag"]
   );
-  assert.equal(new Set(searchKinds.map(kind => kind.filter)).size, 4);
+  assert.equal(new Set(searchKinds.map(kind => kind.filter)).size, 5);
 });
 
 test("public image dimensions point at existing files", () => {

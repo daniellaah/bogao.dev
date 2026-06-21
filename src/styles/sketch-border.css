@@ -1,0 +1,36 @@
+:root,
+html[data-theme="light"] {
+  --sketch-border-subtle-image: url("/borders/sketch-border-subtle.svg");
+  --sketch-border-expressive-image: url("/borders/sketch-border-expressive.svg");
+}
+
+html[data-theme="dark"] {
+  --sketch-border-subtle-image: url("/borders/sketch-border-subtle-dark.svg");
+  --sketch-border-expressive-image: url("/borders/sketch-border-expressive-dark.svg");
+}
+
+.sketch-border.sketch-border {
+  --sketch-border-size: 9px;
+  --sketch-border-slice: 30;
+  --sketch-border-image: var(--sketch-border-subtle-image);
+
+  border: var(--sketch-border-size) solid transparent;
+  border-image-source: var(--sketch-border-image);
+  border-image-slice: var(--sketch-border-slice);
+  border-image-width: var(--sketch-border-size);
+  border-image-repeat: stretch;
+  border-image-outset: 0;
+  background-clip: padding-box;
+}
+
+.sketch-border-thin.sketch-border-thin {
+  --sketch-border-size: 6px;
+}
+
+.sketch-border-bold.sketch-border-bold {
+  --sketch-border-size: 13px;
+}
+
+.sketch-border-expressive.sketch-border-expressive {
+  --sketch-border-image: var(--sketch-border-expressive-image);
+}

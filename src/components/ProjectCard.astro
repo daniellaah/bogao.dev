@@ -10,33 +10,23 @@ type Props = CollectionEntry<"projects"> & {
 const { id, data, compact = false } = Astro.props;
 const { title, description, status, stack, year } = data;
 const href = getProjectPath(id);
-const visibleStack = compact ? stack.slice(0, 3) : stack.slice(0, 4);
+const visibleStack = compact ? stack.slice(0, 3) : stack;
 ---
 
 <article
-  class:list={[
-    "sketch-list-row group py-7 transition duration-200",
-    { "py-5": compact },
-  ]}
+  class:list={["project-card-row", { "project-card-row--compact": compact }]}
 >
-  <div>
-    <div class="flex items-baseline gap-4">
-      <h2 class="min-w-0 text-2xl font-semibold">
-        <a href={href} class="hand-underline">
-          {title}
-        </a>
-      </h2>
-    </div>
+  <a href={href} class="project-list-card sketch-border hand-underline-trigger">
+    <h2 class="min-w-0">
+      <span class="hand-underline content-title text-2xl">{title}</span>
+    </h2>
 
-    <div class="mt-4 flex flex-wrap items-center gap-3">
+    <div class="project-card-meta mt-4 flex flex-wrap items-center gap-3">
       <ProjectStatusBadge status={status} />
       {year && <span class="font-code text-xs text-graphite">{year}</span>}
       {
         visibleStack.length > 0 && (
-          <span
-            class="min-w-0 truncate text-sm text-graphite"
-            title={visibleStack.join(" · ")}
-          >
+          <span class="min-w-0 text-sm text-graphite">
             {visibleStack.join(" · ")}
           </span>
         )
@@ -48,5 +38,5 @@ const visibleStack = compact ? stack.slice(0, 3) : stack.slice(0, 4);
         {description}
       </p>
     </div>
-  </div>
+  </a>
 </article>

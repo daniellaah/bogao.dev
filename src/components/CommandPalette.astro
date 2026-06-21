@@ -7,7 +7,9 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
   class="command-palette hidden"
   role="dialog"
   aria-modal="true"
+  aria-hidden="true"
   aria-labelledby="command-palette-title"
+  hidden
 >
   <button
     type="button"
@@ -18,7 +20,7 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
   >
   </button>
   <div
-    class="command-palette__panel sketch-box"
+    class="command-palette__panel sketch-box sketch-border"
     role="document"
     style="--command-top: 0px; --command-left: 0px; --command-width: min(42rem, calc(100vw - 2rem)); --command-collapsed-scale: 0.1;"
   >
@@ -44,8 +46,11 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
       <input
         id="command-palette-input"
         type="search"
-        placeholder="Search posts, notes, and projects"
+        placeholder="Search posts, notes, projects, and tags"
         autocomplete="off"
+        aria-busy="false"
+        aria-controls="command-palette-results"
+        aria-describedby="command-palette-status"
         class="command-palette__input"
       />
       <span
@@ -70,21 +75,29 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
     <div
       id="command-palette-results-panel"
       class="command-palette__results-panel"
+      aria-hidden="true"
       data-empty
     >
       <p
         id="command-palette-status"
         class="command-palette__status font-code text-xs text-graphite"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
       >
       </p>
-      <ul id="command-palette-results" class="command-palette__results-list">
+      <ul
+        id="command-palette-results"
+        class="command-palette__results-list"
+        role="list"
+      >
       </ul>
     </div>
   </div>
 </div>
 
 <script>
-  type SearchRecordKind = "Post" | "Note" | "Project";
+  type SearchRecordKind = "Post" | "Note" | "Project" | "Tag";
 
   type SearchRecord = {
     title: string;
@@ -101,6 +114,7 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
     __commandPaletteBindingCleanup?: () => void;
     __commandPaletteLifecycleCleanup?: () => void;
   };
+  const COMMAND_PALETTE_CLOSE_MS = 220;
 
   function initCommandPalette() {
     (window as CommandWindow).__commandPaletteBindingCleanup?.();
@@ -170,10 +184,12 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
 
     const setThinking = (active: boolean) => {
       thinking.classList.toggle("is-active", active);
+      input.setAttribute("aria-busy", String(active));
     };
 
     const setResultsPanelVisible = (visible: boolean) => {
       resultsPanel.toggleAttribute("data-empty", !visible);
+      resultsPanel.setAttribute("aria-hidden", String(!visible));
     };
 
     const clearCloseTimer = () => {
@@ -301,7 +317,9 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
 
     const finishClose = () => {
       closeTimer = undefined;
+      root.hidden = true;
       root.classList.add("hidden");
+      root.setAttribute("aria-hidden", "true");
       root.classList.remove(
         "command-palette--expanded",
         "command-palette--closing"
@@ -331,7 +349,7 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
       window.requestAnimationFrame(() => {
         root.classList.remove("command-palette--expanded");
       });
-      closeTimer = window.setTimeout(finishClose, 220);
+      closeTimer = window.setTimeout(finishClose, COMMAND_PALETTE_CLOSE_MS);
     };
 
     const positionPalette = () => {
@@ -375,13 +393,27 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
 
     const openPalette = () => {
       clearCloseTimer();
+
+      if (!root.classList.contains("hidden")) {
+        root.classList.remove("command-palette--closing");
+        root.classList.add("command-palette--expanded");
+        root.hidden = false;
+        root.setAttribute("aria-hidden", "false");
+        setNavSearchActive(true);
+        positionPalette();
+        input.focus();
+        return;
+      }
+
       searchRunId += 1;
       previousActiveElement = document.activeElement;
       searchTrigger = document.querySelector<HTMLElement>(
         "[data-command-open]"
       );
       setNavSearchActive(true);
+      root.hidden = false;
       root.classList.remove("hidden");
+      root.setAttribute("aria-hidden", "false");
       root.classList.remove(
         "command-palette--expanded",
         "command-palette--closing"

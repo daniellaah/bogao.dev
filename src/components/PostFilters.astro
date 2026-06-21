@@ -23,82 +23,112 @@ const availableTags = new Map(
   )
 );
 
-const tags = SITE.postFilterTags.flatMap(configuredTag => {
+const tags = SITE.postPopularFilterTags.flatMap(configuredTag => {
   const slug = slugifyStr(configuredTag);
   const tagName = availableTags.get(slug);
   return tagName ? [{ slug, tagName }] : [];
 });
 
 const filterButtonClass =
-  "sketch-chip ui-text inline-flex items-center px-2.5 py-1 text-sm font-medium text-graphite transition hover:bg-muted/70 hover:text-foreground";
+  "ink-toggle-button sketch-chip ui-text inline-flex items-center px-2.5 py-1 text-sm font-medium text-graphite";
 ---
 
 {
   posts.length > 0 && (
-    <section class="mt-2 space-y-2" data-post-filters aria-label="Filter posts">
-      <div class="grid gap-2 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:items-start">
-        <span class="notebook-kicker pt-1">Year</span>
-        <div class="flex flex-wrap gap-2">
-          <button
-            type="button"
-            data-filter-year="all"
-            class={filterButtonClass}
-            data-active
-            aria-pressed="true"
-          >
-            All
-          </button>
-          {years.map(year => (
-            <button
-              type="button"
-              data-filter-year={year}
-              class={filterButtonClass}
-              aria-pressed="false"
-            >
-              {year}
-            </button>
-          ))}
-        </div>
+    <section
+      class="content-controls"
+      data-post-filters
+      aria-label="Filter posts"
+    >
+      <div class="content-status">
+        <p
+          class="content-status__message"
+          data-filter-status
+          aria-live="polite"
+        >
+          Showing all {posts.length} posts.
+        </p>
       </div>
 
-      {tags.length > 0 && (
-        <div class="grid gap-2 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:items-start">
-          <span class="notebook-kicker pt-1">Tag</span>
-          <div class="flex flex-wrap gap-2">
+      <div class="space-y-2">
+        <div class="grid gap-2 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:items-center">
+          <span class="notebook-kicker">Year</span>
+          <div
+            class="ink-toggle flex flex-wrap gap-2"
+            data-filter-toggle="year"
+          >
             <button
               type="button"
-              data-filter-tag="all"
+              data-filter-year="all"
               class={filterButtonClass}
               data-active
               aria-pressed="true"
             >
               All
             </button>
-            {tags.map(tag => (
+            {years.map(year => (
               <button
                 type="button"
-                data-filter-tag={tag.slug}
+                data-filter-year={year}
                 class={filterButtonClass}
                 aria-pressed="false"
               >
-                {tag.tagName}
+                {year}
               </button>
             ))}
           </div>
         </div>
-      )}
 
-      <p class="font-code text-xs text-graphite" data-filter-status>
-        Showing all posts.
-      </p>
+        {tags.length > 0 && (
+          <div class="grid gap-2 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:items-center">
+            <span class="notebook-kicker">Tag</span>
+            <div class="flex flex-wrap items-center gap-2">
+              <div
+                class="ink-toggle flex flex-wrap gap-2"
+                data-filter-toggle="tag"
+              >
+                <button
+                  type="button"
+                  data-filter-tag="all"
+                  class={filterButtonClass}
+                  data-active
+                  aria-pressed="true"
+                >
+                  All
+                </button>
+                {tags.map(tag => (
+                  <button
+                    type="button"
+                    data-filter-tag={tag.slug}
+                    class={filterButtonClass}
+                    aria-pressed="false"
+                  >
+                    {tag.tagName}
+                  </button>
+                ))}
+              </div>
+              <a
+                href="/tags/"
+                class="sketch-chip ui-text inline-flex min-h-11 items-center px-2.5 py-1 text-sm font-medium text-graphite"
+              >
+                All Tags
+              </a>
+            </div>
+          </div>
+        )}
+      </div>
     </section>
   )
 }
 
 <script>
+  let cleanupPostFiltersInstance = () => {};
+
   function initPostFilters() {
     const root = document.querySelector<HTMLElement>("[data-post-filters]");
     if (!root || root.dataset.initialized === "true") return;
+
+    cleanupPostFiltersInstance();
 
     const posts = Array.from(
       document.querySelectorAll<HTMLElement>("[data-post-list-item]")
@@ -109,6 +139,12 @@ const filterButtonClass =
     );
     const tagButtons = Array.from(
       root.querySelectorAll<HTMLButtonElement>("[data-filter-tag]")
+    );
+    const yearToggle = root.querySelector<HTMLElement>(
+      '[data-filter-toggle="year"]'
+    );
+    const tagToggle = root.querySelector<HTMLElement>(
+      '[data-filter-toggle="tag"]'
     );
     const validTags = new Set([
       "all",
@@ -129,16 +165,46 @@ const filterButtonClass =
       };
     };
 
+    const syncToggleIndicator = (
+      toggle: HTMLElement | null,
+      activeButton: HTMLButtonElement | undefined
+    ) => {
+      if (!toggle || !activeButton) return;
+
+      toggle.style.setProperty(
+        "--sort-indicator-x",
+        `${activeButton.offsetLeft}px`
+      );
+      toggle.style.setProperty(
+        "--sort-indicator-y",
+        `${activeButton.offsetTop}px`
+      );
+      toggle.style.setProperty(
+        "--sort-indicator-width",
+        `${activeButton.offsetWidth}px`
+      );
+      toggle.style.setProperty(
+        "--sort-indicator-height",
+        `${activeButton.offsetHeight}px`
+      );
+    };
+
     const setActiveButton = (
       buttons: HTMLButtonElement[],
       key: string,
-      value: string
+      value: string,
+      toggle: HTMLElement | null
     ) => {
+      let activeButton: HTMLButtonElement | undefined;
+
       for (const button of buttons) {
         const isActive = button.dataset[key] === value;
         button.toggleAttribute("data-active", isActive);
         button.setAttribute("aria-pressed", String(isActive));
+        if (isActive) activeButton = button;
       }
+
+      syncToggleIndicator(toggle, activeButton);
     };
 
     const updateUrl = (year: string, tag: string) => {
@@ -175,13 +241,13 @@ const filterButtonClass =
         if (visible) visibleCount += 1;
       }
 
-      setActiveButton(yearButtons, "filterYear", year);
-      setActiveButton(tagButtons, "filterTag", tag);
+      setActiveButton(yearButtons, "filterYear", year, yearToggle);
+      setActiveButton(tagButtons, "filterTag", tag, tagToggle);
 
       if (status) {
         status.textContent =
           year === "all" && tag === "all"
-            ? "Showing all posts."
+            ? `Showing all ${posts.length} posts.`
             : `Showing ${visibleCount} post${visibleCount === 1 ? "" : "s"}.`;
       }
     };
@@ -203,6 +269,26 @@ const filterButtonClass =
     }
 
     applyFilter();
+    window.requestAnimationFrame(() => {
+      yearToggle?.setAttribute("data-ink-ready", "true");
+      tagToggle?.setAttribute("data-ink-ready", "true");
+    });
+
+    let resizeFrame = 0;
+    const syncIndicators = () => {
+      window.cancelAnimationFrame(resizeFrame);
+      resizeFrame = window.requestAnimationFrame(() => {
+        const { year, tag } = getFilter();
+        setActiveButton(yearButtons, "filterYear", year, yearToggle);
+        setActiveButton(tagButtons, "filterTag", tag, tagToggle);
+      });
+    };
+
+    window.addEventListener("resize", syncIndicators, { passive: true });
+    cleanupPostFiltersInstance = () => {
+      window.cancelAnimationFrame(resizeFrame);
+      window.removeEventListener("resize", syncIndicators);
+    };
   }
 
   (
@@ -215,5 +301,6 @@ const filterButtonClass =
   ).__postFiltersCleanup = () => {
     document.removeEventListener("astro:page-load", initPostFilters);
     document.removeEventListener("astro:after-swap", initPostFilters);
+    cleanupPostFiltersInstance();
   };
 </script>

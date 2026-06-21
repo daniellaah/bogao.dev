@@ -11,14 +11,16 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
 
 <Layout title={`Search | ${SITE.title}`}>
   <Header />
-  <Main pageTitle="Search" pageDesc="Search posts, notes, and projects.">
+  <Main pageTitle="Search" pageDesc="Search posts, notes, projects, and tags.">
     <section class="space-y-5" data-backurl={backUrl}>
-      <div class="sketch-box search-box relative">
+      <div
+        class="sketch-box sketch-border sketch-border-thin search-box relative"
+      >
         <label class="sr-only" for="search-input">Search</label>
         <input
           id="search-input"
           type="search"
-          placeholder="Search posts, notes, and projects"
+          placeholder="Search posts, notes, projects, and tags"
           class="search-input w-full border-0 bg-transparent px-5 py-4 pe-24 text-lg outline-hidden placeholder:text-graphite/75"
           autocomplete="off"
         />
@@ -59,7 +61,7 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
       />
 
       <p id="search-status" class="font-code text-xs text-graphite">
-        Type a keyword to search across posts, notes, and projects.
+        Type a keyword to search across posts, notes, projects, and tags.
       </p>
 
       <ul id="search-results"></ul>
@@ -69,7 +71,7 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
 </Layout>
 
 <script>
-  type SearchRecordKind = "Post" | "Note" | "Project";
+  type SearchRecordKind = "Post" | "Note" | "Project" | "Tag";
 
   type SearchRecord = {
     title: string;
@@ -82,7 +84,7 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
   };
 
   type RankedSearchRecord = SearchRecord & { score: number };
-  type SearchKind = "all" | "posts" | "notes" | "projects";
+  type SearchKind = "all" | "posts" | "notes" | "projects" | "tags";
   type SearchKindEntry = {
     filter: SearchKind;
     label: string;

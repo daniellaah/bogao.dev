@@ -16,7 +16,7 @@ export const SITE = {
   title: "BoGao.Dev",
   ogImage: "og.png",
   postPerPage: 100,
-  postFilterTags: [
+  postPopularFilterTags: [
     "Machine Learning",
     "Deep Learning",
     "CS229",

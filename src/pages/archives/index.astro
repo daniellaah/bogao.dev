@@ -52,10 +52,7 @@ const groupedPosts = posts.reduce(
 
 <Layout title={`Archives | ${SITE.title}`}>
   <Header />
-  <Main
-    pageTitle="Archives"
-    pageDesc="A chronological index of published posts."
-  >
+  <Main pageTitle="Archives">
     {
       Object.entries(groupedPosts)
         .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
