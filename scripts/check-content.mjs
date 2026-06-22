@@ -11,7 +11,47 @@ const COLLECTIONS = [
   { name: "notes", dir: "src/content/notes" },
   { name: "projects", dir: "src/content/projects" },
 ];
-const SUPPORTED_LANGS = ["en", "zh-CN"];
+const ALLOWED_FRONTMATTER_FIELDS = {
+  blog: new Set([
+    "author",
+    "pubDatetime",
+    "modDatetime",
+    "title",
+    "slug",
+    "draft",
+    "tags",
+    "ogImage",
+    "description",
+    "canonicalURL",
+  ]),
+  notes: new Set([
+    "title",
+    "slug",
+    "description",
+    "noteDate",
+    "modDatetime",
+    "draft",
+    "location",
+    "tags",
+    "photos",
+    "canonicalURL",
+  ]),
+  projects: new Set([
+    "title",
+    "description",
+    "status",
+    "order",
+    "startDate",
+    "featured",
+    "draft",
+    "year",
+    "stack",
+    "demoUrl",
+    "repoUrl",
+    "ogImage",
+    "canonicalURL",
+  ]),
+};
 const PROJECT_STATUSES = ["active", "shipping", "archived", "lab"];
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const PUBLIC_IMAGE_DIMENSIONS = JSON.parse(
@@ -107,6 +147,16 @@ const requireFields = (file, data, fields) => {
   }
 };
 
+const validateKnownFields = (file, collection, data) => {
+  const allowedFields = ALLOWED_FRONTMATTER_FIELDS[collection];
+
+  for (const field of Object.keys(data)) {
+    if (!allowedFields.has(field)) {
+      errors.push(`${file}: unknown frontmatter field ${field}`);
+    }
+  }
+};
+
 const validateDate = (file, raw, field, required = false) => {
   const value = raw[field];
   if (!isPresent(value)) {
@@ -117,12 +167,6 @@ const validateDate = (file, raw, field, required = false) => {
   const unquoted = String(value).replace(/^['"]|['"]$/g, "");
   if (!DATE_PATTERN.test(unquoted)) {
     errors.push(`${file}: ${field} must use YYYY-MM-DD`);
-  }
-};
-
-const validateLang = (file, value) => {
-  if (isPresent(value) && !SUPPORTED_LANGS.includes(value)) {
-    errors.push(`${file}: lang must be one of ${SUPPORTED_LANGS.join(", ")}`);
   }
 };
 
@@ -201,10 +245,9 @@ const validatePhotoPaths = (file, photos) => {
 };
 
 const validateBlog = (file, data, raw, seenSlugs) => {
-  requireFields(file, data, ["pubDatetime", "title", "lang", "description"]);
+  requireFields(file, data, ["pubDatetime", "title", "description"]);
   validateDate(file, raw, "pubDatetime", true);
   validateDate(file, raw, "modDatetime");
-  validateLang(file, data.lang);
   validateStringArray(file, data, "tags", true);
   addSlug(seenSlugs, "blog", file, data.slug);
 
@@ -214,10 +257,9 @@ const validateBlog = (file, data, raw, seenSlugs) => {
 };
 
 const validateNote = (file, data, raw, seenSlugs) => {
-  requireFields(file, data, ["description", "noteDate", "lang"]);
+  requireFields(file, data, ["description", "noteDate"]);
   validateDate(file, raw, "noteDate", true);
   validateDate(file, raw, "modDatetime");
-  validateLang(file, data.lang);
   validateStringArray(file, data, "tags");
   validatePhotoPaths(file, validateStringArray(file, data, "photos"));
   addSlug(seenSlugs, "note", file, data.slug);
@@ -228,14 +270,7 @@ const validateNote = (file, data, raw, seenSlugs) => {
 };
 
 const validateProject = (file, data, raw, seenSlugs) => {
-  requireFields(file, data, [
-    "title",
-    "description",
-    "status",
-    "order",
-    "lang",
-  ]);
-  validateLang(file, data.lang);
+  requireFields(file, data, ["title", "description", "status", "order"]);
   validateDate(file, raw, "startDate");
   validateStringArray(file, data, "stack");
   validateUrl(file, data, "demoUrl");
@@ -273,6 +308,8 @@ const main = () => {
     for (const file of files) {
       const source = fs.readFileSync(path.join(ROOT, file), "utf8");
       const { data, raw } = parseFrontmatter(file, source);
+
+      validateKnownFields(file, collection.name, data);
 
       if (collection.name === "blog") validateBlog(file, data, raw, seenSlugs);
       if (collection.name === "notes") validateNote(file, data, raw, seenSlugs);

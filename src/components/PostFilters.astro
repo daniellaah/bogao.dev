@@ -1,12 +1,12 @@
 ---
-import type { CollectionEntry } from "astro:content";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { SITE } from "@/config";
+import type { SortedBlogPost } from "@/utils/getSortedPosts";
 import { slugifyStr } from "@/utils/slugify";
 
 type Props = {
-  posts: CollectionEntry<"blog">[];
+  posts: SortedBlogPost[];
 };
 
 const { posts } = Astro.props;
@@ -30,7 +30,7 @@ const tags = SITE.postPopularFilterTags.flatMap(configuredTag => {
 });
 
 const filterButtonClass =
-  "ink-toggle-button sketch-chip ui-text inline-flex items-center px-2.5 py-1 text-sm font-medium text-graphite";
+  "ink-toggle-button sketch-chip ui-text inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium text-graphite";
 ---
 
 {
@@ -51,11 +51,12 @@ const filterButtonClass =
       </div>
 
       <div class="space-y-2">
-        <div class="grid gap-2 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:items-center">
+        <div class="toggle-control-row">
           <span class="notebook-kicker">Year</span>
           <div
-            class="ink-toggle flex flex-wrap gap-2"
+            class="ink-toggle post-filter-toggle flex flex-wrap gap-2"
             data-filter-toggle="year"
+            aria-label="Filter posts by year"
           >
             <button
               type="button"
@@ -80,12 +81,13 @@ const filterButtonClass =
         </div>
 
         {tags.length > 0 && (
-          <div class="grid gap-2 sm:grid-cols-[3.5rem_minmax(0,1fr)] sm:items-center">
+          <div class="toggle-control-row">
             <span class="notebook-kicker">Tag</span>
             <div class="flex flex-wrap items-center gap-2">
               <div
-                class="ink-toggle flex flex-wrap gap-2"
+                class="ink-toggle post-filter-toggle flex flex-wrap gap-2"
                 data-filter-toggle="tag"
+                aria-label="Filter posts by tag"
               >
                 <button
                   type="button"
@@ -109,7 +111,7 @@ const filterButtonClass =
               </div>
               <a
                 href="/tags/"
-                class="sketch-chip ui-text inline-flex min-h-11 items-center px-2.5 py-1 text-sm font-medium text-graphite"
+                class="sketch-chip ui-text inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium text-graphite"
               >
                 All Tags
               </a>
@@ -269,6 +271,7 @@ const filterButtonClass =
     }
 
     applyFilter();
+
     window.requestAnimationFrame(() => {
       yearToggle?.setAttribute("data-ink-ready", "true");
       tagToggle?.setAttribute("data-ink-ready", "true");

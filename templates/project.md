@@ -6,7 +6,6 @@ draft: true
 order: 10
 startDate: 2026-04-01
 featured: false
-lang: "en"
 year: 2026
 stack:
   - Astro

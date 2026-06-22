@@ -1,5 +1,5 @@
 ---
-import { render, type CollectionEntry } from "astro:content";
+import { render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
@@ -8,7 +8,8 @@ import Datetime from "@/components/Datetime.astro";
 import ShareLinks from "@/components/ShareLinks.astro";
 import BackButton from "@/components/BackButton.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
-import { getPath } from "@/utils/getPath";
+import type { SortedBlogPost } from "@/utils/getSortedPosts";
+import { getPostPath } from "@/utils/getPostPath";
 import { slugifyStr } from "@/utils/slugify";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
@@ -16,8 +17,8 @@ import { SITE } from "@/config";
 import "katex/dist/katex.min.css";
 
 type Props = {
-  post: CollectionEntry<"blog">;
-  posts: CollectionEntry<"blog">[];
+  post: SortedBlogPost;
+  posts: SortedBlogPost[];
 };
 
 const { post, posts } = Astro.props;
@@ -26,7 +27,6 @@ const {
   title,
   author,
   description,
-  lang,
   ogImage: initOgImage,
   canonicalURL,
   pubDatetime,
@@ -57,7 +57,6 @@ const ogImage = ogImageUrl
 const layoutProps = {
   title: `${title} | ${SITE.title}`,
   author,
-  lang,
   description,
   pubDatetime,
   modDatetime,
@@ -68,18 +67,19 @@ const layoutProps = {
 
 /* ========== Prev/Next Posts ========== */
 
-const allPosts = posts.map(({ id, slug, filePath, data: { title } }) => ({
-  id,
-  title,
-  slug,
-  filePath,
+const allPosts = posts.map(postEntry => ({
+  id: postEntry.id,
+  title: postEntry.data.title,
+  href: getPostPath(postEntry),
 }));
 
-const currentPostIndex = allPosts.findIndex(a => a.id === post.id);
+const currentPostIndex = allPosts.findIndex(entry => entry.id === post.id);
 
-const prevPost = currentPostIndex !== 0 ? allPosts[currentPostIndex - 1] : null;
+const prevPost = currentPostIndex > 0 ? allPosts[currentPostIndex - 1] : null;
 const nextPost =
-  currentPostIndex !== allPosts.length ? allPosts[currentPostIndex + 1] : null;
+  currentPostIndex >= 0 && currentPostIndex < allPosts.length - 1
+    ? allPosts[currentPostIndex + 1]
+    : null;
 ---
 
 <Layout {...layoutProps}>
@@ -153,12 +153,7 @@ const nextPost =
           {
             prevPost && (
               <a
-                href={getPath(
-                  prevPost.id,
-                  prevPost.filePath,
-                  true,
-                  prevPost.slug
-                )}
+                href={prevPost.href}
                 class="flex w-full gap-1 hover:opacity-75"
               >
                 <IconChevronLeft class="inline-block flex-none rtl:rotate-180" />
@@ -174,12 +169,7 @@ const nextPost =
           {
             nextPost && (
               <a
-                href={getPath(
-                  nextPost.id,
-                  nextPost.filePath,
-                  true,
-                  nextPost.slug
-                )}
+                href={nextPost.href}
                 class="flex w-full justify-end gap-1 text-end hover:opacity-75 sm:col-start-2"
               >
                 <div>
@@ -456,12 +446,18 @@ const nextPost =
   initTocDivider();
 
   function initActiveToc() {
+    window.__activeTocCleanup?.();
+    window.__activeTocCleanup = undefined;
+
+    const article = document.getElementById("article");
+    if (!article) return false;
+
     const links = Array.from(document.querySelectorAll("[data-toc-link]"));
     const headings = Array.from(
       document.querySelectorAll("#article h2[id], #article h3[id]")
     );
 
-    if (!links.length || !headings.length) return;
+    if (!links.length || !headings.length) return false;
 
     const setActiveTocLink = id => {
       for (const link of links) {
@@ -475,10 +471,6 @@ const nextPost =
       }
     };
 
-    let ticking = false;
-    let pendingTocId = "";
-    let pendingTocTimer = 0;
-
     const getIdFromHash = hash => {
       const rawId = hash.startsWith("#") ? hash.slice(1) : hash;
       try {
@@ -488,44 +480,24 @@ const nextPost =
       }
     };
 
-    const clearPendingToc = () => {
-      pendingTocId = "";
-      if (pendingTocTimer) window.clearTimeout(pendingTocTimer);
-      pendingTocTimer = 0;
-      requestActiveTocUpdate();
-    };
-
-    const holdPendingToc = id => {
-      pendingTocId = id;
-      setActiveTocLink(id);
-      if (pendingTocTimer) window.clearTimeout(pendingTocTimer);
-      pendingTocTimer = window.setTimeout(clearPendingToc, 3500);
-    };
-
     const handleTocClick = event => {
       const hash = event.currentTarget.getAttribute("href");
-      if (hash?.startsWith("#")) holdPendingToc(getIdFromHash(hash));
+      if (!hash?.startsWith("#")) return;
+
+      setActiveTocLink(getIdFromHash(hash));
     };
 
-    const updateActiveTocLink = () => {
-      if (pendingTocId) {
-        setActiveTocLink(pendingTocId);
-        return;
-      }
+    let ticking = false;
 
+    const updateActiveTocLink = () => {
       const activationLine = window.innerHeight * 0.25;
       const scrollBottom = window.scrollY + window.innerHeight;
       const documentBottom = document.documentElement.scrollHeight;
-      const hashId = getIdFromHash(window.location.hash);
-      const hashHeading = headings.find(heading => heading.id === hashId);
       let currentHeading = headings[0];
 
-      if (hashHeading) {
-        const hashHeadingTop = hashHeading.getBoundingClientRect().top;
-        if (hashHeadingTop >= 0 && hashHeadingTop <= window.innerHeight) {
-          setActiveTocLink(hashHeading.id);
-          return;
-        }
+      if (window.scrollY <= 24) {
+        setActiveTocLink(currentHeading.id);
+        return;
       }
 
       if (documentBottom - scrollBottom <= 8) {
@@ -561,6 +533,7 @@ const nextPost =
       passive: true,
     });
     window.addEventListener("resize", requestActiveTocUpdate);
+    window.addEventListener("hashchange", requestActiveTocUpdate);
     for (const link of links) {
       link.addEventListener("click", handleTocClick);
     }
@@ -573,14 +546,22 @@ const nextPost =
       }
     );
 
-    addPostPageCleanup(() => {
-      if (pendingTocTimer) window.clearTimeout(pendingTocTimer);
+    const cleanupActiveToc = () => {
       window.removeEventListener("scroll", requestActiveTocUpdate);
       window.removeEventListener("resize", requestActiveTocUpdate);
+      window.removeEventListener("hashchange", requestActiveTocUpdate);
       for (const link of links) {
         link.removeEventListener("click", handleTocClick);
       }
       activeTocObserver.disconnect();
+    };
+
+    window.__activeTocCleanup = cleanupActiveToc;
+    addPostPageCleanup(() => {
+      if (window.__activeTocCleanup === cleanupActiveToc) {
+        cleanupActiveToc();
+        window.__activeTocCleanup = undefined;
+      }
     });
 
     for (const heading of headings) {
@@ -588,12 +569,34 @@ const nextPost =
     }
 
     if (window.location.hash) {
-      holdPendingToc(getIdFromHash(window.location.hash));
+      setActiveTocLink(getIdFromHash(window.location.hash));
     }
 
     requestActiveTocUpdate();
+    return true;
   }
-  initActiveToc();
+
+  const requestActiveTocInit = () => {
+    let attempts = 0;
+
+    const attemptInit = () => {
+      attempts += 1;
+      const initialized = initActiveToc();
+      if (!initialized && attempts < 6) {
+        window.setTimeout(attemptInit, 50);
+      }
+    };
+
+    requestAnimationFrame(() => requestAnimationFrame(attemptInit));
+  };
+
+  document.addEventListener("astro:page-load", requestActiveTocInit, {
+    once: true,
+  });
+  addPostPageCleanup(() =>
+    document.removeEventListener("astro:page-load", requestActiveTocInit)
+  );
+  requestActiveTocInit();
 
   /* Go to page start after page swap */
   if (window.__postAfterSwapScroll) {

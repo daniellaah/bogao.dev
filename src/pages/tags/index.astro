@@ -19,7 +19,7 @@ type TagStat = {
   noteCount: number;
 };
 
-const tagCollator = new Intl.Collator(["en", "zh-CN"], {
+const tagCollator = new Intl.Collator(undefined, {
   sensitivity: "base",
   numeric: true,
 });
@@ -63,7 +63,7 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
   <Main pageTitle="Tags">
     <section class="space-y-8" data-tags-index data-tags-entering>
       <section>
-        <div class="content-controls tags-sort-panel mb-6">
+        <div class="content-controls toggle-panel-rule tags-sort-panel mb-6">
           <div class="content-status">
             <p
               class="content-status__message"
@@ -219,7 +219,7 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
     const compareCardNames = (cardA: HTMLElement, cardB: HTMLElement) =>
       (cardA.dataset.tagName ?? "").localeCompare(
         cardB.dataset.tagName ?? "",
-        ["en", "zh-CN"],
+        undefined,
         { sensitivity: "base", numeric: true }
       );
 
@@ -328,6 +328,7 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
     }
 
     applyTagsState();
+
     window.requestAnimationFrame(() => {
       sortToggle.dataset.inkReady = "true";
     });

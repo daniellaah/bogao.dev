@@ -38,15 +38,13 @@ src/pages/          页面路由
 src/components/     通用组件
 src/config.ts       站点元信息
 public/images/      站点与内容图片
-templates/          中英文文章模板
+templates/          内容创建模板
 ```
 
 ## 当前状态
 
 - 已接入 Astro Paper 模板
 - 已切换博客内容目录到 `src/content/blog`
-- 已支持 `en` / `zh-CN` 语言元信息，且文章必须显式声明 `lang`
-- `Posts` 页面支持按语言筛选
 - `Posts` 页面当前每页最多显示 `100` 篇文章，并支持年份 / 标签轻量筛选
 - 已自托管 `LXGW WenKai` WOFF2 字体并应用到正文和标题
 - 文章页已切换到 KaTeX 编译期数学公式渲染
@@ -64,7 +62,6 @@ templates/          中英文文章模板
 
 - `pubDatetime`
 - `modDatetime`
-- `lang`
 
 旧文章已经完成一轮批量清洗：
 
@@ -72,7 +69,7 @@ templates/          中英文文章模板
 - 把旧博客绝对链接改成当前 `/posts/...` 路径
 - 修复了空链接
 - 把正文里的页面级 H1 降成了正文层级标题
-- 统一了显式语言字段和部分 tags 命名
+- 统一了部分 tags 命名
 - 重写了 description，避免直接使用旧正文截断
 - 已迁移到 `remark-math + rehype-katex`，并清理了一轮旧文章公式写法
 
@@ -144,17 +141,16 @@ PUBLIC_BAIDU_SITE_VERIFICATION=codeva-xxxx
 
 ## 写作模板
 
-仓库里提供了双语文章模板和内容创建命令：
+仓库里提供了文章、note 和 project 模板与内容创建命令：
 
-- `templates/blog-post.en.md`
-- `templates/blog-post.zh-CN.md`
+- `templates/blog-post.md`
 - `templates/note.md`
 - `templates/project.md`
 
 常用写作命令：
 
 ```bash
-npm run new:post -- "My new post" --lang en --tags machine-learning,notes
+npm run new:post -- "My new post" --tags machine-learning,notes
 npm run new:note -- "LA 5K morning" --location "Los Angeles" --tags running,life
 npm run new:project -- "My project" --stack Python,Astro --repoUrl https://github.com/yourname/project
 ```

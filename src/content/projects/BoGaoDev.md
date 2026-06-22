@@ -5,7 +5,6 @@ status: "shipping"
 order: -1
 startDate: 2026-02-04
 featured: false
-lang: "en"
 year: 2026
 stack:
   - Astro

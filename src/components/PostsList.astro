@@ -1,9 +1,9 @@
 ---
-import type { CollectionEntry } from "astro:content";
 import CompactPostRow from "@/components/CompactPostRow.astro";
+import type { SortedBlogPost } from "@/utils/getSortedPosts";
 
 type Props = {
-  posts: CollectionEntry<"blog">[];
+  posts: SortedBlogPost[];
   filterable?: boolean;
 };
 

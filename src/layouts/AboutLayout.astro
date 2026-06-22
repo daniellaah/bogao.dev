@@ -6,12 +6,12 @@ import Breadcrumb from "@/components/Breadcrumb.astro";
 import Layout from "./Layout.astro";
 import { SITE } from "@/config";
 
-type Props = MarkdownLayoutProps<{ title: string; lang?: string }>;
+type Props = MarkdownLayoutProps<{ title: string }>;
 
 const { frontmatter } = Astro.props;
 ---
 
-<Layout title={`${frontmatter.title} | ${SITE.title}`} lang={frontmatter.lang}>
+<Layout title={`${frontmatter.title} | ${SITE.title}`}>
   <Header />
   <Breadcrumb />
   <main id="main-content" class="app-layout">

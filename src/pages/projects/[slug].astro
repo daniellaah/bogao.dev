@@ -25,7 +25,6 @@ const { Content } = await render(project);
 const {
   title,
   description,
-  lang,
   status,
   stack,
   year,
@@ -55,7 +54,6 @@ const relatedProjects = projects
 <Layout
   title={`${title} | Projects | ${SITE.title}`}
   description={description}
-  lang={lang}
   canonicalURL={canonicalURL}
   ogImage={ogImage}
 >

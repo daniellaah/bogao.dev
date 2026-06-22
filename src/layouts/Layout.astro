@@ -10,7 +10,6 @@ import "@/styles/global.css";
 
 type Props = {
   title?: string;
-  lang?: string;
   author?: string;
   profile?: string;
   description?: string;
@@ -23,7 +22,6 @@ type Props = {
 
 const {
   title = SITE.title,
-  lang = SITE.lang,
   author = SITE.author,
   profile = SITE.profile,
   description = SITE.desc,
@@ -37,8 +35,6 @@ const {
 const socialImageURL = new URL(ogImage, Astro.url);
 const isArticle = Boolean(pubDatetime);
 const ogType = isArticle ? "article" : "website";
-const ogLocale = lang === "zh-CN" ? "zh_CN" : "en_US";
-const htmlLang = lang === "zh-CN" ? "zh" : lang;
 const socialImageAlt = `${title} | ${SITE.title}`;
 
 const structuredData = {
@@ -59,11 +55,7 @@ const structuredData = {
 ---
 
 <!doctype html>
-<html
-  dir={SITE.dir}
-  lang={htmlLang}
-  class:list={[{ "scroll-smooth": scrollSmooth }]}
->
+<html dir={SITE.dir} lang="en" class:list={[{ "scroll-smooth": scrollSmooth }]}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -89,7 +81,7 @@ const structuredData = {
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={SITE.title} />
-    <meta property="og:locale" content={ogLocale} />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />

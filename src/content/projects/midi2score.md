@@ -2,10 +2,9 @@
 title: "MIDI2Score"
 description: "A Transformer-based sequence-to-sequence project for converting MIDI token sequences into MusicXML token sequences."
 status: "active"
-order: 1
+order: -1
 startDate: 2026-03-13
 featured: false
-lang: "en"
 year: 2026
 stack:
   - Python

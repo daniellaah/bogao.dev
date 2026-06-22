@@ -1,12 +1,12 @@
 ---
-import type { CollectionEntry } from "astro:content";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
-import { getPath } from "@/utils/getPath";
+import type { SortedBlogPost } from "@/utils/getSortedPosts";
+import { getPostPath } from "@/utils/getPostPath";
 import { slugifyStr } from "@/utils/slugify";
 
 type Props = {
-  post: CollectionEntry<"blog">;
+  post: SortedBlogPost;
   filterable?: boolean;
 };
 
@@ -26,7 +26,7 @@ const pubDatetime = dayjs.utc(post.data.pubDatetime);
     : undefined}
 >
   <a
-    href={getPath(post.id, post.filePath, true, post.slug)}
+    href={getPostPath(post)}
     class="hand-underline-trigger grid gap-1 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
   >
     <span

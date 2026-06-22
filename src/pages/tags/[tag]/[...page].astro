@@ -7,8 +7,8 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Pagination from "@/components/Pagination.astro";
 import getUniqueTags from "@/utils/getUniqueTags";
-import { getPath } from "@/utils/getPath";
 import { getNotePath } from "@/utils/getNotePath";
+import { getPostPath } from "@/utils/getPostPath";
 import { slugifyStr } from "@/utils/slugify";
 import getSortedPosts from "@/utils/getSortedPosts";
 import { SITE } from "@/config";
@@ -26,7 +26,7 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
       .map(post => ({
         kind: "post" as const,
         title: post.data.title,
-        href: getPath(post.id, post.filePath, true, post.slug),
+        href: getPostPath(post),
         date: post.data.pubDatetime,
       }));
 

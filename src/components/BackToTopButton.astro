@@ -31,11 +31,8 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
    * the "Back to Top" button is clicked. */
   function backToTop() {
     const rootElement = document.documentElement;
-    const btnContainer =
-      document.querySelector<HTMLElement>("#btt-btn-container");
-    const backToTopBtn = document.querySelector<HTMLButtonElement>(
-      "[data-button='back-to-top']"
-    );
+    const btnContainer = document.querySelector("#btt-btn-container");
+    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
     if (!rootElement || !btnContainer || !backToTopBtn) return;
     if (backToTopBtn.dataset.backToTopBound === "true") return;
 

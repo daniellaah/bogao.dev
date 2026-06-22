@@ -23,14 +23,8 @@
 
     h2 {
       @apply mt-10;
-      display: table;
       font-size: 1.45em;
       line-height: 1.3;
-      padding-bottom: 0.2rem;
-      background-image: var(--hand-underline);
-      background-position: left bottom;
-      background-repeat: repeat-x;
-      background-size: 96px 5px;
     }
 
     h3 {

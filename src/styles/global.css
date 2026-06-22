@@ -56,6 +56,10 @@ html[data-theme="light"] {
   );
   --control-border-color-strong: var(--foreground);
   --control-border-radius: 7px 11px 8px 10px / 10px 7px 11px 8px;
+  --toggle-label-width: 4.5rem;
+  --toggle-gap: 0.5rem;
+  --toggle-button-padding-x: 0.75rem;
+  --toggle-button-padding-y: 0.25rem;
   --content-gap: 1.5rem;
   --section-gap: 3rem;
   --motion-duration-press: 120ms;
@@ -665,12 +669,24 @@ html[data-theme="dark"] .site-avatar__image--dark {
   line-height: 1;
 }
 
-.tags-sort-panel {
+.toggle-panel-rule {
   padding-bottom: 0.85rem;
   background-image: var(--line-ledger);
   background-position: left bottom;
   background-repeat: repeat-x;
   background-size: 160px 5px;
+}
+
+.toggle-control-row {
+  display: grid;
+  gap: var(--toggle-gap);
+}
+
+@media (min-width: 40rem) {
+  .toggle-control-row {
+    grid-template-columns: var(--toggle-label-width) minmax(0, 1fr);
+    align-items: center;
+  }
 }
 
 .ink-toggle {
@@ -713,6 +729,12 @@ html[data-theme="dark"] .site-avatar__image--dark {
 .ink-toggle-button.sketch-chip[data-active] {
   border-color: var(--control-border-color-strong);
   background: transparent;
+  color: var(--background);
+}
+
+.ink-toggle:not([data-ink-ready="true"])
+  .ink-toggle-button.sketch-chip[data-active] {
+  background: var(--foreground);
   color: var(--background);
 }
 

@@ -25,26 +25,37 @@ const loadTypeScriptModule = async relativePath => {
   );
 };
 
-test("breadcrumb handles language post routes before generic post routes", async () => {
+test("breadcrumb handles indexed routes", async () => {
   const { getBreadcrumbList } = await loadTypeScriptModule(
     "src/utils/breadcrumb.ts"
   );
 
   assert.deepEqual(getBreadcrumbList("/posts/"), ["Posts (page 1)"]);
   assert.deepEqual(getBreadcrumbList("/posts/2/"), ["Posts (page 2)"]);
-  assert.deepEqual(getBreadcrumbList("/posts/lang/en/"), ["Posts"]);
-  assert.deepEqual(getBreadcrumbList("/posts/lang/zh-cn/"), ["Posts"]);
-  assert.deepEqual(getBreadcrumbList("/posts/lang/zh-cn/2/"), [
-    "Posts (page 2)",
-  ]);
   assert.deepEqual(getBreadcrumbList("/tags/machine-learning/2/"), [
     "tags",
     "machine-learning (page 2)",
   ]);
 });
 
+test("post detail routes use standard post paths", () => {
+  const route = readText("src/pages/posts/[...slug]/index.astro");
+  const postPathHelper = readText("src/utils/getPostPath.ts");
+  const postRouteEntries = fs
+    .readdirSync(path.join(ROOT, "src/pages/posts"))
+    .sort();
+
+  assert.ok(route.includes("getSortedPosts"));
+  assert.ok(route.includes("getPostPath(post, false)"));
+  assert.ok(postPathHelper.includes("post.data.slug ?? post.slug"));
+  assert.ok(postPathHelper.includes('path.replace(/^\\/+/, "")'));
+  assert.deepEqual(postRouteEntries, ["[...page].astro", "[...slug]"]);
+});
+
 test("search kind contract stays explicit and shared", () => {
   const searchKinds = readJson("src/data/search-kinds.json");
+  const searchEndpoint = readText("src/pages/search-index.json.ts");
+  const searchPage = readText("src/pages/search.astro");
 
   assert.deepEqual(
     searchKinds.map(kind => kind.filter),
@@ -55,6 +66,8 @@ test("search kind contract stays explicit and shared", () => {
     [null, "Post", "Note", "Project", "Tag"]
   );
   assert.equal(new Set(searchKinds.map(kind => kind.filter)).size, 5);
+  assert.ok(searchEndpoint.includes("getPostPath(post)"));
+  assert.ok(searchPage.includes("`${record.kind}:${record.url}`"));
 });
 
 test("public image dimensions point at existing files", () => {

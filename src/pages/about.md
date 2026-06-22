@@ -1,7 +1,6 @@
 ---
 layout: ../layouts/AboutLayout.astro
 title: "About"
-lang: "zh-CN"
 ---
 
 你好，我是 Bo。这个博客主要用来整理机器学习笔记、LLM workflow，以及一些围绕 AI 工具和个人实验展开的长期记录。

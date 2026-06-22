@@ -1,8 +1,8 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
-import { getPath } from "@/utils/getPath";
 import { getProjectPath } from "@/utils/getProjectPath";
 import { getNotePath } from "@/utils/getNotePath";
+import { getPostPath } from "@/utils/getPostPath";
 import getSortedPosts from "@/utils/getSortedPosts";
 import getUniqueTags from "@/utils/getUniqueTags";
 import searchKinds from "@/data/search-kinds.json";
@@ -31,7 +31,8 @@ const stripMarkdown = (value: string) =>
     .trim();
 
 export const GET: APIRoute = async () => {
-  const posts = getSortedPosts(await getCollection("blog"));
+  const blogEntries = await getCollection("blog");
+  const posts = getSortedPosts(blogEntries);
   const projects = await getCollection("projects", ({ data }) => !data.draft);
   const notes = await getCollection("notes", ({ data }) => !data.draft);
   const tags = getUniqueTags([...posts, ...notes]);
@@ -40,9 +41,8 @@ export const GET: APIRoute = async () => {
     ...posts.map(post => ({
       title: post.data.title,
       description: post.data.description,
-      url: getPath(post.id, post.filePath, true, post.slug),
+      url: getPostPath(post),
       kind: SEARCH_RECORD_KINDS.posts,
-      lang: post.data.lang,
       metaText: post.data.tags.join(" "),
       content: stripMarkdown(post.body),
     })),
@@ -51,7 +51,6 @@ export const GET: APIRoute = async () => {
       description: project.data.description,
       url: getProjectPath(project.id),
       kind: SEARCH_RECORD_KINDS.projects,
-      lang: project.data.lang,
       metaText: [
         project.data.status,
         String(project.data.year ?? ""),
@@ -66,7 +65,6 @@ export const GET: APIRoute = async () => {
       description: note.data.description,
       url: getNotePath(note.id, note.slug),
       kind: SEARCH_RECORD_KINDS.notes,
-      lang: note.data.lang,
       metaText: [note.data.location ?? "", ...note.data.tags].join(" "),
       content: stripMarkdown(note.body),
     })),
@@ -75,7 +73,6 @@ export const GET: APIRoute = async () => {
       description: `${tag.count} item${tag.count === 1 ? "" : "s"} tagged with #${tag.tagName}`,
       url: `/tags/${tag.tag}/`,
       kind: SEARCH_RECORD_KINDS.tags,
-      lang: "",
       metaText: `${tag.tagName} ${tag.tag}`,
       content: tag.tagName,
     })),

@@ -78,7 +78,6 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
     description: string;
     url: string;
     kind: SearchRecordKind;
-    lang: string;
     metaText: string;
     content: string;
   };
@@ -211,7 +210,16 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
         })
         .filter(Boolean) as RankedSearchRecord[];
 
-      const sorted = ranked
+      const deduped = new Map<string, RankedSearchRecord>();
+      for (const record of ranked) {
+        const key = `${record.kind}:${record.url}`;
+        const current = deduped.get(key);
+        if (!current || record.score > current.score) {
+          deduped.set(key, record);
+        }
+      }
+
+      const sorted = Array.from(deduped.values())
         .sort((a: RankedSearchRecord, b: RankedSearchRecord) => {
           if (b.score !== a.score) return b.score - a.score;
           return a.title.localeCompare(b.title);

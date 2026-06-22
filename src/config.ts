@@ -27,6 +27,4 @@ export const SITE = {
   showArchives: true,
   showBackButton: true, // show back button in post detail
   dir: "ltr", // "rtl" | "auto"
-  lang: "en", // default html lang code
-  supportedLangs: ["en", "zh-CN"],
 } as const;

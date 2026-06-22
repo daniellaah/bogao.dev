@@ -11,15 +11,35 @@ const CONTENT_DIRS = {
   note: "src/content/notes",
   project: "src/content/projects",
 };
+const ALLOWED_OPTIONS = {
+  post: new Set(["title", "date", "tags", "slug", "description"]),
+  note: new Set([
+    "title",
+    "date",
+    "slug",
+    "description",
+    "location",
+    "tags",
+    "photos",
+  ]),
+  project: new Set([
+    "title",
+    "date",
+    "slug",
+    "description",
+    "status",
+    "startDate",
+    "stack",
+    "repoUrl",
+    "demoUrl",
+    "year",
+  ]),
+};
 const TEMPLATE_FILES = {
-  post: {
-    en: "templates/blog-post.en.md",
-    "zh-CN": "templates/blog-post.zh-CN.md",
-  },
+  post: "templates/blog-post.md",
   note: "templates/note.md",
   project: "templates/project.md",
 };
-const SUPPORTED_LANGS = ["en", "zh-CN"];
 const PROJECT_STATUSES = ["active", "shipping", "archived", "lab"];
 
 const today = () => {
@@ -47,17 +67,6 @@ const asList = value =>
     .split(",")
     .map(item => item.trim())
     .filter(Boolean);
-
-const normalizeLang = value => {
-  const lang = value ?? "en";
-  if (!SUPPORTED_LANGS.includes(lang)) {
-    throw new Error(
-      `Unsupported lang "${lang}". Use ${SUPPORTED_LANGS.join(", ")}.`
-    );
-  }
-
-  return lang;
-};
 
 const parseArgs = argv => {
   const values = {};
@@ -91,9 +100,19 @@ const parseArgs = argv => {
   return { values, positional };
 };
 
+const validateKnownOptions = (kind, values) => {
+  const allowedOptions = ALLOWED_OPTIONS[kind];
+
+  for (const option of Object.keys(values)) {
+    if (!allowedOptions.has(option)) {
+      throw new Error(`Unsupported option for ${kind}: --${option}`);
+    }
+  }
+};
+
 const usage = () => {
   console.log(`Usage:
-  npm run new:post -- "Post title" [--lang en|zh-CN] [--date YYYY-MM-DD] [--tags tag1,tag2] [--slug custom-slug]
+  npm run new:post -- "Post title" [--date YYYY-MM-DD] [--tags tag1,tag2] [--slug custom-slug]
   npm run new:note -- "Note title" [--date YYYY-MM-DD] [--location "Los Angeles"] [--tags running,life] [--photos /images/notes/photo.webp]
   npm run new:project -- "Project title" [--status active|shipping|archived|lab] [--startDate YYYY-MM-DD] [--stack Python,Astro] [--repoUrl https://github.com/...]
 `);
@@ -123,12 +142,14 @@ const yamlArrayField = (key, items) =>
   items.length > 0 ? `${key}:\n${yamlList(items)}` : `${key}: []`;
 
 const makePost = options => {
-  const lang = normalizeLang(options.lang);
   const date = options.date ?? today();
   const slug = slugifyForContent(options.slug ?? options.title);
-  const filename = `${date}-${slug}.md`;
+  const filename = `${slug}.md`;
   const tags = asList(options.tags).length ? asList(options.tags) : ["notes"];
-  const templateBody = readTemplateBody(TEMPLATE_FILES.post[lang]);
+  const templateBody = readTemplateBody(TEMPLATE_FILES.post);
+  const title = options.title;
+  const description =
+    options.description ?? `Draft post about ${options.title}.`;
 
   return {
     file: `${CONTENT_DIRS.post}/${filename}`,
@@ -136,12 +157,11 @@ const makePost = options => {
 author: Bo
 pubDatetime: ${date}
 modDatetime: ${date}
-title: ${quoteYaml(options.title)}
+title: ${quoteYaml(title)}
 slug: ${quoteYaml(slug)}
 draft: true
 ${yamlArrayField("tags", tags)}
-lang: ${quoteYaml(lang)}
-description: ${quoteYaml(options.description ?? `Draft post about ${options.title}.`)}
+description: ${quoteYaml(description)}
 ---
 
 ${templateBody}
@@ -150,7 +170,6 @@ ${templateBody}
 };
 
 const makeNote = options => {
-  const lang = normalizeLang(options.lang);
   const date = options.date ?? today();
   const slug = slugifyForContent(options.slug ?? `${date}-${options.title}`);
   const filename = `${slug}.md`;
@@ -167,7 +186,6 @@ description: ${quoteYaml(options.description ?? `Draft note about ${options.titl
 noteDate: ${date}
 modDatetime:
 draft: true
-lang: ${quoteYaml(lang)}
 ${options.location ? `location: ${quoteYaml(options.location)}\n` : ""}${yamlArrayField("tags", tags)}
 ${yamlArrayField("photos", photos)}
 ---
@@ -178,7 +196,6 @@ ${templateBody}
 };
 
 const makeProject = options => {
-  const lang = normalizeLang(options.lang);
   const status = options.status ?? "active";
   if (!PROJECT_STATUSES.includes(status)) {
     throw new Error(
@@ -202,7 +219,6 @@ order: -1
 startDate: ${startDate}
 featured: false
 draft: true
-lang: ${quoteYaml(lang)}
 year: ${year}
 ${yamlArrayField("stack", stack)}
 ${options.demoUrl ? `demoUrl: ${quoteYaml(options.demoUrl)}\n` : ""}${options.repoUrl ? `repoUrl: ${quoteYaml(options.repoUrl)}\n` : ""}---
@@ -221,6 +237,7 @@ const main = () => {
   }
 
   const { values, positional } = parseArgs(rest);
+  validateKnownOptions(kind, values);
   const title = values.title ?? positional.join(" ").trim();
 
   if (!title) {
