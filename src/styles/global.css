@@ -218,20 +218,74 @@ html[data-theme="dark"] {
 
 .toc-panel {
   max-height: calc(100svh - 7rem);
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
 .toc-link {
-  display: inline;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
+  position: relative;
+  display: block;
+  max-width: 100%;
+  border-radius: 0.75rem;
+  padding: 0.35rem 0 0.35rem 1.5rem;
+  color: var(--graphite);
+  line-height: 1.35;
+  transition: color var(--motion-duration-base) var(--motion-ease-standard);
+}
+
+.toc-link.level-3 {
+  padding-inline-start: 2.35rem;
+}
+
+.toc-link.level-4 {
+  padding-inline-start: 3.15rem;
+}
+
+.toc-link::before {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 0.12rem;
+  width: 0.56rem;
+  height: 0.56rem;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  background: var(--background);
+  content: "";
+  opacity: 0.42;
+  transform: translateY(-50%) scale(0.82);
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard),
+    opacity var(--motion-duration-fast) var(--motion-ease-standard),
+    transform var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.toc-link.level-3::before {
+  inset-inline-start: 1rem;
+  width: 0.46rem;
+  height: 0.46rem;
+}
+
+.toc-link.level-4::before {
+  inset-inline-start: 1.75rem;
+  width: 0.38rem;
+  height: 0.38rem;
 }
 
 .toc-link[aria-current="true"],
 .toc-link.is-active {
   color: var(--foreground);
-  background-image: var(--hand-underline);
-  background-size: 100% 5px;
+  background-image: none;
+  background-size: 0 5px;
+}
+
+.toc-link[aria-current="true"]::before,
+.toc-link.is-active::before {
+  background: currentColor;
+  box-shadow: 0 0 0 0.25rem
+    color-mix(in srgb, var(--foreground) 8%, transparent);
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
 }
 
 .post-title {
@@ -500,6 +554,12 @@ html[data-theme="dark"] .site-avatar__image--dark {
   background-image: var(--hand-underline);
   background-size: 100% 5px;
   text-decoration: none;
+}
+
+.toc-link.ink-link:is(:hover, :focus-visible),
+.toc-link.ink-link:is(.is-active, [aria-current="true"]) {
+  background-image: none;
+  background-size: 0 5px;
 }
 
 @keyframes thinking-dot {

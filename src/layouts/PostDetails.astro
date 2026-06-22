@@ -36,7 +36,9 @@ const {
 
 const { Content, headings } = await render(post);
 const tocHeadings = headings
-  .filter(heading => heading.depth === 2 || heading.depth === 3)
+  .filter(
+    heading => heading.depth === 2 || heading.depth === 3 || heading.depth === 4
+  )
   .slice(0, 12);
 const showToc = tocHeadings.length >= 3;
 
@@ -115,10 +117,14 @@ const nextPost =
               >
                 <ol class="space-y-2 text-sm leading-6">
                   {tocHeadings.map(heading => (
-                    <li class:list={[heading.depth === 3 && "ps-4"]}>
+                    <li>
                       <a
                         href={`#${heading.slug}`}
-                        class="toc-link ink-link text-foreground/80 hover:text-foreground"
+                        class:list={[
+                          "toc-link ink-link text-foreground/80 hover:text-foreground",
+                          heading.depth === 3 && "level-3",
+                          heading.depth === 4 && "level-4",
+                        ]}
                         data-toc-link
                       >
                         {heading.text}
@@ -195,10 +201,14 @@ const nextPost =
             >
               <ol class="space-y-2 text-sm leading-6">
                 {tocHeadings.map(heading => (
-                  <li class:list={[heading.depth === 3 && "ps-4"]}>
+                  <li>
                     <a
                       href={`#${heading.slug}`}
-                      class="toc-link ink-link text-foreground/75 hover:text-foreground"
+                      class:list={[
+                        "toc-link ink-link text-foreground/75 hover:text-foreground",
+                        heading.depth === 3 && "level-3",
+                        heading.depth === 4 && "level-4",
+                      ]}
                       data-toc-link
                     >
                       {heading.text}
@@ -445,6 +455,8 @@ const nextPost =
   }
   initTocDivider();
 
+  const TOC_FIXED_HEADER_OFFSET = 120;
+
   function initActiveToc() {
     window.__activeTocCleanup?.();
     window.__activeTocCleanup = undefined;
@@ -454,22 +466,11 @@ const nextPost =
 
     const links = Array.from(document.querySelectorAll("[data-toc-link]"));
     const headings = Array.from(
-      document.querySelectorAll("#article h2[id], #article h3[id]")
+      article.querySelectorAll("h2[id], h3[id], h4[id]")
     );
+    const linkByHeadingId = new Map();
 
     if (!links.length || !headings.length) return false;
-
-    const setActiveTocLink = id => {
-      for (const link of links) {
-        const isActive = link.getAttribute("href") === `#${id}`;
-        link.classList.toggle("is-active", isActive);
-        if (isActive) {
-          link.setAttribute("aria-current", "true");
-        } else {
-          link.removeAttribute("aria-current");
-        }
-      }
-    };
 
     const getIdFromHash = hash => {
       const rawId = hash.startsWith("#") ? hash.slice(1) : hash;
@@ -480,6 +481,41 @@ const nextPost =
       }
     };
 
+    for (const link of links) {
+      const href = link.getAttribute("href");
+      if (!href?.startsWith("#")) continue;
+
+      linkByHeadingId.set(getIdFromHash(href), link);
+    }
+
+    const linkedHeadings = headings.filter(heading =>
+      linkByHeadingId.has(heading.id)
+    );
+
+    if (!linkedHeadings.length) return false;
+
+    let activeId = null;
+
+    const setActiveTocLink = id => {
+      if (!id || id === activeId) return;
+
+      activeId = id;
+
+      for (const link of links) {
+        const href = link.getAttribute("href");
+        const isActive = href?.startsWith("#") && getIdFromHash(href) === id;
+        link.classList.toggle("is-active", isActive);
+        if (isActive) {
+          link.setAttribute("aria-current", "true");
+        } else {
+          link.removeAttribute("aria-current");
+        }
+      }
+    };
+
+    let hashUpdateTimer;
+    let initialUpdateTimer = 0;
+
     const handleTocClick = event => {
       const hash = event.currentTarget.getAttribute("href");
       if (!hash?.startsWith("#")) return;
@@ -487,26 +523,24 @@ const nextPost =
       setActiveTocLink(getIdFromHash(hash));
     };
 
+    const handleHashChange = () => {
+      if (!window.location.hash) return;
+
+      const id = getIdFromHash(window.location.hash);
+      if (linkByHeadingId.has(id)) {
+        setActiveTocLink(id);
+      }
+      window.clearTimeout(hashUpdateTimer);
+      hashUpdateTimer = window.setTimeout(requestActiveTocUpdate, 180);
+    };
+
     let ticking = false;
 
     const updateActiveTocLink = () => {
-      const activationLine = window.innerHeight * 0.25;
-      const scrollBottom = window.scrollY + window.innerHeight;
-      const documentBottom = document.documentElement.scrollHeight;
-      let currentHeading = headings[0];
+      const activationLine = TOC_FIXED_HEADER_OFFSET;
+      let currentHeading = linkedHeadings[0];
 
-      if (window.scrollY <= 24) {
-        setActiveTocLink(currentHeading.id);
-        return;
-      }
-
-      if (documentBottom - scrollBottom <= 8) {
-        currentHeading = headings[headings.length - 1];
-        setActiveTocLink(currentHeading.id);
-        return;
-      }
-
-      for (const heading of headings) {
+      for (const heading of linkedHeadings) {
         if (heading.getBoundingClientRect().top <= activationLine) {
           currentHeading = heading;
         } else {
@@ -514,9 +548,14 @@ const nextPost =
         }
       }
 
-      if (currentHeading?.id) {
-        setActiveTocLink(currentHeading.id);
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 8
+      ) {
+        currentHeading = linkedHeadings[linkedHeadings.length - 1];
       }
+
+      setActiveTocLink(currentHeading.id);
     };
 
     const requestActiveTocUpdate = () => {
@@ -533,27 +572,21 @@ const nextPost =
       passive: true,
     });
     window.addEventListener("resize", requestActiveTocUpdate);
-    window.addEventListener("hashchange", requestActiveTocUpdate);
+    window.addEventListener("hashchange", handleHashChange);
     for (const link of links) {
       link.addEventListener("click", handleTocClick);
     }
 
-    const activeTocObserver = new IntersectionObserver(
-      () => requestActiveTocUpdate(),
-      {
-        rootMargin: "-20% 0px -70% 0px",
-        threshold: 0,
-      }
-    );
-
     const cleanupActiveToc = () => {
       window.removeEventListener("scroll", requestActiveTocUpdate);
       window.removeEventListener("resize", requestActiveTocUpdate);
-      window.removeEventListener("hashchange", requestActiveTocUpdate);
+      window.removeEventListener("hashchange", handleHashChange);
       for (const link of links) {
         link.removeEventListener("click", handleTocClick);
       }
-      activeTocObserver.disconnect();
+      window.clearTimeout(hashUpdateTimer);
+      window.clearTimeout(initialUpdateTimer);
+      window.removeEventListener("load", requestActiveTocUpdate);
     };
 
     window.__activeTocCleanup = cleanupActiveToc;
@@ -564,39 +597,18 @@ const nextPost =
       }
     });
 
-    for (const heading of headings) {
-      activeTocObserver.observe(heading);
-    }
-
     if (window.location.hash) {
       setActiveTocLink(getIdFromHash(window.location.hash));
     }
 
-    requestActiveTocUpdate();
+    updateActiveTocLink();
+    requestAnimationFrame(requestActiveTocUpdate);
+    initialUpdateTimer = window.setTimeout(requestActiveTocUpdate, 120);
+    window.addEventListener("load", requestActiveTocUpdate, { once: true });
     return true;
   }
 
-  const requestActiveTocInit = () => {
-    let attempts = 0;
-
-    const attemptInit = () => {
-      attempts += 1;
-      const initialized = initActiveToc();
-      if (!initialized && attempts < 6) {
-        window.setTimeout(attemptInit, 50);
-      }
-    };
-
-    requestAnimationFrame(() => requestAnimationFrame(attemptInit));
-  };
-
-  document.addEventListener("astro:page-load", requestActiveTocInit, {
-    once: true,
-  });
-  addPostPageCleanup(() =>
-    document.removeEventListener("astro:page-load", requestActiveTocInit)
-  );
-  requestActiveTocInit();
+  initActiveToc();
 
   /* Go to page start after page swap */
   if (window.__postAfterSwapScroll) {
