@@ -10,7 +10,6 @@ tags:
   - "deeplearning.ai"
 description: "这是Andrew Ng在Coursera上的深度学习专项课程中第一课Neural Networks and Deep Learning第一周Introduction to deep learning的学习笔记"
 ---
-![](http://7xrrje.com1.z0.glb.clouddn.com/andrewng-deeplearningai.jpeg)
 这是Andrew Ng在Coursera上的深度学习专项课程中第一课Neural Networks and Deep Learning第一周Introduction to deep learning的学习笔记.
 
 - - - - -

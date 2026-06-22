@@ -10,28 +10,19 @@ tags:
   - "deeplearning.ai"
 description: "这是Andrew Ng在Coursera上的深度学习专项课程中第一门课Neural Networks and Deep Learning第四周Deep Neural Networks的学习笔记. 本周的大部分内容在上一周的笔记中都已经..."
 ---
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_1305.png)
 这是Andrew Ng在Coursera上的深度学习专项课程中第一门课Neural Networks and Deep Learning第四周Deep Neural Networks的学习笔记. 本周的大部分内容在上一周的笔记中都已经覆盖了, 所以本周的笔记会非常简略. 本周重点任务是使用Python要实现一个任意层的神经网络, 并在cat数据上测试. 
 注: 本课程适合有一定基本概念的同学使用, 如果没有任何基础, 可以先学习Andrew Ng在Coursera上的机器学习课程. 课程见这里: [Coursera Machine Learning](https://www.coursera.org/learn/machine-learning), 这门课程我也做了[笔记](/posts/machine-learning-andrew-ng-my-notes/), 可供参考.
 
 - - - - -
 ## 一. 深度神经网络中的常用符号回顾
 在上一周的内容中, 我们已经介绍了神经网络中的常用符号以及各种变量的维度. 这里就不再赘述, 不清楚的可以回顾上周的笔记或视频内容.
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_1306.png?imageMogr/v2/thumbnail/!20p)
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_1308.png?imageMogr/v2/thumbnail/!20p)
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_1309.png?imageMogr/v2/thumbnail/!35p)
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_1310.png?imageMogr/v2/thumbnail/!35p)
 ## 二. Intuition about deep representation
 关于深度神经网络直观地解释这部分笔记暂略, 请直接观看课程视频内容:[Why deep representation?](https://www.coursera.org/learn/neural-networks-deep-learning/lecture/rz9xJ/why-deep-representations).
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_1311.png?imageMogr/v2/thumbnail/!35p)
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_1312.png?imageMogr/v2/thumbnail/!35p)
 ## 三. 深度神经网络中的前向/反向传播
 在第三周的笔记中详细介绍了神经网络的前向/方向传播, 这里完全套用, 只是多了层数而已. 还不能手推的同学可以仔细研究上周的笔记内容([戳我](/posts/deeplearning-ai-neural-networks-and-deep-learning-week3/)).
 ## 四. 参数与超参数
 在神经网络中参数指的是$W, b$, 这两个参数是通过梯度下降算法不断优化的. 而超参数指的是学习率, 迭代次数, 决定神经网络结构的参数以及激活函数的选择等等, 在后面我们还会提到momentum, minibatch size, regularization等等. 这些都属于超参数, 需要我们手动设定. 
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_1320.png?imageMogr/v2/thumbnail/!35p)
 这些超参数也决定了最终的参数$W, b$. 不同的超参数的选择会导致模型很大的差别, 所以超参数的选择也非常重要(后面的课程会讲解如何选择超参数).
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_1321.png?imageMogr/v2/thumbnail/!35p)
 ## 五. 使用Python实现深度神经网络
 完成本周内容以及课后作业后, 我们应该可以使用Python+Numpy实现一个任意结构的二分类神经网络. 以下为参考代码, 也可从这里[Github](https://github.com/daniellaah/deeplearning.ai-notes-code/tree/master/Neural%20Networks%20and%20Deep%20Learning/week4)下载.  
 

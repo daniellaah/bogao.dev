@@ -71,25 +71,17 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
 </Layout>
 
 <script>
-  type SearchRecordKind = "Post" | "Note" | "Project" | "Tag";
-
-  type SearchRecord = {
-    title: string;
-    description: string;
-    url: string;
-    kind: SearchRecordKind;
-    metaText: string;
-    content: string;
-  };
-
-  type RankedSearchRecord = SearchRecord & { score: number };
-  type SearchKind = "all" | "posts" | "notes" | "projects" | "tags";
-  type SearchKindEntry = {
-    filter: SearchKind;
-    label: string;
-    recordKind: SearchRecordKind | null;
-    scope: string;
-  };
+  import {
+    escapeSearchHtml,
+    normalizeSearchText,
+    scoreSearchRecord,
+    splitSearchTerms,
+    type RankedSearchRecord,
+    type SearchKind,
+    type SearchKindEntry,
+    type SearchRecord,
+    type SearchRecordKind,
+  } from "@/utils/search";
 
   function initSearchPage() {
     const input = document.querySelector<HTMLInputElement>("#search-input");
@@ -118,27 +110,8 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
       searchKindEntries.map(kind => [kind.filter, kind.scope])
     ) as Record<SearchKind, string>;
 
-    const escapeHtml = (value: string) =>
-      value
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#39;");
-
-    const normalize = (value: string) =>
-      value.toLowerCase().replace(/\s+/g, " ").trim();
-    const isCjk = (value: string) => /[\u3400-\u9fff]/.test(value);
-    const splitTerms = (value: string) => {
-      const normalized = normalize(value);
-      if (!normalized) return [];
-      return isCjk(normalized) && !normalized.includes(" ")
-        ? [normalized]
-        : normalized.split(" ").filter(Boolean);
-    };
-
     const buildExcerpt = (content: string, terms: string[]) => {
-      const normalized = normalize(content);
+      const normalized = normalizeSearchText(content);
       const firstTerm = terms.find((term: string) => normalized.includes(term));
       if (!firstTerm) return content.slice(0, 160);
 
@@ -181,7 +154,7 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
       query: string,
       kind: SearchKind
     ) => {
-      const terms = splitTerms(query);
+      const terms = splitSearchTerms(query);
       const visibleRecords = getVisibleRecords(records, kind);
 
       if (!terms.length) {
@@ -191,23 +164,7 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
       }
 
       const ranked = visibleRecords
-        .map((record: SearchRecord) => {
-          const title = normalize(record.title);
-          const description = normalize(record.description);
-          const meta = normalize(record.metaText);
-          const content = normalize(record.content);
-
-          let score = 0;
-          for (const term of terms) {
-            if (title.includes(term)) score += 12;
-            else if (description.includes(term)) score += 8;
-            else if (meta.includes(term)) score += 5;
-            else if (content.includes(term)) score += 3;
-            else return null;
-          }
-
-          return { ...record, score };
-        })
+        .map((record: SearchRecord) => scoreSearchRecord(record, terms))
         .filter(Boolean) as RankedSearchRecord[];
 
       const deduped = new Map<string, RankedSearchRecord>();
@@ -242,15 +199,15 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
           );
           return `
             <li class="sketch-list-row py-5">
-              <a href="${escapeHtml(record.url)}" class="hand-underline-trigger block">
+              <a href="${escapeSearchHtml(record.url)}" class="hand-underline-trigger block">
                 <div class="flex items-baseline justify-between gap-4">
                   <span class="hand-underline content-title min-w-0 text-lg font-medium">
-                    ${escapeHtml(record.title)}
+                    ${escapeSearchHtml(record.title)}
                   </span>
-                  <span class="notebook-kicker shrink-0">${escapeHtml(record.kind)}</span>
+                  <span class="notebook-kicker shrink-0">${escapeSearchHtml(record.kind)}</span>
                 </div>
-                <p class="mt-2 text-sm leading-6 text-graphite">${escapeHtml(record.description)}</p>
-                <p class="mt-2 text-sm leading-6 text-graphite/80">${escapeHtml(excerpt)}</p>
+                <p class="mt-2 text-sm leading-6 text-graphite">${escapeSearchHtml(record.description)}</p>
+                <p class="mt-2 text-sm leading-6 text-graphite/80">${escapeSearchHtml(excerpt)}</p>
               </a>
             </li>
           `;
@@ -302,7 +259,7 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
     };
 
     const runSearch = async (query: string, kind: SearchKind) => {
-      if (!splitTerms(query).length) {
+      if (!splitSearchTerms(query).length) {
         renderEmptyPrompt(kind);
         return;
       }

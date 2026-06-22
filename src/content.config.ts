@@ -1,7 +1,14 @@
 import { defineCollection, z } from "astro:content";
 import { SITE } from "@/config";
+import contentRules from "@/data/content-rules.json";
 
-export const BLOG_PATH = "src/content/blog";
+export const BLOG_PATH = contentRules.collections.blog.dir;
+const projectStatuses = contentRules.projectStatuses as [
+  "active",
+  "shipping",
+  "archived",
+  "lab",
+];
 
 const blog = defineCollection({
   schema: ({ image }) =>
@@ -24,9 +31,7 @@ const projects = defineCollection({
     z.object({
       title: z.string(),
       description: z.string(),
-      status: z
-        .enum(["active", "shipping", "archived", "lab"])
-        .default("active"),
+      status: z.enum(projectStatuses).default("active"),
       order: z.number().int().default(99),
       startDate: z.coerce.date().optional().nullable(),
       featured: z.boolean().default(false),

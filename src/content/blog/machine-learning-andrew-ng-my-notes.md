@@ -8,7 +8,6 @@ tags:
   - "Coursera"
 description: "Coursera 机器学习课程笔记目录页，整理从监督学习到 Photo OCR 的各周内容。"
 ---
-![](http://7xrrje.com1.z0.glb.clouddn.com/AndrewHallway2.jpg)
 
 课程信息:  [主页](https://www.coursera.org/learn/machine-learning/home/welcome) [Wiki](https://share.coursera.org/wiki/index.php/ML:Main)
 

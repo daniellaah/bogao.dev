@@ -7,7 +7,6 @@ tags:
   - "排序"
 description: "排序算法Python实现(上)"
 ---
-![](http://7xrrje.com1.z0.glb.clouddn.com/luxury-silver-pen-with-a-business-diary-picjumbo-com.jpg)
 文章概览:
 1. 冒泡排序解释以及Python实现
 2. 选择排序解释以及Python实现

@@ -8,7 +8,6 @@ tags:
   - "CS229"
 description: "课程信息: 主页 Youtube 相关阅读:"
 ---
-![](http://7xrrje.com1.z0.glb.clouddn.com/lo_llbs1rs0-jan-senderek.jpg?imageMogr2/thumbnail/!50p)
 课程信息:  [主页](http://cs229.stanford.edu) [Youtube](https://www.youtube.com/playlist?list=PLA89DCFA6ADACE599)
 相关阅读:
 1. [支持向量机系列-pluskid](http://blog.pluskid.org/?page_id=683)(强烈推荐)
@@ -28,15 +27,12 @@ $$
 \mathop{max}_\alpha W(\alpha_1, \alpha_2, ... , \alpha_m).
 $$
 先撇开SVM不谈, 这里的$W$是$\alpha_i$的一个函数. 我们前面已经看过了两种优化算法, 一种是梯度下降(gradient descent), 另一种是牛顿方法(Newton's method). 现在我们所要说的是第三种优化算法, 坐标上升法(coordinate ascent):
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_765.png)
 上面是该算法的过程, 在内循环中, 每次固定除了第i个$\alpha$, 即,将$W$看成只关于第$i$个$\alpha$的函数. 然后对第$i$个$\alpha$进行优化, 然后依次对下一个$\alpha$进行优化:
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_766.png)
 这里提一点, 优化$\alpha$的顺序是可以改变的, 取决于你觉得下一次优化哪一个$\alpha$会带来最大的进步. 
 相对其他优化算法来讲, 坐标上升需要更多的迭代次数来收敛. 但它的优点就是在于内循环的计算非常简单.
 ## 序列最小优化算法
 SVM终于接近尾声了...
 前面有一个问题一直没有解决, 就是如何求解这个优化问题:
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_763.png)
 这一节的标题序列最小优化算法(Sequential minimal optimazation)就是用来解决这个优化问题的. 刚才讲的coordinate ascend现在自然要用到啦.
 在刚才讲的coordinate ascend中, 我们每次固定除了某一个变量之外的所有变量, 将优化目标看成仅仅是这一个没有固定变量的函数, 再对该变量进行优化. 在SVM中, 好像也可以直接这么用. 但是别忘了, SVM的优化是有约束条件的:
 $$
@@ -60,7 +56,6 @@ $$
 \alpha_1y^{(1)}+\alpha_2y^{(2)}=\zeta
 $$
 我们可以用下图画出$\alpha_1$和$\alpha_2$的约束(注意不要忘了$0\le\alpha_i\le C$):
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_767.png)
 由$\alpha_1y^{(1)}+\alpha_2y^{(2)}=\zeta$我们可以得到:
 $$
 \alpha_1 = \frac{\zeta-\alpha_2y^{(2)}}{y^{(1)}}.

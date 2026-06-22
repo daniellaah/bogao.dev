@@ -97,18 +97,14 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
 </div>
 
 <script>
-  type SearchRecordKind = "Post" | "Note" | "Project" | "Tag";
+  import {
+    escapeSearchHtml,
+    scoreSearchRecord,
+    splitSearchTerms,
+    type RankedSearchRecord,
+    type SearchRecord,
+  } from "@/utils/search";
 
-  type SearchRecord = {
-    title: string;
-    description: string;
-    url: string;
-    kind: SearchRecordKind;
-    metaText: string;
-    content: string;
-  };
-
-  type RankedSearchRecord = SearchRecord & { score: number };
   type CommandWindow = Window & {
     __commandPaletteBindingCleanup?: () => void;
     __commandPaletteLifecycleCleanup?: () => void;
@@ -162,25 +158,6 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
     let searchRunId = 0;
     let searchTrigger: HTMLElement | null = null;
 
-    const escapeHtml = (value: string) =>
-      value
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#39;");
-
-    const normalize = (value: string) =>
-      value.toLowerCase().replace(/\s+/g, " ").trim();
-    const isCjk = (value: string) => /[\u3400-\u9fff]/.test(value);
-    const splitTerms = (value: string) => {
-      const normalized = normalize(value);
-      if (!normalized) return [];
-      return isCjk(normalized) && !normalized.includes(" ")
-        ? [normalized]
-        : normalized.split(" ").filter(Boolean);
-    };
-
     const setThinking = (active: boolean) => {
       thinking.classList.toggle("is-active", active);
       input.setAttribute("aria-busy", String(active));
@@ -217,26 +194,8 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
       return loadedRecords;
     };
 
-    const scoreRecord = (record: SearchRecord, terms: string[]) => {
-      const title = normalize(record.title);
-      const description = normalize(record.description);
-      const meta = normalize(record.metaText);
-      const content = normalize(record.content);
-
-      let score = 0;
-      for (const term of terms) {
-        if (title.includes(term)) score += 12;
-        else if (description.includes(term)) score += 8;
-        else if (meta.includes(term)) score += 5;
-        else if (content.includes(term)) score += 3;
-        else return null;
-      }
-
-      return { ...record, score };
-    };
-
     const renderResults = (records: SearchRecord[], query: string) => {
-      const terms = splitTerms(query);
+      const terms = splitSearchTerms(query);
       if (!terms.length) {
         status.textContent = "";
         results.innerHTML = "";
@@ -248,7 +207,7 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
       setResultsPanelVisible(true);
 
       const sorted = records
-        .map(record => scoreRecord(record, terms))
+        .map(record => scoreSearchRecord(record, terms))
         .filter((record): record is RankedSearchRecord => Boolean(record))
         .sort((a: RankedSearchRecord, b: RankedSearchRecord) => {
           if (b.score !== a.score) return b.score - a.score;
@@ -269,14 +228,14 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
         .map(
           record => `
             <li class="command-palette__result">
-              <a href="${escapeHtml(record.url)}" class="hand-underline-trigger block">
+              <a href="${escapeSearchHtml(record.url)}" class="hand-underline-trigger block">
                 <div class="flex items-baseline justify-between gap-4">
                   <span class="hand-underline content-title min-w-0 truncate text-base font-medium">
-                    ${escapeHtml(record.title)}
+                    ${escapeSearchHtml(record.title)}
                   </span>
-                  <span class="notebook-kicker shrink-0">${escapeHtml(record.kind)}</span>
+                  <span class="notebook-kicker shrink-0">${escapeSearchHtml(record.kind)}</span>
                 </div>
-                <p class="mt-1 truncate text-sm text-graphite">${escapeHtml(record.description || record.metaText)}</p>
+                <p class="mt-1 truncate text-sm text-graphite">${escapeSearchHtml(record.description || record.metaText)}</p>
               </a>
             </li>
           `
@@ -287,7 +246,7 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
     const runSearch = async () => {
       const query = input.value.trim();
       const currentRunId = ++searchRunId;
-      if (!splitTerms(query).length) {
+      if (!splitSearchTerms(query).length) {
         renderResults([], "");
         return;
       }

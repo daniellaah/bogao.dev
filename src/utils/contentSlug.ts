@@ -8,7 +8,10 @@ const stripMarkdownExt = (value: string) =>
 const getEntryFileSlug = (id: string) =>
   stripMarkdownExt(id.split("/").filter(Boolean).at(-1) ?? id);
 
+export const getPathSegmentSlug = (segment: string) =>
+  slugifyStr(stripMarkdownExt(segment));
+
 export const getResolvedSlug = (id: string, explicitSlug?: string) => {
   const rawSlug = explicitSlug?.trim() || getEntryFileSlug(id);
-  return slugifyStr(stripMarkdownExt(rawSlug));
+  return getPathSegmentSlug(rawSlug);
 };

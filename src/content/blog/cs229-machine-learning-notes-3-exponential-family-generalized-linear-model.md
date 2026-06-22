@@ -7,7 +7,6 @@ tags:
   - "Machine Learning"
 description: "这篇笔记先介绍指数分布族，再继续梳理广义线性模型和 Softmax Regression 的基本形式与推导。"
 ---
-![](http://7xrrje.com1.z0.glb.clouddn.com/photo-1468956332313-2dcf1542828f.jpg)
 课程信息:  [主页](http://cs229.stanford.edu) [Youtube](https://www.youtube.com/playlist?list=PLA89DCFA6ADACE599)
 
 - - - - -
@@ -111,7 +110,6 @@ $$
 多项式分布也属于指数分布族，由他推导出的广义线性模型可以解决多分类的问题，它是logistic模型的一个扩展。
 设$y\in \{1,2,...,k\}$, 参数为:$\phi_1,\phi_2,...,\phi_k$, $P(y=i)=\phi_i$.这样写的话，其实我们的参数是冗余的，因为所有概率的和应该等于1. 所以有$\phi_k = 1 - (\phi_1+\phi_2+...+\phi_{k-1})$.
 为了使多项式分布能写成指数分布族的形式，我们定义$T(y)\in R^{k-1}$: 
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_719.png)
 这里我们再引入indicator function:
 $$
 1(True)=1,
@@ -123,27 +121,19 @@ $$
 (T(y))_i=1\{ y=i\}
 $$
 下面我们就可以证明多项式分布是属于指数分布族，以下是推导过程：
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_720.png)
 其中：
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_721.png)
 由:
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_722.png)
 可做如下推导：
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_723.png)
 即:
 $$
 \phi_k=\frac{1}{\sum_{i=1}^{k}e^{\eta_i}}
 $$
 将上式再带回到(7)中可得:
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_724.png)
 这个函数就叫做softmax函数. 
 下面我们看如何推导出softmax regression:
 首先我们有:
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_725.png)
 根据广义线性模型的三个假设，我们就得到了$h_\theta(x)$:
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_726.png)
 log likelihood如下:
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_727.png)
 
 参考:
 1. [机器学习笔记-子实](https://github.com/zlotus/notes-LSJU-machine-learning)

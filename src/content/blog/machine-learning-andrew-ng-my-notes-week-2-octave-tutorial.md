@@ -11,7 +11,6 @@ tags:
   - "Octave"
 description: "读取矩阵A第1行和第3行的所有元素："
 ---
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_63.png)
 - 课程地址：[Octave Tutorial](https://www.coursera.org/learn/machine-learning/lecture/9fHfl/basic-operations)
 - 课程Wiki：[Octave Tutorial](https://share.coursera.org/wiki/index.php/ML:Octave_Tutorial)
 - 课件：[PPT](https://d396qusza40orc.cloudfront.net/ml/docs/slides/Lecture5.pptx) [PDF](https://d396qusza40orc.cloudfront.net/ml/docs/slides/Lecture5.pdf)
@@ -315,13 +314,11 @@ D =
 ```matlab
 >> help eye
 ```
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_598.png?imageMogr/v2/thumbnail/!45p)
 构造10000个随机数，并绘制出图形(高斯分布)：
 ```matlab
 >> w=randn(1,10000);
 >> hist(w,50)
 ```
-![高斯分布](http://7xrrje.com1.z0.glb.clouddn.com/GaussianDistribution.png) 
 
 ## 数据的读取与存储
 本节所用到的数据: [featuresX.dat](https://raw.githubusercontent.com/tansaku/py-coursera/master/featuresX.dat), [priceY.dat](https://raw.githubusercontent.com/tansaku/py-coursera/master/priceY.dat)
@@ -334,7 +331,6 @@ D =
 featuresX.dat	priceY.dat
 ```
 数据如下所示：
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_599.png?imageMogr/v2/thumbnail/!45p)
 读取数据：
 ```matlab
 % 方式一：
@@ -396,14 +392,12 @@ ans =
 ```
 
 使用whos查看变量更详细的信息：
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_600.png?imageMogr/v2/thumbnail/!45p)
 使用如下命令用来删除某个变量：
 ```matlab
 >> clear featuresX
 >> whos
 ```
 这个时候再使用`whos`查看，发现featuresX已经不见了。
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_601.png?imageMogr/v2/thumbnail/!45p)
 ## 存储数据
 假设我们现在需要取出`priceY`前十个数据，使用如下命令：
 ```matlab
@@ -690,19 +684,16 @@ x = [0: 0.01: 0.98];
 >> y = sin(2*pi*4*x);
 >> plot(x,y);
 ```
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_602.png?imageMogr/v2/thumbnail/!55p)
 绘制出cos函数图像
 ```matlab
 y2 = cos(2*pi*4*x);
 ```
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_603.png?imageMogr/v2/thumbnail/!55p)
 将两个函数绘制在一起：
 ```matlab
 >> plot(x,y);
 >> hold on;
 >> plot(x,y2,'r')
 ```
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_604.png?imageMogr/v2/thumbnail/!55p)
 
 添加说明：
 ```matlab
@@ -712,13 +703,11 @@ y2 = cos(2*pi*4*x);
 error: 'lengend' undefined near line 1 column 1
 >> legend("sin", "cos");
 ```
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_605.png?imageMogr/v2/thumbnail/!55p)
 
 存储图像：
 ```matlab
 >> print -dpng "myPlot.png"
 ```
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_606.png?imageMogr/v2/thumbnail/!55p)
 
 关掉绘制的图像：
 ```matlab
@@ -736,14 +725,12 @@ error: 'lengend' undefined near line 1 column 1
 >> subplot(1,2,1);plot(x, y);
 >> subplot(1,2,2);plot(x, y2);
 ```
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_607.png?imageMogr/v2/thumbnail/!55p)
 
 改变左边图像的横坐标的刻度：
 ```matlab
 >> subplot(1,2,1)
 >> axis([0 0.5 -1 1])
 ```
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_608.png?imageMogr/v2/thumbnail/!55p)
 
 清除所有绘制的图像：
 ```matlab
@@ -754,12 +741,10 @@ error: 'lengend' undefined near line 1 column 1
 ```matlab
 >> imagesc(magic(15))
 ```
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_609.png?imageMogr/v2/thumbnail/!55p)
 
 ```matlab
 >> imagesc(A), colorbar, colormap gray
 ```
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_610.png?imageMogr/v2/thumbnail/!55p)
 
 ## 控制语句
 
@@ -789,7 +774,6 @@ v =
     1    2    3    4    5    6    7    8    9   10
 ```
 定义一个函数：
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_611.png?imageMogr/v2/thumbnail/!55p)
 ```matlab
 >> ls
 featuresX.dat		myPlot.png		squareThisNumber.m
@@ -818,7 +802,6 @@ ans = /Users/bobo
 ans =  25
 ```
 返回两个值的函数：
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_612.png?imageMogr/v2/thumbnail/!55p)
 ```matlab
 >> [y1, y2] = squareAndCube(3)
 y1 =  9
@@ -826,7 +809,6 @@ y2 =  27
 ```
 
 代价函数：
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_613.png?imageMogr/v2/thumbnail/!55p)
 ```matlab
 >> X = [1 1; 1 2; 1 3]
 X =

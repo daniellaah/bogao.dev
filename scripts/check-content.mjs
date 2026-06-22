@@ -2,61 +2,19 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import kebabcase from "lodash.kebabcase";
-import slugify from "slugify";
+import {
+  ALLOWED_FRONTMATTER_FIELDS,
+  COLLECTIONS,
+  PROJECT_STATUSES,
+  REPO_ROOT,
+  slugifyForContent,
+  stripMarkdownExt,
+} from "./content-rules.mjs";
 
-const ROOT = process.cwd();
-const COLLECTIONS = [
-  { name: "blog", dir: "src/content/blog" },
-  { name: "notes", dir: "src/content/notes" },
-  { name: "projects", dir: "src/content/projects" },
-];
-const ALLOWED_FRONTMATTER_FIELDS = {
-  blog: new Set([
-    "author",
-    "pubDatetime",
-    "modDatetime",
-    "title",
-    "slug",
-    "draft",
-    "tags",
-    "ogImage",
-    "description",
-    "canonicalURL",
-  ]),
-  notes: new Set([
-    "title",
-    "slug",
-    "description",
-    "noteDate",
-    "modDatetime",
-    "draft",
-    "location",
-    "tags",
-    "photos",
-    "canonicalURL",
-  ]),
-  projects: new Set([
-    "title",
-    "description",
-    "status",
-    "order",
-    "startDate",
-    "featured",
-    "draft",
-    "year",
-    "stack",
-    "demoUrl",
-    "repoUrl",
-    "ogImage",
-    "canonicalURL",
-  ]),
-};
-const PROJECT_STATUSES = ["active", "shipping", "archived", "lab"];
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 const PUBLIC_IMAGE_DIMENSIONS = JSON.parse(
   fs.readFileSync(
-    path.join(ROOT, "src/data/public-image-dimensions.json"),
+    path.join(REPO_ROOT, "src/data/public-image-dimensions.json"),
     "utf8"
   )
 );
@@ -64,19 +22,8 @@ const PUBLIC_IMAGE_DIMENSIONS = JSON.parse(
 const errors = [];
 const warnings = [];
 
-const hasNonLatin = value => /[^\x00-\x7F]/.test(value);
-
-const stripMarkdownExt = value => value.replace(/\.(md|mdx)$/i, "");
-
-const slugifyForContent = value => {
-  const raw = hasNonLatin(value)
-    ? kebabcase(value)
-    : slugify(value, { lower: true });
-  return stripMarkdownExt(raw).replace(/^[-.\s]+|[-.\s]+$/g, "") || "untitled";
-};
-
 const listMarkdownFiles = dir => {
-  const absoluteDir = path.join(ROOT, dir);
+  const absoluteDir = path.join(REPO_ROOT, dir);
   if (!fs.existsSync(absoluteDir)) return [];
 
   return fs.readdirSync(absoluteDir, { withFileTypes: true }).flatMap(entry => {
@@ -187,7 +134,9 @@ const validateStringArray = (file, data, field, required = false) => {
 
 const addSlug = (seenSlugs, collection, file, explicitSlug) => {
   const fileSlug = stripMarkdownExt(path.basename(file));
-  const slug = slugifyForContent(explicitSlug || fileSlug);
+  const slug = slugifyForContent(explicitSlug || fileSlug, {
+    stripMarkdownExt: true,
+  });
   const duplicate = seenSlugs.get(slug);
 
   if (duplicate) {
@@ -218,7 +167,7 @@ const validatePhotoPaths = (file, photos) => {
       continue;
     }
 
-    const publicFile = path.join(ROOT, "public", photo);
+    const publicFile = path.join(REPO_ROOT, "public", photo);
     if (!fs.existsSync(publicFile)) {
       errors.push(`${file}: note photo does not exist: ${photo}`);
     }
@@ -306,7 +255,7 @@ const main = () => {
     const files = listMarkdownFiles(collection.dir);
 
     for (const file of files) {
-      const source = fs.readFileSync(path.join(ROOT, file), "utf8");
+      const source = fs.readFileSync(path.join(REPO_ROOT, file), "utf8");
       const { data, raw } = parseFrontmatter(file, source);
 
       validateKnownFields(file, collection.name, data);

@@ -2,45 +2,14 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import kebabcase from "lodash.kebabcase";
-import slugify from "slugify";
-
-const ROOT = process.cwd();
-const CONTENT_DIRS = {
-  post: "src/content/blog",
-  note: "src/content/notes",
-  project: "src/content/projects",
-};
-const ALLOWED_OPTIONS = {
-  post: new Set(["title", "date", "tags", "slug", "description"]),
-  note: new Set([
-    "title",
-    "date",
-    "slug",
-    "description",
-    "location",
-    "tags",
-    "photos",
-  ]),
-  project: new Set([
-    "title",
-    "date",
-    "slug",
-    "description",
-    "status",
-    "startDate",
-    "stack",
-    "repoUrl",
-    "demoUrl",
-    "year",
-  ]),
-};
-const TEMPLATE_FILES = {
-  post: "templates/blog-post.md",
-  note: "templates/note.md",
-  project: "templates/project.md",
-};
-const PROJECT_STATUSES = ["active", "shipping", "archived", "lab"];
+import {
+  ALLOWED_OPTIONS,
+  PROJECT_STATUSES,
+  REPO_ROOT,
+  TEMPLATE_FILES,
+  getContentDir,
+  slugifyForContent,
+} from "./content-rules.mjs";
 
 const today = () => {
   const date = new Date();
@@ -48,15 +17,6 @@ const today = () => {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
-};
-
-const hasNonLatin = value => /[^\x00-\x7F]/.test(value);
-
-const slugifyForContent = value => {
-  const raw = hasNonLatin(value)
-    ? kebabcase(value)
-    : slugify(value, { lower: true });
-  return raw.replace(/^[-.\s]+|[-.\s]+$/g, "") || "untitled";
 };
 
 const quoteYaml = value =>
@@ -119,13 +79,13 @@ const usage = () => {
 };
 
 const readTemplateBody = templateFile => {
-  const template = fs.readFileSync(path.join(ROOT, templateFile), "utf8");
+  const template = fs.readFileSync(path.join(REPO_ROOT, templateFile), "utf8");
   const match = template.match(/^---\n[\s\S]*?\n---\n([\s\S]*)$/);
   return match?.[1]?.trimStart() ?? "";
 };
 
 const writeFile = (relativeFile, content) => {
-  const file = path.join(ROOT, relativeFile);
+  const file = path.join(REPO_ROOT, relativeFile);
   if (fs.existsSync(file)) {
     throw new Error(`Refusing to overwrite existing file: ${relativeFile}`);
   }
@@ -152,7 +112,7 @@ const makePost = options => {
     options.description ?? `Draft post about ${options.title}.`;
 
   return {
-    file: `${CONTENT_DIRS.post}/${filename}`,
+    file: `${getContentDir("post")}/${filename}`,
     content: `---
 author: Bo
 pubDatetime: ${date}
@@ -178,7 +138,7 @@ const makeNote = options => {
   const templateBody = readTemplateBody(TEMPLATE_FILES.note);
 
   return {
-    file: `${CONTENT_DIRS.note}/${filename}`,
+    file: `${getContentDir("note")}/${filename}`,
     content: `---
 title: ${quoteYaml(options.title)}
 slug: ${quoteYaml(slug)}
@@ -210,7 +170,7 @@ const makeProject = options => {
   const year = Number(options.year ?? startDate.slice(0, 4));
 
   return {
-    file: `${CONTENT_DIRS.project}/${slug}.md`,
+    file: `${getContentDir("project")}/${slug}.md`,
     content: `---
 title: ${quoteYaml(options.title)}
 description: ${quoteYaml(options.description ?? `A short description of ${options.title}.`)}
@@ -231,7 +191,7 @@ ${templateBody}
 const main = () => {
   const [kind, ...rest] = process.argv.slice(2);
 
-  if (!CONTENT_DIRS[kind]) {
+  if (!getContentDir(kind)) {
     usage();
     process.exit(1);
   }

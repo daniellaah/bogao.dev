@@ -8,7 +8,6 @@ tags:
   - "CS229"
 description: "课程信息: 主页 Youtube 参考资料: 《统计学习方法》 参考阅读:"
 ---
-![](http://7xrrje.com1.z0.glb.clouddn.com/photo-1420768255295-e871cbf6eb81.jpg)
 课程信息:  [主页](http://cs229.stanford.edu) [Youtube](https://www.youtube.com/playlist?list=PLA89DCFA6ADACE599)
 参考资料: [《统计学习方法》](https://book.douban.com/subject/10590856/)
 参考阅读:
@@ -115,7 +114,6 @@ $$
 也就是说, 在某种情况下,会有$d^\ast=p^\ast$, 这个时候我们就可把求原始问题转化成求对偶问题.假设$f$和$g_i$是凸函数, $h$是仿射的. 并且存在$w$是的对于所有的$i$能够使$g_i(w)<0$.
 在上述假设条件下, 一定存在$w^{\ast}, {\alpha}^{\ast}, {\beta}^{\ast}$, 使得$w^{\ast}$是原始问题的解, $ {\alpha}^{\ast}, {\beta}^{\ast}$是对偶问题的解.并且还有$p^{\ast}=d^{\ast}=\mathcal{L}(w^{\ast}, {\alpha}^{\ast}, {\beta}^{\ast})$. 
 $w^{\ast}, {\alpha}^{\ast}, {\beta}^{\ast}$满足KKT条件(Karush-Kuhn-Tucker conditions):
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_751.png)
 如果存在满足KKT条件的$w^{\ast}, {\alpha}^{\ast}, {\beta}^{\ast}$, 则原始问题与对偶问题一定有解. (5)式又称为KKT对偶互补条件(KKT dual complementarity condition), 这个条件表明如果$\alpha^\ast>0$, 那么就有$g_i(w^\ast)=0$. 即约束条件$g_i(w^\ast)≤0$“激活”, w处于可行域的边界上. 而其他位于可行域内部$g_i(w^\ast)<0$的点都不起约束作用, 对应的$\alpha^\ast=0$.
 ## 三. 最优间隔分类器
 有了上面的知识之后, 我们再回到SVM的问题:
@@ -128,7 +126,6 @@ g_i(w)=-y^{(i)}(w^Tx^{(i)}+b)+1\le0.
 $$
 从上一节讨论的KKT条件可知, 只有当训练样本的函数间隔为1时($g_i(w)=0$), 它前面的系数$\alpha_i>0$. 对于其他的训练样本, 前面的系数$\alpha_i=0$.
 考虑下图, 最大间隔分类超平面为实线:
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_752.png)
 其中一个正样本和两个负样本正好在平行于分类超平面的虚线上, 只有这三个样本对应的$\alpha_i<0$, 其它样本对应的$\alpha_i=0$. 这三个样本就叫做支持向量(这也就是支持向量机名字的由来).从这里我们可以看出, 支持向量的个数远远小于训练集的大小. 
 我们构造拉格朗日函数: 
 $$
@@ -164,9 +161,7 @@ $$
 \end{align}
 $$
 有了$\mathop\min_{w,b}\mathcal{L}(w,b,\alpha)$, 我们便可进行max操作, 即:
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_753.png)
 可以证明该优化问题满足KKT条件(证明可见[张雨石的博客](http://blog.csdn.net/stdcoutzyx/article/details/9774135)).求得$\alpha_i^\ast$之后(如何求解后面再讲), 可通过$w=\sum_{i=1}^m\alpha_iy^{(i)}x^{(i)}$求得$w^\ast$, 最后通过下式求得$b^\ast$:
-![](http://7xrrje.com1.z0.glb.clouddn.com/screenshot_754.png)
 当我们求出了所有的参数, 我们就可以通过计算$w^Tx+b$来进行分类了:
 $$
 \begin{align} w^Tx+b & = {\left(\sum_i^m\alpha_iy_ix_i\right)}^Tx+b \\\ & = \sum_i^m\alpha_iy_i\langle x_i,x \rangle +b\end{align}.

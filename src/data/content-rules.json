@@ -1,0 +1,89 @@
+{
+  "collections": {
+    "blog": {
+      "dir": "src/content/blog",
+      "frontmatterFields": [
+        "author",
+        "pubDatetime",
+        "modDatetime",
+        "title",
+        "slug",
+        "draft",
+        "tags",
+        "ogImage",
+        "description",
+        "canonicalURL"
+      ]
+    },
+    "notes": {
+      "dir": "src/content/notes",
+      "frontmatterFields": [
+        "title",
+        "slug",
+        "description",
+        "noteDate",
+        "modDatetime",
+        "draft",
+        "location",
+        "tags",
+        "photos",
+        "canonicalURL"
+      ]
+    },
+    "projects": {
+      "dir": "src/content/projects",
+      "frontmatterFields": [
+        "title",
+        "description",
+        "status",
+        "order",
+        "startDate",
+        "featured",
+        "draft",
+        "year",
+        "stack",
+        "demoUrl",
+        "repoUrl",
+        "ogImage",
+        "canonicalURL"
+      ]
+    }
+  },
+  "contentKinds": {
+    "post": {
+      "collection": "blog",
+      "template": "templates/blog-post.md",
+      "allowedOptions": ["title", "date", "tags", "slug", "description"]
+    },
+    "note": {
+      "collection": "notes",
+      "template": "templates/note.md",
+      "allowedOptions": [
+        "title",
+        "date",
+        "slug",
+        "description",
+        "location",
+        "tags",
+        "photos"
+      ]
+    },
+    "project": {
+      "collection": "projects",
+      "template": "templates/project.md",
+      "allowedOptions": [
+        "title",
+        "date",
+        "slug",
+        "description",
+        "status",
+        "startDate",
+        "stack",
+        "repoUrl",
+        "demoUrl",
+        "year"
+      ]
+    }
+  },
+  "projectStatuses": ["active", "shipping", "archived", "lab"]
+}

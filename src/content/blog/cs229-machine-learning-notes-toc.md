@@ -7,7 +7,6 @@ tags:
   - "Machine Learning"
 description: "CS229 机器学习笔记目录页，整理课程背景和各讲内容索引。"
 ---
-![](http://7xrrje.com1.z0.glb.clouddn.com/andrewng2.jpg)
 课程信息:  [主页](http://cs229.stanford.edu) [Youtube](https://www.youtube.com/playlist?list=PLA89DCFA6ADACE599)
 
 - - - - -

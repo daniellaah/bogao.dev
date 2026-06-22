@@ -1,6 +1,5 @@
 import { BLOG_PATH } from "@/content.config";
-import { getResolvedSlug } from "./contentSlug";
-import { slugifyStr } from "./slugify";
+import { getPathSegmentSlug, getResolvedSlug } from "./contentSlug";
 
 /**
  * Get full path of a blog post
@@ -15,16 +14,13 @@ export function getPath(
   includeBase = true,
   explicitSlug?: string
 ) {
-  const normalizeSegment = (segment: string) =>
-    slugifyStr(segment.replace(/\.(md|mdx)$/i, ""));
-
   const pathSegments = filePath
     ?.replace(BLOG_PATH, "")
     .split("/")
     .filter(path => path !== "") // remove empty string in the segments ["", "other-path"] <- empty string will be removed
     .filter(path => !path.startsWith("_")) // exclude directories start with underscore "_"
     .slice(0, -1) // remove the last segment_ file name_ since it's unnecessary
-    .map(segment => normalizeSegment(segment)); // slugify each segment path
+    .map(segment => getPathSegmentSlug(segment)); // slugify each segment path
 
   const basePath = includeBase ? "/posts" : "";
   const slug = getResolvedSlug(id, explicitSlug);
