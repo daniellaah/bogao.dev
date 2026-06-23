@@ -1585,6 +1585,21 @@ test("content scripts share content rule contracts", async () => {
     contentRules.slugifyForContent("Custom Slug.md"),
     "custom-slug.md"
   );
+  assert.throws(
+    () =>
+      execFileSync(process.execPath, ["scripts/new-content.mjs", "project"], {
+        cwd: ROOT,
+        encoding: "utf8",
+      }),
+    error => {
+      assert.match(error.stdout, /Usage:/);
+      assert.match(
+        error.stdout,
+        new RegExp(`--status ${rules.projectStatuses.join("\\|")}`)
+      );
+      return true;
+    }
+  );
   assert.ok(contentConfig.includes("content-rules.json"));
   assert.ok(checkContent.includes('from "./content-rules.mjs"'));
   assert.ok(newContent.includes('from "./content-rules.mjs"'));

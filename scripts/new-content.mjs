@@ -81,7 +81,7 @@ const usage = () => {
   console.log(`Usage:
   npm run new:post -- "Post title" [--date YYYY-MM-DD] [--tags tag1,tag2] [--slug custom-slug]
   npm run new:note -- "Note title" [--date YYYY-MM-DD] [--location "Los Angeles"] [--tags running,life] [--photos /images/notes/photo.webp]
-  npm run new:project -- "Project title" [--status active|shipping|archived|lab] [--startDate YYYY-MM-DD] [--stack Python,Astro] [--repoUrl https://github.com/...]
+  npm run new:project -- "Project title" [--status ${PROJECT_STATUSES.join("|")}] [--startDate YYYY-MM-DD] [--stack Python,Astro] [--repoUrl https://github.com/...]
 `);
 };
 
