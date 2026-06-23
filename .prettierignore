@@ -4,7 +4,6 @@
 # Except these files & folders
 !/src
 !/public
-!/.github
 !/docs
 !/scripts
 !/templates
@@ -13,7 +12,6 @@
 !astro.config.ts
 !.prettierrc.mjs
 !package.json
-!.prettierrc
 !eslint.config.js
 !README.md
 !vercel.json
