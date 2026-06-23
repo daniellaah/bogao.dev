@@ -157,6 +157,29 @@ const makeEventElement = ({ classNames = [] } = {}) => {
   };
 };
 
+const makeMetricButton = (dataset, metrics) => {
+  const attributes = new Map();
+  let clickHandler = () => {};
+  return {
+    dataset,
+    offsetLeft: metrics.left,
+    offsetTop: metrics.top,
+    offsetWidth: metrics.width,
+    offsetHeight: metrics.height,
+    addEventListener: (event, handler) => {
+      if (event === "click") clickHandler = handler;
+    },
+    click: () => clickHandler(),
+    toggleAttribute: (name, active) => {
+      if (active) attributes.set(name, "");
+      else attributes.delete(name);
+    },
+    setAttribute: (name, value) => attributes.set(name, value),
+    getAttribute: name => attributes.get(name),
+    hasAttribute: name => attributes.has(name),
+  };
+};
+
 test("breadcrumb handles indexed routes", async () => {
   const { getBreadcrumbList } = await loadTypeScriptModule(
     "src/utils/breadcrumb.ts"
@@ -440,35 +463,24 @@ test("toggle controls update active state and indicator geometry", async () => {
       setProperty: (name, value) => indicatorStyles.set(name, value),
     },
   };
-  const makeButton = (value, metrics) => {
-    const attributes = new Map();
-    return {
-      dataset: { tagSort: value },
-      offsetLeft: metrics.left,
-      offsetTop: metrics.top,
-      offsetWidth: metrics.width,
-      offsetHeight: metrics.height,
-      toggleAttribute: (name, active) => {
-        if (active) attributes.set(name, "");
-        else attributes.delete(name);
-      },
-      setAttribute: (name, value) => attributes.set(name, value),
-      getAttribute: name => attributes.get(name),
-      hasAttribute: name => attributes.has(name),
-    };
-  };
-  const popularButton = makeButton("popular", {
-    left: 0,
-    top: 0,
-    width: 48,
-    height: 32,
-  });
-  const azButton = makeButton("az", {
-    left: 56,
-    top: 4,
-    width: 36,
-    height: 28,
-  });
+  const popularButton = makeMetricButton(
+    { tagSort: "popular" },
+    {
+      left: 0,
+      top: 0,
+      width: 48,
+      height: 32,
+    }
+  );
+  const azButton = makeMetricButton(
+    { tagSort: "az" },
+    {
+      left: 56,
+      top: 4,
+      width: 36,
+      height: 28,
+    }
+  );
 
   setActiveToggleButton([popularButton, azButton], "tagSort", "az", toggle);
 
@@ -797,40 +809,24 @@ test("tags index client script preserves sort state behavior", async () => {
   const originalDocument = globalThis.document;
   const appendedCards = [];
   const indicatorStyles = new Map();
-  const makeButton = (value, metrics) => {
-    const attributes = new Map();
-    let clickHandler = () => {};
-    return {
-      dataset: { tagSort: value },
-      offsetLeft: metrics.left,
-      offsetTop: metrics.top,
-      offsetWidth: metrics.width,
-      offsetHeight: metrics.height,
-      addEventListener: (event, handler) => {
-        if (event === "click") clickHandler = handler;
-      },
-      click: () => clickHandler(),
-      toggleAttribute: (name, active) => {
-        if (active) attributes.set(name, "");
-        else attributes.delete(name);
-      },
-      setAttribute: (name, value) => attributes.set(name, value),
-      getAttribute: name => attributes.get(name),
-      hasAttribute: name => attributes.has(name),
-    };
-  };
-  const popularButton = makeButton("popular", {
-    left: 0,
-    top: 0,
-    width: 48,
-    height: 32,
-  });
-  const azButton = makeButton("az", {
-    left: 56,
-    top: 4,
-    width: 36,
-    height: 28,
-  });
+  const popularButton = makeMetricButton(
+    { tagSort: "popular" },
+    {
+      left: 0,
+      top: 0,
+      width: 48,
+      height: 32,
+    }
+  );
+  const azButton = makeMetricButton(
+    { tagSort: "az" },
+    {
+      left: 56,
+      top: 4,
+      width: 36,
+      height: 28,
+    }
+  );
   const status = { textContent: "" };
   const sortToggle = {
     dataset: {},
@@ -913,28 +909,7 @@ test("post filters client script preserves URL-backed filtering", async () => {
   const originalDocument = globalThis.document;
   const originalHistory = globalThis.history;
   const indicatorStyles = new Map();
-  const makeButton = (dataset, metrics) => {
-    const attributes = new Map();
-    let clickHandler = () => {};
-    return {
-      dataset,
-      offsetLeft: metrics.left,
-      offsetTop: metrics.top,
-      offsetWidth: metrics.width,
-      offsetHeight: metrics.height,
-      addEventListener: (event, handler) => {
-        if (event === "click") clickHandler = handler;
-      },
-      click: () => clickHandler(),
-      toggleAttribute: (name, active) => {
-        if (active) attributes.set(name, "");
-        else attributes.delete(name);
-      },
-      setAttribute: (name, value) => attributes.set(name, value),
-      getAttribute: name => attributes.get(name),
-    };
-  };
-  const yearAll = makeButton(
+  const yearAll = makeMetricButton(
     { filterYear: "all" },
     {
       left: 0,
@@ -943,7 +918,7 @@ test("post filters client script preserves URL-backed filtering", async () => {
       height: 32,
     }
   );
-  const year2024 = makeButton(
+  const year2024 = makeMetricButton(
     { filterYear: "2024" },
     {
       left: 52,
@@ -952,7 +927,7 @@ test("post filters client script preserves URL-backed filtering", async () => {
       height: 32,
     }
   );
-  const tagAll = makeButton(
+  const tagAll = makeMetricButton(
     { filterTag: "all" },
     {
       left: 0,
@@ -961,7 +936,7 @@ test("post filters client script preserves URL-backed filtering", async () => {
       height: 32,
     }
   );
-  const tagNotes = makeButton(
+  const tagNotes = makeMetricButton(
     { filterTag: "notes" },
     {
       left: 52,
