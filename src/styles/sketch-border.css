@@ -26,11 +26,3 @@ html[data-theme="dark"] {
 .sketch-border-thin.sketch-border-thin {
   --sketch-border-size: 6px;
 }
-
-.sketch-border-bold.sketch-border-bold {
-  --sketch-border-size: 13px;
-}
-
-.sketch-border-expressive.sketch-border-expressive {
-  --sketch-border-image: var(--sketch-border-expressive-image);
-}
