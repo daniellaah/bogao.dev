@@ -61,9 +61,7 @@ export const GET: APIRoute = async () => {
       content: stripMarkdown(project.body),
     })),
     ...notes.map(note => ({
-      title:
-        note.data.title ??
-        new Date(note.data.noteDate).toISOString().slice(0, 10),
+      title: note.data.title ?? note.data.noteDate.toISOString().slice(0, 10),
       description: note.data.description,
       url: getNotePath(note.id, note.slug),
       kind: SEARCH_RECORD_KINDS.notes,

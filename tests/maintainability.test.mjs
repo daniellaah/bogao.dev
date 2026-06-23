@@ -191,6 +191,55 @@ const loadSearchIndexInternals = async () => {
   );
 };
 
+const loadSearchIndexRoute = async () => {
+  const source = readText("src/pages/search-index.json.ts").replace(
+    /^import .*$/gm,
+    ""
+  );
+  const prelude = `
+const searchKinds = ${JSON.stringify(readJson("src/data/search-kinds.json"))};
+const getCollection = async (collection, filter) => {
+  const entries = globalThis.__searchIndexCollections?.[collection] ?? [];
+  return filter ? entries.filter(filter) : entries;
+};
+const stripMarkdownExt = value => value.replace(/\\.(md|mdx)$/i, "");
+const getProjectPath = id => \`/projects/\${stripMarkdownExt(id)}\`;
+const getNotePath = (id, explicitSlug) =>
+  \`/notes/\${explicitSlug ?? stripMarkdownExt(id)}\`;
+const getPostPath = post =>
+  \`/posts/\${stripMarkdownExt(post.data.slug ?? post.slug ?? post.id)}\`;
+const getSortedPosts = posts =>
+  posts
+    .filter(post => !post.data.draft && post.data.pubDatetime)
+    .sort((postA, postB) => postB.data.pubDatetime.getTime() - postA.data.pubDatetime.getTime());
+const getUniqueTags = entries => {
+  const tagMap = new Map();
+  for (const entry of entries.filter(item => !item.data.draft)) {
+    for (const tagName of new Set(entry.data.tags ?? [])) {
+      const tag = tagName.toLowerCase().replace(/\\s+/g, "-");
+      const current = tagMap.get(tag) ?? { tag, tagName, count: 0 };
+      current.count += 1;
+      tagMap.set(tag, current);
+    }
+  }
+  return Array.from(tagMap.values()).sort((tagA, tagB) => tagA.tag.localeCompare(tagB.tag));
+};
+const isPublishedNote = note => !note.data.draft;
+const isPublishedProject = project => !project.data.draft;
+`;
+  const { outputText } = ts.transpileModule(`${prelude}\n${source}`, {
+    ...TRANSPILE_OPTIONS,
+    compilerOptions: {
+      ...TRANSPILE_OPTIONS.compilerOptions,
+      module: ts.ModuleKind.ES2022,
+    },
+  });
+
+  return import(
+    `data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`
+  );
+};
+
 const makeTestClassList = initial => {
   const classes = new Set(initial);
   return {
@@ -480,6 +529,52 @@ test("search index content strips markdown-only markup", async () => {
       ].join("\n")
     ),
     "Heading Visible link text and . and html text"
+  );
+});
+
+test("search index route preserves note date fallback titles", async () => {
+  const { GET } = await loadSearchIndexRoute();
+
+  await withGlobalMocks(
+    {
+      __searchIndexCollections: {
+        blog: [],
+        projects: [],
+        notes: [
+          {
+            id: "daily-note.md",
+            slug: "daily-note",
+            body: "Daily note body",
+            data: {
+              description: "Daily description",
+              draft: false,
+              location: "Los Angeles",
+              noteDate: new Date("2026-03-07T00:00:00.000Z"),
+              tags: [],
+            },
+          },
+        ],
+      },
+    },
+    async () => {
+      const response = await GET();
+      const records = await response.json();
+
+      assert.equal(
+        response.headers.get("Content-Type"),
+        "application/json; charset=utf-8"
+      );
+      assert.deepEqual(records, [
+        {
+          title: "2026-03-07",
+          description: "Daily description",
+          url: "/notes/daily-note",
+          kind: "Note",
+          metaText: "Los Angeles",
+          content: "Daily note body",
+        },
+      ]);
+    }
   );
 });
 
