@@ -423,6 +423,122 @@ test("toggle controls update active state and indicator geometry", async () => {
   assert.equal(indicatorStyles.get("--sort-indicator-height"), "28px");
 });
 
+test("tags index client script preserves sort state behavior", async () => {
+  const { setupTagsIndexPage } = await loadProjectModule(
+    "src/scripts/tagsIndex.ts",
+    ["src/scripts/toggleControls.ts", "src/scripts/tagsIndex.ts"]
+  );
+  const originalWindow = globalThis.window;
+  const originalDocument = globalThis.document;
+  const appendedCards = [];
+  const indicatorStyles = new Map();
+  const makeButton = (value, metrics) => {
+    const attributes = new Map();
+    let clickHandler = () => {};
+    return {
+      dataset: { tagSort: value },
+      offsetLeft: metrics.left,
+      offsetTop: metrics.top,
+      offsetWidth: metrics.width,
+      offsetHeight: metrics.height,
+      addEventListener: (event, handler) => {
+        if (event === "click") clickHandler = handler;
+      },
+      click: () => clickHandler(),
+      toggleAttribute: (name, active) => {
+        if (active) attributes.set(name, "");
+        else attributes.delete(name);
+      },
+      setAttribute: (name, value) => attributes.set(name, value),
+      getAttribute: name => attributes.get(name),
+      hasAttribute: name => attributes.has(name),
+    };
+  };
+  const popularButton = makeButton("popular", {
+    left: 0,
+    top: 0,
+    width: 48,
+    height: 32,
+  });
+  const azButton = makeButton("az", {
+    left: 56,
+    top: 4,
+    width: 36,
+    height: 28,
+  });
+  const status = { textContent: "" };
+  const sortToggle = {
+    dataset: {},
+    style: {
+      setProperty: (name, value) => indicatorStyles.set(name, value),
+    },
+  };
+  const cardGrid = {
+    append: card => appendedCards.push(card.dataset.tagName),
+  };
+  const cards = [
+    {
+      dataset: { tagName: "Beta", totalCount: "3" },
+      getAnimations: () => [],
+    },
+    {
+      dataset: { tagName: "Alpha", totalCount: "1" },
+      getAnimations: () => [],
+    },
+  ];
+  const root = {
+    dataset: {},
+    removeAttribute: name => delete root.dataset[name],
+    querySelector: selector =>
+      ({
+        "[data-tags-status]": status,
+        "[data-tags-sort-toggle]": sortToggle,
+        "[data-tags-card-grid]": cardGrid,
+      })[selector] ?? null,
+    querySelectorAll: selector =>
+      ({
+        "[data-tag-sort]": [popularButton, azButton],
+        "[data-tag-card]": cards,
+      })[selector] ?? [],
+  };
+
+  globalThis.window = {
+    matchMedia: () => ({ matches: true }),
+    requestAnimationFrame: callback => {
+      callback();
+      return 1;
+    },
+    cancelAnimationFrame: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  };
+  globalThis.document = {
+    querySelector: selector => (selector === "[data-tags-index]" ? root : null),
+  };
+
+  try {
+    setupTagsIndexPage();
+    assert.equal(
+      status.textContent,
+      "Showing all 2 topics, sorted by popularity."
+    );
+    assert.equal(popularButton.getAttribute("aria-pressed"), "true");
+    assert.equal(azButton.getAttribute("aria-pressed"), "false");
+    assert.equal(sortToggle.dataset.inkReady, "true");
+
+    azButton.click();
+
+    assert.deepEqual(appendedCards, ["Alpha", "Beta"]);
+    assert.equal(status.textContent, "Showing all 2 topics, sorted A-Z.");
+    assert.equal(popularButton.getAttribute("aria-pressed"), "false");
+    assert.equal(azButton.getAttribute("aria-pressed"), "true");
+    assert.equal(indicatorStyles.get("--sort-indicator-x"), "56px");
+  } finally {
+    globalThis.window = originalWindow;
+    globalThis.document = originalDocument;
+  }
+});
+
 test("OG image resolution is shared by post and project detail pages", async () => {
   const { resolveOgImage } = await loadTypeScriptModule("src/utils/ogImage.ts");
   const postDetails = readText("src/layouts/PostDetails.astro");
