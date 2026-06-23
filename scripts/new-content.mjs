@@ -114,7 +114,6 @@ const makePost = options => {
   const filename = `${slug}.md`;
   const tags = asListWithDefault(options.tags, DEFAULT_CONTENT_TAGS);
   const templateBody = readTemplateBody(TEMPLATE_FILES.post);
-  const title = options.title;
   const description =
     options.description ?? `Draft post about ${options.title}.`;
 
@@ -124,7 +123,7 @@ const makePost = options => {
 author: Bo
 pubDatetime: ${date}
 modDatetime: ${date}
-title: ${quoteYaml(title)}
+title: ${quoteYaml(options.title)}
 slug: ${quoteYaml(slug)}
 draft: true
 ${yamlArrayField("tags", tags)}
