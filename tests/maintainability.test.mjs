@@ -1677,6 +1677,17 @@ test("new content script preserves post and note tag generation", () => {
       ],
       { cwd: fixture, encoding: "utf8" }
     );
+    execFileSync(
+      process.execPath,
+      [
+        "scripts/new-content.mjs",
+        "note",
+        "Default Note Tags",
+        "--date",
+        "2026-06-23",
+      ],
+      { cwd: fixture, encoding: "utf8" }
+    );
 
     const postSource = fs.readFileSync(
       path.join(fixture, "src/content/blog/default-tags.md"),
@@ -1686,9 +1697,14 @@ test("new content script preserves post and note tag generation", () => {
       path.join(fixture, "src/content/notes/2026-06-22-tagged-note.md"),
       "utf8"
     );
+    const defaultNoteSource = fs.readFileSync(
+      path.join(fixture, "src/content/notes/2026-06-23-default-note-tags.md"),
+      "utf8"
+    );
 
     assert.match(postSource, /^tags:\n  - "notes"$/m);
     assert.match(noteSource, /^tags:\n  - "running"\n  - "life"$/m);
+    assert.match(defaultNoteSource, /^tags:\n  - "notes"$/m);
   });
 });
 

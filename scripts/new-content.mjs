@@ -11,6 +11,8 @@ import {
   slugifyForContent,
 } from "./content-rules.mjs";
 
+const DEFAULT_CONTENT_TAGS = ["notes"];
+
 const today = () => {
   const date = new Date();
   const year = date.getFullYear();
@@ -110,7 +112,7 @@ const makePost = options => {
   const date = options.date ?? today();
   const slug = slugifyForContent(options.slug ?? options.title);
   const filename = `${slug}.md`;
-  const tags = asListWithDefault(options.tags, ["notes"]);
+  const tags = asListWithDefault(options.tags, DEFAULT_CONTENT_TAGS);
   const templateBody = readTemplateBody(TEMPLATE_FILES.post);
   const title = options.title;
   const description =
@@ -138,7 +140,7 @@ const makeNote = options => {
   const date = options.date ?? today();
   const slug = slugifyForContent(options.slug ?? `${date}-${options.title}`);
   const filename = `${slug}.md`;
-  const tags = asListWithDefault(options.tags, ["notes"]);
+  const tags = asListWithDefault(options.tags, DEFAULT_CONTENT_TAGS);
   const photos = asList(options.photos);
   const templateBody = readTemplateBody(TEMPLATE_FILES.note);
 
