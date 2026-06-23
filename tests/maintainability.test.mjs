@@ -50,8 +50,11 @@ const readText = relativePath =>
 
 const readJson = relativePath => JSON.parse(readText(relativePath));
 
+const getFrontmatterFromSource = source =>
+  source.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? "";
+
 const parseFrontmatter = relativePath =>
-  readText(relativePath).match(/^---\n([\s\S]*?)\n---/)?.[1] ?? "";
+  getFrontmatterFromSource(readText(relativePath));
 
 const getFrontmatterField = (frontmatter, field) =>
   frontmatter
@@ -1648,7 +1651,7 @@ test("new content script generates project drafts without frontmatter slugs", ()
     );
     const generatedFile = "src/content/projects/agent-notes.md";
     const source = fs.readFileSync(path.join(fixture, generatedFile), "utf8");
-    const frontmatter = source.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? "";
+    const frontmatter = getFrontmatterFromSource(source);
 
     assert.match(output, new RegExp(`Created ${generatedFile}`));
     assert.match(frontmatter, /^title: "Agent Notes"$/m);
@@ -1773,7 +1776,7 @@ test("project URLs are filename-driven, not frontmatter slug-driven", () => {
 
   for (const file of projectFiles) {
     const source = readText(`src/content/projects/${file}`);
-    const frontmatter = source.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? "";
+    const frontmatter = getFrontmatterFromSource(source);
     assert.ok(
       !/^slug:/m.test(frontmatter),
       `${file} should not define a project slug`
