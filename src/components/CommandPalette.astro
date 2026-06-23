@@ -98,10 +98,10 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
 
 <script>
   import {
+    createSearchIndexLoader,
     escapeSearchHtml,
-    scoreSearchRecord,
+    rankSearchRecords,
     splitSearchTerms,
-    type RankedSearchRecord,
     type SearchRecord,
   } from "@/utils/search";
 
@@ -151,8 +151,7 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
     )
       return;
 
-    let loadedRecords: SearchRecord[] | null = null;
-    let recordsPromise: Promise<SearchRecord[]> | null = null;
+    const loadRecords = createSearchIndexLoader();
     let previousActiveElement: Element | null = null;
     let closeTimer: number | undefined;
     let searchRunId = 0;
@@ -183,17 +182,6 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
       searchTrigger?.toggleAttribute("data-command-active", active);
     };
 
-    const loadRecords = async () => {
-      if (loadedRecords) return loadedRecords;
-      recordsPromise ??= fetch("/search-index.json").then(response => {
-        if (!response.ok) throw new Error("Search index request failed.");
-        return response.json() as Promise<SearchRecord[]>;
-      });
-
-      loadedRecords = await recordsPromise;
-      return loadedRecords;
-    };
-
     const renderResults = (records: SearchRecord[], query: string) => {
       const terms = splitSearchTerms(query);
       if (!terms.length) {
@@ -206,14 +194,10 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
 
       setResultsPanelVisible(true);
 
-      const sorted = records
-        .map(record => scoreSearchRecord(record, terms))
-        .filter((record): record is RankedSearchRecord => Boolean(record))
-        .sort((a: RankedSearchRecord, b: RankedSearchRecord) => {
-          if (b.score !== a.score) return b.score - a.score;
-          return a.title.localeCompare(b.title);
-        })
-        .slice(0, 8);
+      const sorted = rankSearchRecords(records, terms, {
+        limit: 8,
+        dedupe: false,
+      });
 
       setThinking(false);
 
@@ -382,7 +366,7 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
         input.focus();
       });
       void loadRecords().catch(() => {
-        recordsPromise = null;
+        // Retry state is reset inside createSearchIndexLoader.
       });
     };
 

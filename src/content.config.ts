@@ -1,8 +1,10 @@
 import { defineCollection, z } from "astro:content";
 import { SITE } from "@/config";
 import contentRules from "@/data/content-rules.json";
+import { BLOG_PATH } from "@/utils/contentPaths";
 
-export const BLOG_PATH = contentRules.collections.blog.dir;
+export { BLOG_PATH };
+
 const projectStatuses = contentRules.projectStatuses as [
   "active",
   "shipping",

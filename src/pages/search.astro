@@ -72,9 +72,10 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
 
 <script>
   import {
+    createSearchIndexLoader,
     escapeSearchHtml,
     normalizeSearchText,
-    scoreSearchRecord,
+    rankSearchRecords,
     splitSearchTerms,
     type RankedSearchRecord,
     type SearchKind,
@@ -163,25 +164,7 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
         return;
       }
 
-      const ranked = visibleRecords
-        .map((record: SearchRecord) => scoreSearchRecord(record, terms))
-        .filter(Boolean) as RankedSearchRecord[];
-
-      const deduped = new Map<string, RankedSearchRecord>();
-      for (const record of ranked) {
-        const key = `${record.kind}:${record.url}`;
-        const current = deduped.get(key);
-        if (!current || record.score > current.score) {
-          deduped.set(key, record);
-        }
-      }
-
-      const sorted = Array.from(deduped.values())
-        .sort((a: RankedSearchRecord, b: RankedSearchRecord) => {
-          if (b.score !== a.score) return b.score - a.score;
-          return a.title.localeCompare(b.title);
-        })
-        .slice(0, 20);
+      const sorted = rankSearchRecords(visibleRecords, terms);
 
       if (!sorted.length) {
         status.textContent = `No results for ${query} in ${getScopeText(kind)}`;
@@ -232,25 +215,11 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
       );
     };
 
-    let loadedRecords: SearchRecord[] | null = null;
-    let recordsPromise: Promise<SearchRecord[]> | null = null;
+    const loadSearchRecords = createSearchIndexLoader();
 
     const loadRecords = async (showLoading = false) => {
-      if (loadedRecords) return loadedRecords;
       if (showLoading) status.textContent = "Loading search index...";
-
-      recordsPromise ??= fetch("/search-index.json").then(response => {
-        if (!response.ok) throw new Error("Search index request failed.");
-        return response.json() as Promise<SearchRecord[]>;
-      });
-
-      try {
-        loadedRecords = await recordsPromise;
-        return loadedRecords;
-      } catch (error) {
-        recordsPromise = null;
-        throw error;
-      }
+      return loadSearchRecords();
     };
 
     const renderEmptyPrompt = (kind: SearchKind) => {
@@ -283,7 +252,7 @@ const backUrl = SITE.showBackButton ? `${Astro.url.pathname}` : "/";
       "focus",
       () => {
         void loadRecords().catch(() => {
-          recordsPromise = null;
+          // Retry state is reset inside createSearchIndexLoader.
         });
       },
       { once: true }

@@ -8,6 +8,7 @@ import BackButton from "@/components/BackButton.astro";
 import ProjectStatusBadge from "@/components/ProjectStatusBadge.astro";
 import getSortedProjects from "@/utils/getSortedProjects";
 import { getProjectPath } from "@/utils/getProjectPath";
+import { resolveOgImage } from "@/utils/ogImage";
 import { SITE } from "@/config";
 
 export const getStaticPaths = (async () => {
@@ -31,20 +32,8 @@ const {
   demoUrl,
   repoUrl,
   canonicalURL,
-  ogImage: initOgImage,
 } = project.data;
-
-let ogImageUrl: string | undefined;
-
-if (typeof initOgImage === "string") {
-  ogImageUrl = initOgImage;
-} else if (initOgImage?.src) {
-  ogImageUrl = initOgImage.src;
-}
-
-const ogImage = ogImageUrl
-  ? new URL(ogImageUrl, Astro.url.origin).href
-  : undefined;
+const ogImage = resolveOgImage(project.data.ogImage, Astro.url.origin);
 
 const relatedProjects = projects
   .filter(({ id }) => id !== project.id)

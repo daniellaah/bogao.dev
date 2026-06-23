@@ -73,14 +73,15 @@ templates/          内容创建模板
 - 重写了 description，避免直接使用旧正文截断
 - 已迁移到 `remark-math + rehype-katex`，并清理了一轮旧文章公式写法
 
-当前仍未处理的迁移项：
+当前仍需要注意的内容资源项：
 
-- 正文里的旧远程图片仍然保留原地址
-- 图片资源需要后续人工补图或替换
+- 历史正文目前没有使用 Markdown 图片语法的远程图片引用
+- 如后续补回旧文章配图，优先放到 `public/images/posts/`
+- Notes 中的本地照片需要登记尺寸，见 `src/data/public-image-dimensions.json`
 
 ## 下一步建议
 
-- 人工处理旧文章图片资源
+- 按需补充旧文章图片资源
 - 按需替换默认 OG 图、favicon 和个人资料素材
 - 发布新的正式文章
 

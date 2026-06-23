@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import {
   ALLOWED_FRONTMATTER_FIELDS,
   COLLECTIONS,
@@ -35,7 +36,7 @@ const listMarkdownFiles = dir => {
   });
 };
 
-const parseScalar = value => {
+export const parseScalar = value => {
   const trimmed = value.trim();
   if (trimmed === "") return "";
   if (trimmed === "null") return null;
@@ -52,7 +53,7 @@ const parseScalar = value => {
   return trimmed;
 };
 
-const parseFrontmatter = (file, source) => {
+export const parseFrontmatter = (file, source) => {
   const match = source.match(/^---\n([\s\S]*?)\n---/);
   if (!match) {
     errors.push(`${file}: missing YAML frontmatter`);
@@ -278,4 +279,9 @@ const main = () => {
   console.log("Content check passed.");
 };
 
-main();
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  main();
+}

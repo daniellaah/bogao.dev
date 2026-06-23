@@ -1,4 +1,4 @@
-import { BLOG_PATH } from "@/content.config";
+import { BLOG_PATH } from "./contentPaths";
 import { getPathSegmentSlug, getResolvedSlug } from "./contentSlug";
 
 /**

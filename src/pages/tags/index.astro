@@ -5,19 +5,11 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
-import { slugifyStr } from "@/utils/slugify";
+import { collectTagStats, type TagStat } from "@/utils/tags";
 import { SITE } from "@/config";
 
 const posts = getSortedPosts(await getCollection("blog"));
 const notes = (await getCollection("notes")).filter(note => !note.data.draft);
-
-type TagStat = {
-  slug: string;
-  tagName: string;
-  totalCount: number;
-  postCount: number;
-  noteCount: number;
-};
 
 const tagCollator = new Intl.Collator(undefined, {
   sensitivity: "base",
@@ -28,33 +20,10 @@ const compareTags = (tagA: TagStat, tagB: TagStat) =>
 const compareTagsByPopularity = (tagA: TagStat, tagB: TagStat) =>
   tagB.totalCount - tagA.totalCount || compareTags(tagA, tagB);
 
-const tagMap = new Map<string, TagStat>();
-
-const addTags = (tagNames: string[], kind: "post" | "note") => {
-  const uniqueTags = new Map(
-    tagNames.map(tagName => [slugifyStr(tagName), tagName] as const)
-  );
-
-  for (const [slug, tagName] of uniqueTags) {
-    const current = tagMap.get(slug);
-    const nextTagName = current?.tagName ?? tagName;
-    const postCount = (current?.postCount ?? 0) + (kind === "post" ? 1 : 0);
-    const noteCount = (current?.noteCount ?? 0) + (kind === "note" ? 1 : 0);
-
-    tagMap.set(slug, {
-      slug,
-      tagName: nextTagName,
-      postCount,
-      noteCount,
-      totalCount: postCount + noteCount,
-    });
-  }
-};
-
-for (const post of posts) addTags(post.data.tags, "post");
-for (const note of notes) addTags(note.data.tags, "note");
-
-const tags = Array.from(tagMap.values()).sort(compareTags);
+const tags = collectTagStats([
+  ...posts.map(post => ({ tags: post.data.tags, kind: "post" as const })),
+  ...notes.map(note => ({ tags: note.data.tags, kind: "note" as const })),
+]).sort(compareTags);
 const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
 ---
 
@@ -146,6 +115,8 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
 </Layout>
 
 <script>
+  import { setActiveToggleButton } from "@/scripts/toggleControls";
+
   type TagSort = "az" | "popular";
 
   let cleanupTagsIndexInstance = () => {};
@@ -181,40 +152,6 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
         root.removeAttribute("data-tags-entering");
       }, 620);
     }
-
-    const setActiveButton = (
-      buttons: HTMLButtonElement[],
-      dataKey: string,
-      value: string
-    ) => {
-      let activeButton: HTMLButtonElement | undefined;
-
-      for (const button of buttons) {
-        const isActive = button.dataset[dataKey] === value;
-        button.toggleAttribute("data-active", isActive);
-        button.setAttribute("aria-pressed", String(isActive));
-        if (isActive) activeButton = button;
-      }
-
-      if (activeButton) {
-        sortToggle.style.setProperty(
-          "--sort-indicator-x",
-          `${activeButton.offsetLeft}px`
-        );
-        sortToggle.style.setProperty(
-          "--sort-indicator-y",
-          `${activeButton.offsetTop}px`
-        );
-        sortToggle.style.setProperty(
-          "--sort-indicator-width",
-          `${activeButton.offsetWidth}px`
-        );
-        sortToggle.style.setProperty(
-          "--sort-indicator-height",
-          `${activeButton.offsetHeight}px`
-        );
-      }
-    };
 
     const compareCardNames = (cardA: HTMLElement, cardB: HTMLElement) =>
       (cardA.dataset.tagName ?? "").localeCompare(
@@ -308,7 +245,7 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
     };
 
     const applyTagsState = () => {
-      setActiveButton(sortButtons, "tagSort", currentSort);
+      setActiveToggleButton(sortButtons, "tagSort", currentSort, sortToggle);
 
       status.textContent =
         currentSort === "popular"
@@ -337,7 +274,7 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
     const syncSortIndicator = () => {
       window.cancelAnimationFrame(resizeFrame);
       resizeFrame = window.requestAnimationFrame(() => {
-        setActiveButton(sortButtons, "tagSort", currentSort);
+        setActiveToggleButton(sortButtons, "tagSort", currentSort, sortToggle);
       });
     };
 

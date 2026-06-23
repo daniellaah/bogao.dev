@@ -1,8 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import kebabcase from "lodash.kebabcase";
-import slugify from "slugify";
+import {
+  slugifyForContent,
+  stripMarkdownExt,
+} from "../src/utils/slugifyCore.js";
 
 export const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -44,17 +46,4 @@ export const getContentDir = kind => {
   return collection ? contentRules.collections[collection]?.dir : undefined;
 };
 
-const hasNonLatin = value => /[^\x00-\x7F]/.test(value);
-
-export const stripMarkdownExt = value => value.replace(/\.(md|mdx)$/i, "");
-
-export const slugifyForContent = (
-  value,
-  { stripMarkdownExt: shouldStripMarkdownExt = false } = {}
-) => {
-  const raw = hasNonLatin(value)
-    ? kebabcase(value)
-    : slugify(value, { lower: true });
-  const slug = shouldStripMarkdownExt ? stripMarkdownExt(raw) : raw;
-  return slug.replace(/^[-.\s]+|[-.\s]+$/g, "") || "untitled";
-};
+export { slugifyForContent, stripMarkdownExt };

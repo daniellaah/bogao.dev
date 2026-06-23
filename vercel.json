@@ -395,12 +395,12 @@
     },
     {
       "source": "/posts/machine-learning-resources-04f643",
-      "destination": "/posts/machine-learning-resources",
+      "destination": "/posts/ai-learning-resources",
       "permanent": true
     },
     {
       "source": "/posts/machine-learning-resources-04f643/",
-      "destination": "/posts/machine-learning-resources/",
+      "destination": "/posts/ai-learning-resources/",
       "permanent": true
     },
     {

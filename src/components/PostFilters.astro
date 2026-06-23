@@ -124,6 +124,8 @@ const filterButtonClass =
 }
 
 <script>
+  import { setActiveToggleButton } from "@/scripts/toggleControls";
+
   let cleanupPostFiltersInstance = () => {};
 
   function initPostFilters() {
@@ -167,48 +169,6 @@ const filterButtonClass =
       };
     };
 
-    const syncToggleIndicator = (
-      toggle: HTMLElement | null,
-      activeButton: HTMLButtonElement | undefined
-    ) => {
-      if (!toggle || !activeButton) return;
-
-      toggle.style.setProperty(
-        "--sort-indicator-x",
-        `${activeButton.offsetLeft}px`
-      );
-      toggle.style.setProperty(
-        "--sort-indicator-y",
-        `${activeButton.offsetTop}px`
-      );
-      toggle.style.setProperty(
-        "--sort-indicator-width",
-        `${activeButton.offsetWidth}px`
-      );
-      toggle.style.setProperty(
-        "--sort-indicator-height",
-        `${activeButton.offsetHeight}px`
-      );
-    };
-
-    const setActiveButton = (
-      buttons: HTMLButtonElement[],
-      key: string,
-      value: string,
-      toggle: HTMLElement | null
-    ) => {
-      let activeButton: HTMLButtonElement | undefined;
-
-      for (const button of buttons) {
-        const isActive = button.dataset[key] === value;
-        button.toggleAttribute("data-active", isActive);
-        button.setAttribute("aria-pressed", String(isActive));
-        if (isActive) activeButton = button;
-      }
-
-      syncToggleIndicator(toggle, activeButton);
-    };
-
     const updateUrl = (year: string, tag: string) => {
       const params = getParams();
       if (year === "all") params.delete("year");
@@ -243,8 +203,8 @@ const filterButtonClass =
         if (visible) visibleCount += 1;
       }
 
-      setActiveButton(yearButtons, "filterYear", year, yearToggle);
-      setActiveButton(tagButtons, "filterTag", tag, tagToggle);
+      setActiveToggleButton(yearButtons, "filterYear", year, yearToggle);
+      setActiveToggleButton(tagButtons, "filterTag", tag, tagToggle);
 
       if (status) {
         status.textContent =
@@ -282,8 +242,8 @@ const filterButtonClass =
       window.cancelAnimationFrame(resizeFrame);
       resizeFrame = window.requestAnimationFrame(() => {
         const { year, tag } = getFilter();
-        setActiveButton(yearButtons, "filterYear", year, yearToggle);
-        setActiveButton(tagButtons, "filterTag", tag, tagToggle);
+        setActiveToggleButton(yearButtons, "filterYear", year, yearToggle);
+        setActiveToggleButton(tagButtons, "filterTag", tag, tagToggle);
       });
     };
 
