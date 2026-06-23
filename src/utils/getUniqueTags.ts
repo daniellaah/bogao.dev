@@ -17,7 +17,13 @@ const getUniqueTags = <T extends TaggedEntry>(entries: T[]) => {
   return collectTagStats(
     entries.map(({ data }) => ({ tags: data.tags, draft: data.draft }))
   )
-    .map(({ tag, tagName, count }): Tag => ({ tag, tagName, count }))
+    .map(
+      ({ tag, tagName, totalCount }): Tag => ({
+        tag,
+        tagName,
+        count: totalCount,
+      })
+    )
     .sort((tagA, tagB) => tagA.tag.localeCompare(tagB.tag));
 };
 

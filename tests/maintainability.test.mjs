@@ -649,6 +649,29 @@ test("tag aggregation keeps post and note counts in one shared helper", async ()
   );
 });
 
+test("unique tag helper preserves search tag counts", async () => {
+  const { default: getUniqueTags } = await loadProjectModule(
+    "src/utils/getUniqueTags.ts",
+    [
+      "src/utils/slugifyCore.js",
+      "src/utils/tags.ts",
+      "src/utils/getUniqueTags.ts",
+    ]
+  );
+
+  assert.deepEqual(
+    getUniqueTags([
+      { data: { tags: ["Machine Learning", "Machine Learning"] } },
+      { data: { tags: ["Running"] } },
+      { data: { tags: ["Draft"], draft: true } },
+    ]),
+    [
+      { tag: "machine-learning", tagName: "Machine Learning", count: 1 },
+      { tag: "running", tagName: "Running", count: 1 },
+    ]
+  );
+});
+
 test("shared dayjs utility preserves UTC content date formatting", async () => {
   const { default: dayjs } = await loadProjectModule("src/utils/dayjs.ts", [
     "src/utils/dayjs.ts",

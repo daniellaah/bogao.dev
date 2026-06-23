@@ -13,7 +13,6 @@ export type TagStat = {
   tag: string;
   tagName: string;
   totalCount: number;
-  count: number;
   postCount: number;
   noteCount: number;
 };
@@ -39,7 +38,6 @@ export const collectTagStats = (sources: TagSource[]) => {
         tag: slug,
         tagName: current?.tagName ?? tagName,
         totalCount,
-        count: totalCount,
         postCount,
         noteCount,
       });
