@@ -108,6 +108,8 @@ const withGlobalMocks = async (mocks, callback) => {
   }
 };
 
+const flushAsyncUpdates = () => new Promise(resolve => setImmediate(resolve));
+
 const loadTypeScriptModule = async relativePath => {
   const source = readText(relativePath);
   const { outputText } = ts.transpileModule(source, TRANSPILE_OPTIONS);
@@ -1377,7 +1379,7 @@ test("command palette client script opens, searches, and closes", async () => {
 
       input.value = "gradient";
       input.dispatch("input");
-      await new Promise(resolve => setImmediate(resolve));
+      await flushAsyncUpdates();
 
       assert.equal(status.textContent, "1 result for gradient");
       assert.ok(results.innerHTML.includes("/posts/gradient"));
@@ -1468,7 +1470,7 @@ test("search page client script preserves URL-backed search behavior", async () 
     },
     async () => {
       setupSearchPage();
-      await new Promise(resolve => setImmediate(resolve));
+      await flushAsyncUpdates();
 
       assert.equal(input.value, "gradient");
       assert.equal(postsButton.getAttribute("aria-pressed"), "true");
@@ -1480,13 +1482,13 @@ test("search page client script preserves URL-backed search behavior", async () 
 
       input.value = "note";
       input.dispatch("input", { currentTarget: input });
-      await new Promise(resolve => setImmediate(resolve));
+      await flushAsyncUpdates();
 
       assert.equal(history.replacedWith, "/search?q=note&type=posts");
       assert.equal(status.textContent, "No results for note in posts");
 
       notesButton.dispatch("click");
-      await new Promise(resolve => setImmediate(resolve));
+      await flushAsyncUpdates();
 
       assert.equal(history.replacedWith, "/search?q=note&type=notes");
       assert.equal(notesButton.getAttribute("aria-pressed"), "true");
