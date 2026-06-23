@@ -213,6 +213,7 @@ test("search kind contract stays explicit and shared", () => {
   const searchEndpoint = readText("src/pages/search-index.json.ts");
   const searchPage = readText("src/pages/search.astro");
   const searchUtils = readText("src/utils/search.ts");
+  const searchPageScript = readText("src/scripts/searchPage.ts");
 
   assert.deepEqual(
     searchKinds.map(kind => kind.filter),
@@ -224,7 +225,10 @@ test("search kind contract stays explicit and shared", () => {
   );
   assert.equal(new Set(searchKinds.map(kind => kind.filter)).size, 5);
   assert.ok(searchEndpoint.includes("getPostPath(post)"));
-  assert.ok(searchPage.includes("rankSearchRecords(visibleRecords, terms)"));
+  assert.ok(searchPage.includes('from "@/scripts/searchPage"'));
+  assert.ok(
+    searchPageScript.includes("rankSearchRecords(visibleRecords, terms)")
+  );
   assert.ok(searchUtils.includes("`${record.kind}:${record.url}`"));
 });
 
@@ -256,6 +260,7 @@ test("search UI helpers share ranking and query parsing rules", async () => {
     splitSearchTerms,
   } = await loadTypeScriptModule("src/utils/search.ts");
   const searchPage = readText("src/pages/search.astro");
+  const searchPageScript = readText("src/scripts/searchPage.ts");
   const commandPalette = readText("src/components/CommandPalette.astro");
   const commandPaletteScript = readText("src/scripts/commandPalette.ts");
 
@@ -343,7 +348,8 @@ test("search UI helpers share ranking and query parsing rules", async () => {
     assert.equal((await loadSearchIndex())[0].title, "Retry works");
     assert.equal(calls, 2);
   }
-  assert.ok(searchPage.includes('from "@/utils/search"'));
+  assert.ok(searchPage.includes('from "@/scripts/searchPage"'));
+  assert.ok(searchPageScript.includes('from "../utils/search"'));
   assert.ok(commandPalette.includes('from "@/scripts/commandPalette"'));
   assert.ok(commandPaletteScript.includes('from "../utils/search"'));
 });
@@ -905,6 +911,144 @@ test("command palette client script opens, searches, and closes", async () => {
     globalThis.document = originalDocument;
     globalThis.fetch = originalFetch;
     globalThis.HTMLElement = originalHTMLElement;
+  }
+});
+
+test("search page client script preserves URL-backed search behavior", async () => {
+  const { setupSearchPage } = await loadProjectModule(
+    "src/scripts/searchPage.ts",
+    ["src/utils/search.ts", "src/scripts/searchPage.ts"]
+  );
+  const originalWindow = globalThis.window;
+  const originalDocument = globalThis.document;
+  const originalHistory = globalThis.history;
+  const originalFetch = globalThis.fetch;
+  const searchKinds = readJson("src/data/search-kinds.json");
+  const makeElement = ({ dataset = {}, textContent = "" } = {}) => {
+    const attributes = new Map();
+    const handlers = new Map();
+    return {
+      dataset,
+      handlers,
+      innerHTML: "",
+      textContent,
+      value: "",
+      addEventListener: (event, handler) => handlers.set(event, handler),
+      removeEventListener: event => handlers.delete(event),
+      dispatch: (event, payload = {}) => handlers.get(event)?.(payload),
+      focus: () => {
+        globalThis.document.activeElement = input;
+      },
+      setAttribute: (name, value) => attributes.set(name, value),
+      getAttribute: name => attributes.get(name),
+      toggleAttribute: (name, active) => {
+        if (active) attributes.set(name, "");
+        else attributes.delete(name);
+      },
+      hasAttribute: name => attributes.has(name),
+    };
+  };
+  const input = makeElement();
+  const clearButton = makeElement();
+  const status = makeElement();
+  const results = makeElement();
+  const kindData = makeElement({ textContent: JSON.stringify(searchKinds) });
+  const allButton = makeElement({ dataset: { searchKind: "all" } });
+  const postsButton = makeElement({ dataset: { searchKind: "posts" } });
+  const notesButton = makeElement({ dataset: { searchKind: "notes" } });
+  const location = {
+    pathname: "/search",
+    search: "?q=gradient&type=posts",
+  };
+  const history = {
+    state: { from: "test" },
+    replacedWith: "",
+    replaceState: (_state, _title, url) => {
+      history.replacedWith = url;
+      const [pathname, search = ""] = url.split("?");
+      location.pathname = pathname;
+      location.search = search ? `?${search}` : "";
+    },
+  };
+
+  globalThis.fetch = async () => ({
+    ok: true,
+    json: async () => [
+      {
+        title: "Gradient <Descent>",
+        description: "Optimization",
+        url: "/posts/gradient",
+        kind: "Post",
+        metaText: "machine learning",
+        content: "calculus gradient descent article",
+      },
+      {
+        title: "Gradient note",
+        description: "Daily note",
+        url: "/notes/gradient",
+        kind: "Note",
+        metaText: "running",
+        content: "gradient thought",
+      },
+    ],
+  });
+  globalThis.window = { location };
+  globalThis.history = history;
+  globalThis.document = {
+    activeElement: null,
+    querySelector: selector =>
+      ({
+        "#search-input": input,
+        "#search-clear": clearButton,
+        "#search-status": status,
+        "#search-results": results,
+        "#search-kind-data": kindData,
+      })[selector] ?? null,
+    querySelectorAll: selector =>
+      selector === "[data-search-kind]"
+        ? [allButton, postsButton, notesButton]
+        : [],
+  };
+
+  try {
+    setupSearchPage();
+    await new Promise(resolve => setImmediate(resolve));
+
+    assert.equal(input.value, "gradient");
+    assert.equal(postsButton.getAttribute("aria-pressed"), "true");
+    assert.equal(notesButton.getAttribute("aria-pressed"), "false");
+    assert.equal(status.textContent, "1 result for gradient in posts");
+    assert.ok(results.innerHTML.includes("/posts/gradient"));
+    assert.ok(results.innerHTML.includes("Gradient &lt;Descent&gt;"));
+    assert.ok(!results.innerHTML.includes("/notes/gradient"));
+
+    input.value = "note";
+    input.dispatch("input", { currentTarget: input });
+    await new Promise(resolve => setImmediate(resolve));
+
+    assert.equal(history.replacedWith, "/search?q=note&type=posts");
+    assert.equal(status.textContent, "No results for note in posts");
+
+    notesButton.dispatch("click");
+    await new Promise(resolve => setImmediate(resolve));
+
+    assert.equal(history.replacedWith, "/search?q=note&type=notes");
+    assert.equal(notesButton.getAttribute("aria-pressed"), "true");
+    assert.equal(status.textContent, "1 result for note in notes");
+    assert.ok(results.innerHTML.includes("/notes/gradient"));
+
+    clearButton.dispatch("click");
+
+    assert.equal(input.value, "");
+    assert.equal(history.replacedWith, "/search?type=notes");
+    assert.equal(status.textContent, "Type a keyword to search across notes.");
+    assert.equal(results.innerHTML, "");
+    assert.equal(globalThis.document.activeElement, input);
+  } finally {
+    globalThis.window = originalWindow;
+    globalThis.document = originalDocument;
+    globalThis.history = originalHistory;
+    globalThis.fetch = originalFetch;
   }
 });
 
