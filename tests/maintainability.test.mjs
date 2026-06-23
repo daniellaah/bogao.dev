@@ -19,6 +19,15 @@ const TRANSPILE_OPTIONS = {
     target: ts.ScriptTarget.ES2022,
   },
 };
+const NEW_CONTENT_FIXTURE_FILES = [
+  "scripts/content-rules.mjs",
+  "scripts/new-content.mjs",
+  "src/data/content-rules.json",
+  "src/utils/slugifyCore.js",
+  "templates/blog-post.md",
+  "templates/note.md",
+  "templates/project.md",
+];
 
 const readText = relativePath =>
   fs.readFileSync(path.join(ROOT, relativePath), "utf8");
@@ -43,6 +52,28 @@ const listMarkdownFiles = dir =>
     });
 
 const stripMarkdownExt = value => value.replace(/\.(md|mdx)$/i, "");
+
+const withNewContentFixture = callback => {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "new-content-script-"));
+
+  try {
+    fs.symlinkSync(
+      path.join(ROOT, "node_modules"),
+      path.join(fixture, "node_modules"),
+      "dir"
+    );
+
+    for (const file of NEW_CONTENT_FIXTURE_FILES) {
+      const target = path.join(fixture, file);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(path.join(ROOT, file), target);
+    }
+
+    return callback(fixture);
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
+};
 
 const loadTypeScriptModule = async relativePath => {
   const source = readText(relativePath);
@@ -1558,30 +1589,7 @@ test("content scripts resolve repository root outside the cwd", () => {
 });
 
 test("new content script generates project drafts without frontmatter slugs", () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "new-content-script-"));
-  const fixtureFiles = [
-    "scripts/content-rules.mjs",
-    "scripts/new-content.mjs",
-    "src/data/content-rules.json",
-    "src/utils/slugifyCore.js",
-    "templates/blog-post.md",
-    "templates/note.md",
-    "templates/project.md",
-  ];
-
-  try {
-    fs.symlinkSync(
-      path.join(ROOT, "node_modules"),
-      path.join(fixture, "node_modules"),
-      "dir"
-    );
-
-    for (const file of fixtureFiles) {
-      const target = path.join(fixture, file);
-      fs.mkdirSync(path.dirname(target), { recursive: true });
-      fs.copyFileSync(path.join(ROOT, file), target);
-    }
-
+  withNewContentFixture(fixture => {
     const output = execFileSync(
       process.execPath,
       [
@@ -1616,36 +1624,11 @@ test("new content script generates project drafts without frontmatter slugs", ()
       /^repoUrl: "https:\/\/github\.com\/example\/repo"$/m
     );
     assert.ok(!/^slug:/m.test(frontmatter));
-  } finally {
-    fs.rmSync(fixture, { recursive: true, force: true });
-  }
+  });
 });
 
 test("new content script preserves post and note tag generation", () => {
-  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "new-content-script-"));
-  const fixtureFiles = [
-    "scripts/content-rules.mjs",
-    "scripts/new-content.mjs",
-    "src/data/content-rules.json",
-    "src/utils/slugifyCore.js",
-    "templates/blog-post.md",
-    "templates/note.md",
-    "templates/project.md",
-  ];
-
-  try {
-    fs.symlinkSync(
-      path.join(ROOT, "node_modules"),
-      path.join(fixture, "node_modules"),
-      "dir"
-    );
-
-    for (const file of fixtureFiles) {
-      const target = path.join(fixture, file);
-      fs.mkdirSync(path.dirname(target), { recursive: true });
-      fs.copyFileSync(path.join(ROOT, file), target);
-    }
-
+  withNewContentFixture(fixture => {
     execFileSync(
       process.execPath,
       [
@@ -1682,9 +1665,7 @@ test("new content script preserves post and note tag generation", () => {
 
     assert.match(postSource, /^tags:\n  - "notes"$/m);
     assert.match(noteSource, /^tags:\n  - "running"\n  - "life"$/m);
-  } finally {
-    fs.rmSync(fixture, { recursive: true, force: true });
-  }
+  });
 });
 
 test("content check frontmatter parser handles current template shapes", async () => {
