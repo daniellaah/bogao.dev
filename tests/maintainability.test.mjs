@@ -539,6 +539,52 @@ test("home page client script preserves back link and avatar replay behavior", a
   }
 });
 
+test("back navigation client script preserves stored back link behavior", async () => {
+  const { storeBackUrl, updateBackButtonUrl } = await loadProjectModule(
+    "src/scripts/backNavigation.ts",
+    ["src/scripts/backNavigation.ts"]
+  );
+  const originalDocument = globalThis.document;
+  const originalSessionStorage = globalThis.sessionStorage;
+  const storage = new Map();
+  const backButton = { href: "/" };
+  let mainContent = { dataset: { backurl: "/posts/example/" } };
+  globalThis.sessionStorage = {
+    getItem: key => storage.get(key) ?? null,
+    setItem: (key, value) => storage.set(key, value),
+  };
+  globalThis.document = {
+    querySelector: selector =>
+      ({
+        "#main-content": mainContent,
+        "#back-button": backButton,
+      })[selector] ?? null,
+  };
+
+  try {
+    storeBackUrl();
+
+    assert.equal(storage.get("backUrl"), "/posts/example/");
+
+    updateBackButtonUrl();
+
+    assert.equal(backButton.href, "/posts/example/");
+
+    mainContent = { dataset: {} };
+    storage.clear();
+    backButton.href = "/";
+
+    storeBackUrl();
+    updateBackButtonUrl();
+
+    assert.equal(storage.has("backUrl"), false);
+    assert.equal(backButton.href, "/");
+  } finally {
+    globalThis.document = originalDocument;
+    globalThis.sessionStorage = originalSessionStorage;
+  }
+});
+
 test("header nav client script preserves menu toggle behavior", async () => {
   const { setupHeaderNav } = await loadProjectModule(
     "src/scripts/headerNav.ts",

@@ -27,26 +27,16 @@ const { layoutClass = "app-layout", label = "Go back" } = Astro.props;
 }
 
 <script>
-  /* Update back link after ClientRouter navigation. */
-  function updateGoBackUrl() {
-    const backButton: HTMLAnchorElement | null =
-      document.querySelector("#back-button");
-
-    const backUrl = sessionStorage.getItem("backUrl");
-
-    if (backUrl && backButton) {
-      backButton.href = backUrl;
-    }
-  }
+  import { updateBackButtonUrl } from "@/scripts/backNavigation";
 
   (
     window as Window & { __backButtonCleanup?: () => void }
   ).__backButtonCleanup?.();
-  document.addEventListener("astro:page-load", updateGoBackUrl);
+  document.addEventListener("astro:page-load", updateBackButtonUrl);
   (
     window as Window & { __backButtonCleanup?: () => void }
   ).__backButtonCleanup = () => {
-    document.removeEventListener("astro:page-load", updateGoBackUrl);
+    document.removeEventListener("astro:page-load", updateBackButtonUrl);
   };
-  updateGoBackUrl();
+  updateBackButtonUrl();
 </script>

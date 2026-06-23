@@ -39,14 +39,7 @@ const backUrl = SITE.showBackButton ? Astro.url.pathname : "/";
 </main>
 
 <script>
-  function storeBackUrl() {
-    const mainContent: HTMLElement | null =
-      document.querySelector("#main-content");
-    const backUrl = mainContent?.dataset?.backurl;
-    if (backUrl) {
-      sessionStorage.setItem("backUrl", backUrl);
-    }
-  }
+  import { storeBackUrl } from "@/scripts/backNavigation";
 
   (
     window as Window & { __mainBackUrlCleanup?: () => void }
