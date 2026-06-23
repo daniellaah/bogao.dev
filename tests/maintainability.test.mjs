@@ -191,6 +191,16 @@ const loadSearchIndexInternals = async () => {
   );
 };
 
+const ROUTE_POST_HELPERS = `
+const stripMarkdownExt = value => value.replace(/\\.(md|mdx)$/i, "");
+const getPostPath = post =>
+  \`/posts/\${stripMarkdownExt(post.data.slug ?? post.slug ?? post.id)}\`;
+const getSortedPosts = posts =>
+  posts
+    .filter(post => !post.data.draft && post.data.pubDatetime)
+    .sort((postA, postB) => postB.data.pubDatetime.getTime() - postA.data.pubDatetime.getTime());
+`;
+
 const loadSearchIndexRoute = async () => {
   const source = readText("src/pages/search-index.json.ts").replace(
     /^import .*$/gm,
@@ -202,16 +212,10 @@ const getCollection = async (collection, filter) => {
   const entries = globalThis.__searchIndexCollections?.[collection] ?? [];
   return filter ? entries.filter(filter) : entries;
 };
-const stripMarkdownExt = value => value.replace(/\\.(md|mdx)$/i, "");
+${ROUTE_POST_HELPERS}
 const getProjectPath = id => \`/projects/\${stripMarkdownExt(id)}\`;
 const getNotePath = (id, explicitSlug) =>
   \`/notes/\${explicitSlug ?? stripMarkdownExt(id)}\`;
-const getPostPath = post =>
-  \`/posts/\${stripMarkdownExt(post.data.slug ?? post.slug ?? post.id)}\`;
-const getSortedPosts = posts =>
-  posts
-    .filter(post => !post.data.draft && post.data.pubDatetime)
-    .sort((postA, postB) => postB.data.pubDatetime.getTime() - postA.data.pubDatetime.getTime());
 const getUniqueTags = entries => {
   const tagMap = new Map();
   for (const entry of entries.filter(item => !item.data.draft)) {
@@ -253,13 +257,7 @@ const rss = options => new Response(JSON.stringify(options), {
 });
 const getCollection = async collection =>
   globalThis.__rssCollections?.[collection] ?? [];
-const stripMarkdownExt = value => value.replace(/\\.(md|mdx)$/i, "");
-const getPostPath = post =>
-  \`/posts/\${stripMarkdownExt(post.data.slug ?? post.slug ?? post.id)}\`;
-const getSortedPosts = posts =>
-  posts
-    .filter(post => !post.data.draft && post.data.pubDatetime)
-    .sort((postA, postB) => postB.data.pubDatetime.getTime() - postA.data.pubDatetime.getTime());
+${ROUTE_POST_HELPERS}
 `;
   const { outputText } = ts.transpileModule(`${prelude}\n${source}`, {
     ...TRANSPILE_OPTIONS,
