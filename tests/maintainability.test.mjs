@@ -178,7 +178,9 @@ const loadSearchIndexInternals = async () => {
 const makeTestClassList = initial => {
   const classes = new Set(initial);
   return {
+    add: (...names) => names.forEach(name => classes.add(name)),
     contains: name => classes.has(name),
+    remove: (...names) => names.forEach(name => classes.delete(name)),
     toggle: (name, active) => {
       if (active === undefined) {
         if (classes.has(name)) classes.delete(name);
@@ -1224,23 +1226,11 @@ test("command palette client script opens, searches, and closes", async () => {
     "src/scripts/commandPalette.ts",
     ["src/utils/search.ts", "src/scripts/commandPalette.ts"]
   );
-  const makeClassList = initial => {
-    const classes = new Set(initial);
-    return {
-      add: (...names) => names.forEach(name => classes.add(name)),
-      remove: (...names) => names.forEach(name => classes.delete(name)),
-      contains: name => classes.has(name),
-      toggle: (name, active) => {
-        if (active) classes.add(name);
-        else classes.delete(name);
-      },
-    };
-  };
 
   class MockElement {
     constructor({ classNames = [], dataset = {}, rect = {} } = {}) {
       this.attributes = new Map();
-      this.classList = makeClassList(classNames);
+      this.classList = makeTestClassList(classNames);
       this.dataset = dataset;
       this.eventHandlers = new Map();
       this.hidden = false;
