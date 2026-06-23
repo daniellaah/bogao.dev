@@ -6,6 +6,7 @@ import path from "node:path";
 import { test } from "node:test";
 import { pathToFileURL } from "node:url";
 import ts from "typescript";
+import { stripMarkdownExt } from "../src/utils/slugifyCore.js";
 
 const ROOT = process.cwd();
 const MODULE_TEST_CACHE_DIR = path.join(
@@ -69,8 +70,6 @@ const listMarkdownFiles = dir =>
       if (entry.isDirectory()) return listMarkdownFiles(relativePath);
       return /\.(md|mdx)$/i.test(entry.name) ? [relativePath] : [];
     });
-
-const stripMarkdownExt = value => value.replace(/\.(md|mdx)$/i, "");
 
 const withNewContentFixture = callback => {
   const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "new-content-script-"));
