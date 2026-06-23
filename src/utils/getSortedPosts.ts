@@ -12,8 +12,7 @@ const isPublishablePost = (
   if (!data.pubDatetime) return false;
 
   const isPublishTimePassed =
-    Date.now() >
-    new Date(data.pubDatetime).getTime() - SITE.scheduledPostMargin;
+    Date.now() > data.pubDatetime.getTime() - SITE.scheduledPostMargin;
   return !data.draft && (import.meta.env.DEV || isPublishTimePassed);
 };
 
