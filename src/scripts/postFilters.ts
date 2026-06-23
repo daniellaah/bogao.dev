@@ -1,4 +1,7 @@
-import { setActiveToggleButton } from "./toggleControls";
+import {
+  addToggleIndicatorResizeSync,
+  setActiveToggleButton,
+} from "./toggleControls";
 
 let cleanupPostFiltersInstance = () => {};
 
@@ -115,19 +118,9 @@ export function setupPostFiltersPage() {
     tagToggle?.setAttribute("data-ink-ready", "true");
   });
 
-  let resizeFrame = 0;
-  const syncIndicators = () => {
-    window.cancelAnimationFrame(resizeFrame);
-    resizeFrame = window.requestAnimationFrame(() => {
-      const { year, tag } = getFilter();
-      setActiveToggleButton(yearButtons, "filterYear", year, yearToggle);
-      setActiveToggleButton(tagButtons, "filterTag", tag, tagToggle);
-    });
-  };
-
-  window.addEventListener("resize", syncIndicators, { passive: true });
-  cleanupPostFiltersInstance = () => {
-    window.cancelAnimationFrame(resizeFrame);
-    window.removeEventListener("resize", syncIndicators);
-  };
+  cleanupPostFiltersInstance = addToggleIndicatorResizeSync(() => {
+    const { year, tag } = getFilter();
+    setActiveToggleButton(yearButtons, "filterYear", year, yearToggle);
+    setActiveToggleButton(tagButtons, "filterTag", tag, tagToggle);
+  });
 }

@@ -19,6 +19,21 @@ const syncToggleIndicator = (
   );
 };
 
+export const addToggleIndicatorResizeSync = (syncIndicator: () => void) => {
+  let resizeFrame = 0;
+  const syncOnResize = () => {
+    window.cancelAnimationFrame(resizeFrame);
+    resizeFrame = window.requestAnimationFrame(syncIndicator);
+  };
+
+  window.addEventListener("resize", syncOnResize, { passive: true });
+
+  return () => {
+    window.cancelAnimationFrame(resizeFrame);
+    window.removeEventListener("resize", syncOnResize);
+  };
+};
+
 export const setActiveToggleButton = (
   buttons: HTMLButtonElement[],
   dataKey: string,

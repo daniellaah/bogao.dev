@@ -1,4 +1,7 @@
-import { setActiveToggleButton } from "./toggleControls";
+import {
+  addToggleIndicatorResizeSync,
+  setActiveToggleButton,
+} from "./toggleControls";
 
 type TagSort = "az" | "popular";
 
@@ -156,17 +159,7 @@ export function setupTagsIndexPage() {
     sortToggle.dataset.inkReady = "true";
   });
 
-  let resizeFrame = 0;
-  const syncSortIndicator = () => {
-    window.cancelAnimationFrame(resizeFrame);
-    resizeFrame = window.requestAnimationFrame(() => {
-      setActiveToggleButton(sortButtons, "tagSort", currentSort, sortToggle);
-    });
-  };
-
-  window.addEventListener("resize", syncSortIndicator, { passive: true });
-  cleanupTagsIndexInstance = () => {
-    window.cancelAnimationFrame(resizeFrame);
-    window.removeEventListener("resize", syncSortIndicator);
-  };
+  cleanupTagsIndexInstance = addToggleIndicatorResizeSync(() => {
+    setActiveToggleButton(sortButtons, "tagSort", currentSort, sortToggle);
+  });
 }
