@@ -423,6 +423,7 @@ test("search UI helpers share ranking and query parsing rules", async () => {
     SEARCH_LOAD_ERROR_MESSAGE,
     createSearchIndexLoader,
     escapeSearchHtml,
+    formatSearchEmptyPrompt,
     formatNoSearchResults,
     rankSearchRecords,
     scoreSearchRecord,
@@ -440,6 +441,14 @@ test("search UI helpers share ranking and query parsing rules", async () => {
   assert.deepEqual(splitSearchTerms("机器学习"), ["机器学习"]);
   assert.equal(escapeSearchHtml("<tag>&\"'"), "&lt;tag&gt;&amp;&quot;&#39;");
   assert.equal(SEARCH_LOAD_ERROR_MESSAGE, "Search failed to load.");
+  assert.equal(
+    formatSearchEmptyPrompt("posts, notes, projects, and tags"),
+    "Type a keyword to search across posts, notes, projects, and tags."
+  );
+  assert.equal(
+    formatSearchEmptyPrompt("notes"),
+    "Type a keyword to search across notes."
+  );
   assert.equal(formatNoSearchResults("gradient"), "No results for gradient");
   assert.equal(
     scoreSearchRecord(

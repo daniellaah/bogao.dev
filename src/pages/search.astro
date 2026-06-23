@@ -5,6 +5,7 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import searchKinds from "@/data/search-kinds.json";
 import { SITE } from "@/config";
+import { formatSearchEmptyPrompt } from "@/utils/search";
 ---
 
 <Layout title={`Search | ${SITE.title}`}>
@@ -59,7 +60,7 @@ import { SITE } from "@/config";
       />
 
       <p id="search-status" class="font-code text-xs text-graphite">
-        Type a keyword to search across posts, notes, projects, and tags.
+        {formatSearchEmptyPrompt(searchKinds[0].scope)}
       </p>
 
       <ul id="search-results"></ul>

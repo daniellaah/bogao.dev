@@ -2,6 +2,7 @@ import {
   SEARCH_LOAD_ERROR_MESSAGE,
   createSearchIndexLoader,
   escapeSearchHtml,
+  formatSearchEmptyPrompt,
   formatNoSearchResults,
   formatSearchResultSummary,
   normalizeSearchText,
@@ -81,7 +82,7 @@ export function setupSearchPage() {
   const getScopeText = (kind: SearchKind) => searchKindToScope[kind];
 
   const renderEmptyPrompt = (kind: SearchKind) => {
-    status.textContent = `Type a keyword to search across ${getScopeText(kind)}.`;
+    status.textContent = formatSearchEmptyPrompt(getScopeText(kind));
     results.innerHTML = "";
   };
 
