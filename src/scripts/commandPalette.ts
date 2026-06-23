@@ -1,6 +1,7 @@
 import {
   createSearchIndexLoader,
   escapeSearchHtml,
+  formatSearchResultSummary,
   rankSearchRecords,
   splitSearchTerms,
   type SearchRecord,
@@ -109,7 +110,7 @@ export function setupCommandPalettePage() {
       return;
     }
 
-    status.textContent = `${sorted.length} result${sorted.length > 1 ? "s" : ""} for ${query}`;
+    status.textContent = formatSearchResultSummary(sorted.length, query);
     results.innerHTML = sorted
       .map(
         record => `

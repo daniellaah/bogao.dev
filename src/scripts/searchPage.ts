@@ -1,6 +1,7 @@
 import {
   createSearchIndexLoader,
   escapeSearchHtml,
+  formatSearchResultSummary,
   normalizeSearchText,
   rankSearchRecords,
   splitSearchTerms,
@@ -103,7 +104,7 @@ export function setupSearchPage() {
       return;
     }
 
-    status.textContent = `${sorted.length} result${sorted.length > 1 ? "s" : ""} for ${query} in ${getScopeText(kind)}`;
+    status.textContent = `${formatSearchResultSummary(sorted.length, query)} in ${getScopeText(kind)}`;
 
     results.innerHTML = sorted
       .map((record: RankedSearchRecord) => {

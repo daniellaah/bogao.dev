@@ -47,6 +47,9 @@ export const splitSearchTerms = (value: string) => {
     : normalized.split(" ").filter(Boolean);
 };
 
+export const formatSearchResultSummary = (count: number, query: string) =>
+  `${count} result${count > 1 ? "s" : ""} for ${query}`;
+
 export const scoreSearchRecord = (
   record: SearchRecord,
   terms: string[]
