@@ -20,7 +20,7 @@ export type SearchKindEntry = {
   scope: string;
 };
 
-export type SearchRankOptions = {
+type SearchRankOptions = {
   limit?: number;
   dedupe?: boolean;
   getDedupeKey?: (record: RankedSearchRecord) => string;
