@@ -28,6 +28,11 @@ const asList = value =>
     .map(item => item.trim())
     .filter(Boolean);
 
+const asListWithDefault = (value, defaultItems) => {
+  const items = asList(value);
+  return items.length > 0 ? items : defaultItems;
+};
+
 const parseArgs = argv => {
   const values = {};
   const positional = [];
@@ -105,7 +110,7 @@ const makePost = options => {
   const date = options.date ?? today();
   const slug = slugifyForContent(options.slug ?? options.title);
   const filename = `${slug}.md`;
-  const tags = asList(options.tags).length ? asList(options.tags) : ["notes"];
+  const tags = asListWithDefault(options.tags, ["notes"]);
   const templateBody = readTemplateBody(TEMPLATE_FILES.post);
   const title = options.title;
   const description =
@@ -133,7 +138,7 @@ const makeNote = options => {
   const date = options.date ?? today();
   const slug = slugifyForContent(options.slug ?? `${date}-${options.title}`);
   const filename = `${slug}.md`;
-  const tags = asList(options.tags).length ? asList(options.tags) : ["notes"];
+  const tags = asListWithDefault(options.tags, ["notes"]);
   const photos = asList(options.photos);
   const templateBody = readTemplateBody(TEMPLATE_FILES.note);
 

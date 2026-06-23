@@ -1621,6 +1621,72 @@ test("new content script generates project drafts without frontmatter slugs", ()
   }
 });
 
+test("new content script preserves post and note tag generation", () => {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "new-content-script-"));
+  const fixtureFiles = [
+    "scripts/content-rules.mjs",
+    "scripts/new-content.mjs",
+    "src/data/content-rules.json",
+    "src/utils/slugifyCore.js",
+    "templates/blog-post.md",
+    "templates/note.md",
+    "templates/project.md",
+  ];
+
+  try {
+    fs.symlinkSync(
+      path.join(ROOT, "node_modules"),
+      path.join(fixture, "node_modules"),
+      "dir"
+    );
+
+    for (const file of fixtureFiles) {
+      const target = path.join(fixture, file);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(path.join(ROOT, file), target);
+    }
+
+    execFileSync(
+      process.execPath,
+      [
+        "scripts/new-content.mjs",
+        "post",
+        "Default Tags",
+        "--date",
+        "2026-06-22",
+      ],
+      { cwd: fixture, encoding: "utf8" }
+    );
+    execFileSync(
+      process.execPath,
+      [
+        "scripts/new-content.mjs",
+        "note",
+        "Tagged Note",
+        "--date",
+        "2026-06-22",
+        "--tags",
+        "running, life",
+      ],
+      { cwd: fixture, encoding: "utf8" }
+    );
+
+    const postSource = fs.readFileSync(
+      path.join(fixture, "src/content/blog/default-tags.md"),
+      "utf8"
+    );
+    const noteSource = fs.readFileSync(
+      path.join(fixture, "src/content/notes/2026-06-22-tagged-note.md"),
+      "utf8"
+    );
+
+    assert.match(postSource, /^tags:\n  - "notes"$/m);
+    assert.match(noteSource, /^tags:\n  - "running"\n  - "life"$/m);
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
+});
+
 test("content check frontmatter parser handles current template shapes", async () => {
   const { parseFrontmatter } = await import(
     pathToFileURL(path.join(ROOT, "scripts/check-content.mjs")).href
