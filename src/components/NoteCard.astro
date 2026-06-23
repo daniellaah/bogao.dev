@@ -9,8 +9,7 @@ type Props = CollectionEntry<"notes">;
 const { id, slug, data } = Astro.props;
 const { title, description, noteDate, location, photos } = data;
 const href = getNotePath(id, slug);
-const photo = photos[0];
-const photoSrc = photo;
+const photoSrc = photos[0];
 const photoDimensions = getPublicImageDimensions(photoSrc);
 const heading = title ?? dayjs.utc(noteDate).format("MMM D, YYYY");
 ---
