@@ -21,7 +21,6 @@ npm run build
 npm run preview
 npm run content:check
 npm run new:post -- "Post title"
-npm run new:note -- "Note title"
 npm run new:project -- "Project title"
 npm test
 npm run lint
@@ -32,7 +31,6 @@ npm run format
 
 ```text
 src/content/blog/   博客文章
-src/content/notes/  短笔记 / memo
 src/content/projects/ 项目内容
 src/pages/          页面路由
 src/components/     通用组件
@@ -48,7 +46,7 @@ templates/          内容创建模板
 - `Posts` 页面当前每页最多显示 `100` 篇文章，并支持年份 / 标签轻量筛选
 - 已自托管 `LXGW WenKai` WOFF2 字体并应用到正文和标题
 - 文章页已切换到 KaTeX 编译期数学公式渲染
-- 站内搜索使用自定义 `/search-index.json`，覆盖 posts、notes、projects 和 tags
+- 站内搜索使用自定义 `/search-index.json`，覆盖 posts、projects 和 tags
 - 已写入基础站点信息与首页文案
 - 已导入一批旧博客文章
 - 旧文章已统一迁移到新的 `pubDatetime` / `modDatetime`
@@ -77,7 +75,6 @@ templates/          内容创建模板
 
 - 历史正文目前没有使用 Markdown 图片语法的远程图片引用
 - 如后续补回旧文章配图，优先放到 `public/images/posts/`
-- Notes 中的本地照片需要登记尺寸，见 `src/data/public-image-dimensions.json`
 
 ## 下一步建议
 
@@ -142,17 +139,15 @@ PUBLIC_BAIDU_SITE_VERIFICATION=codeva-xxxx
 
 ## 写作模板
 
-仓库里提供了文章、note 和 project 模板与内容创建命令：
+仓库里提供了文章和 project 模板与内容创建命令：
 
 - `templates/blog-post.md`
-- `templates/note.md`
 - `templates/project.md`
 
 常用写作命令：
 
 ```bash
 npm run new:post -- "My new post" --tags machine-learning,notes
-npm run new:note -- "LA 5K morning" --location "Los Angeles" --tags running,life
 npm run new:project -- "My project" --stack Python,Astro --repoUrl https://github.com/yourname/project
 ```
 
@@ -160,7 +155,7 @@ npm run new:project -- "My project" --stack Python,Astro --repoUrl https://githu
 
 - 新内容默认 `draft: true`
 - 日期默认使用当天，格式为 `YYYY-MM-DD`
-- Post / Note 会写入显式 `slug`，后续修改标题或文件名不会改变 URL
+- Post 会写入显式 `slug`，后续修改标题或文件名不会改变 URL
 - 如果标题生成的 slug 不理想，可以用 `--slug your-custom-slug` 指定
 - Project URL 固定由文件名生成；`new:project --slug` 只用于控制生成的文件名，不会写入 frontmatter `slug`
 
@@ -179,7 +174,6 @@ npm run build
 当前项目建议按内容类型拆分图片目录：
 
 - `public/images/posts/`：博客文章配图
-- `public/images/notes/`：notes / memo 照片
 - `public/images/projects/`：项目封面与截图
 - `public/images/site/`：站点级图片，例如头像和装饰图
 - `public/`：根级站点资源，例如 favicon、app icon 和默认 OG 图
@@ -194,18 +188,9 @@ npm run build
 例如：
 
 ```text
-public/images/notes/2026-03-15-la-5k-01.jpg
 public/images/projects/promptlane-dashboard-cover.png
 public/images/posts/sorting-algorithm-merge-sort.png
 ```
-
-Notes 中的本地照片还需要在下面的文件里登记尺寸，避免页面加载时发生布局抖动：
-
-```text
-src/data/public-image-dimensions.json
-```
-
-`npm run content:check` 会检查 note 照片是否存在，以及本地照片是否已登记 `width` / `height`。
 
 ## Open Graph
 

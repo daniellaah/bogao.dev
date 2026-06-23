@@ -13,12 +13,6 @@ import {
 } from "./content-rules.mjs";
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
-const PUBLIC_IMAGE_DIMENSIONS = JSON.parse(
-  fs.readFileSync(
-    path.join(REPO_ROOT, "src/data/public-image-dimensions.json"),
-    "utf8"
-  )
-);
 
 const errors = [];
 const warnings = [];
@@ -166,56 +160,12 @@ const validateUrl = (file, data, field) => {
   }
 };
 
-const validatePhotoPaths = (file, photos) => {
-  for (const photo of photos) {
-    if (/^https?:\/\//.test(photo)) continue;
-    if (!photo.startsWith("/images/")) {
-      errors.push(`${file}: note photo must live under /images/`);
-      continue;
-    }
-
-    const publicFile = path.join(REPO_ROOT, "public", photo);
-    if (!fs.existsSync(publicFile)) {
-      errors.push(`${file}: note photo does not exist: ${photo}`);
-    }
-
-    const dimensions = PUBLIC_IMAGE_DIMENSIONS[photo];
-    if (!dimensions) {
-      errors.push(
-        `${file}: note photo needs dimensions in src/data/public-image-dimensions.json: ${photo}`
-      );
-      continue;
-    }
-
-    if (
-      !Number.isInteger(dimensions.width) ||
-      !Number.isInteger(dimensions.height) ||
-      dimensions.width <= 0 ||
-      dimensions.height <= 0
-    ) {
-      errors.push(
-        `${file}: note photo dimensions must be positive integers: ${photo}`
-      );
-    }
-  }
-};
-
 const validateBlog = (file, data, raw, seenSlugs) => {
   requireFields(file, data, ["pubDatetime", "title", "description"]);
   validateDate(file, raw, "pubDatetime", true);
   validateDate(file, raw, "modDatetime");
   validateStringArray(file, data, "tags", true);
   addSlug(seenSlugs, "blog", file, data.slug);
-  warnImplicitSlug(file, data);
-};
-
-const validateNote = (file, data, raw, seenSlugs) => {
-  requireFields(file, data, ["description", "noteDate"]);
-  validateDate(file, raw, "noteDate", true);
-  validateDate(file, raw, "modDatetime");
-  validateStringArray(file, data, "tags");
-  validatePhotoPaths(file, validateStringArray(file, data, "photos"));
-  addSlug(seenSlugs, "note", file, data.slug);
   warnImplicitSlug(file, data);
 };
 
@@ -262,7 +212,6 @@ const main = () => {
       validateKnownFields(file, collection.name, data);
 
       if (collection.name === "blog") validateBlog(file, data, raw, seenSlugs);
-      if (collection.name === "notes") validateNote(file, data, raw, seenSlugs);
       if (collection.name === "projects") {
         validateProject(file, data, raw, seenSlugs);
       }

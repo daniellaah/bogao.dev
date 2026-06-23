@@ -1,10 +1,7 @@
 import { slugifyStr } from "./slugifyCore";
 
-type TagKind = "post" | "note";
-
 type TagSource = {
   tags: string[];
-  kind?: TagKind;
   draft?: boolean;
 };
 
@@ -14,7 +11,6 @@ export type TagStat = {
   tagName: string;
   totalCount: number;
   postCount: number;
-  noteCount: number;
 };
 
 export const collectTagStats = (sources: TagSource[]) => {
@@ -27,10 +23,7 @@ export const collectTagStats = (sources: TagSource[]) => {
 
     for (const [slug, tagName] of uniqueTags) {
       const current = tagMap.get(slug);
-      const postCount =
-        (current?.postCount ?? 0) + (source.kind === "post" ? 1 : 0);
-      const noteCount =
-        (current?.noteCount ?? 0) + (source.kind === "note" ? 1 : 0);
+      const postCount = (current?.postCount ?? 0) + 1;
       const totalCount = (current?.totalCount ?? 0) + 1;
 
       tagMap.set(slug, {
@@ -39,7 +32,6 @@ export const collectTagStats = (sources: TagSource[]) => {
         tagName: current?.tagName ?? tagName,
         totalCount,
         postCount,
-        noteCount,
       });
     }
   }

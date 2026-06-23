@@ -46,7 +46,7 @@ title: "About"
 
 - 继续清理和整理历史机器学习笔记
 - 持续记录 LLM workflow 和 AI coding 相关实验
-- 让 blog / notes / projects 三种内容形式更明确分工
+- 让 posts 和 projects 两种内容形式更明确分工
 
 ## Contact
 

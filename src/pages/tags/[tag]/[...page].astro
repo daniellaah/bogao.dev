@@ -7,17 +7,14 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Pagination from "@/components/Pagination.astro";
 import getUniqueTags from "@/utils/getUniqueTags";
-import { getNotePath } from "@/utils/getNotePath";
 import { getPostPath } from "@/utils/getPostPath";
 import { slugifyStr } from "@/utils/slugifyCore";
 import getSortedPosts from "@/utils/getSortedPosts";
-import { getPublishedNotes } from "@/utils/noteVisibility";
 import { SITE } from "@/config";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const posts = getSortedPosts(await getCollection("blog"));
-  const notes = getPublishedNotes(await getCollection("notes"));
-  const tags = getUniqueTags([...posts, ...notes]);
+  const tags = getUniqueTags(posts);
 
   return tags.flatMap(({ tag, tagName }) => {
     const taggedPosts = posts
@@ -25,31 +22,12 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
         post.data.tags.some(postTag => slugifyStr(postTag) === tag)
       )
       .map(post => ({
-        kind: "post" as const,
         title: post.data.title,
         href: getPostPath(post),
         date: post.data.pubDatetime,
       }));
 
-    const taggedNotes = notes
-      .filter(note =>
-        note.data.tags.some(noteTag => slugifyStr(noteTag) === tag)
-      )
-      .map(note => ({
-        kind: "note" as const,
-        title:
-          note.data.title ??
-          new Intl.DateTimeFormat("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-            timeZone: "UTC",
-          }).format(note.data.noteDate),
-        href: getNotePath(note.id, note.slug),
-        date: note.data.noteDate,
-      }));
-
-    const taggedItems = [...taggedPosts, ...taggedNotes].sort(
+    const taggedItems = taggedPosts.sort(
       (a, b) => b.date.getTime() - a.date.getTime()
     );
 
@@ -71,7 +49,7 @@ const { page, tagName } = Astro.props;
   <Main
     pageTitle={[`Tag:`, `${tagName}`]}
     titleTransition={tag}
-    pageDesc={`All posts and notes with the tag "${tagName}".`}
+    pageDesc={`All posts with the tag "${tagName}".`}
   >
     <h1 slot="title" transition:name={tag}>{`Tag:${tag}`}</h1>
     <ul class="mt-6">
@@ -80,9 +58,8 @@ const { page, tagName } = Astro.props;
           <li class="ledger-row last:border-b-0">
             <a
               href={item.href}
-              class="hand-underline-trigger grid gap-1 sm:grid-cols-[5.5rem_minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
+              class="hand-underline-trigger grid gap-1 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
             >
-              <span class="notebook-kicker">{item.kind}</span>
               <span class="min-w-0 text-base leading-none sm:text-[1.15rem] sm:leading-none">
                 <span class="hand-underline content-title">{item.title}</span>
               </span>

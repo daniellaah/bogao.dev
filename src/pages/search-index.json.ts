@@ -1,11 +1,9 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
 import { getProjectPath } from "@/utils/getProjectPath";
-import { getNotePath } from "@/utils/getNotePath";
 import { getPostPath } from "@/utils/getPostPath";
 import getSortedPosts from "@/utils/getSortedPosts";
 import getUniqueTags from "@/utils/getUniqueTags";
-import { isPublishedNote } from "@/utils/noteVisibility";
 import { isPublishedProject } from "@/utils/projectVisibility";
 import searchKinds from "@/data/search-kinds.json";
 
@@ -16,7 +14,6 @@ const SEARCH_RECORD_KINDS = Object.fromEntries(
 ) as {
   posts: "Post";
   projects: "Project";
-  notes: "Note";
   tags: "Tag";
 };
 
@@ -36,8 +33,7 @@ export const GET: APIRoute = async () => {
   const blogEntries = await getCollection("blog");
   const posts = getSortedPosts(blogEntries);
   const projects = await getCollection("projects", isPublishedProject);
-  const notes = await getCollection("notes", isPublishedNote);
-  const tags = getUniqueTags([...posts, ...notes]);
+  const tags = getUniqueTags(posts);
 
   const records = [
     ...posts.map(post => ({
@@ -59,14 +55,6 @@ export const GET: APIRoute = async () => {
         ...project.data.stack,
       ].join(" "),
       content: stripMarkdown(project.body),
-    })),
-    ...notes.map(note => ({
-      title: note.data.title ?? note.data.noteDate.toISOString().slice(0, 10),
-      description: note.data.description,
-      url: getNotePath(note.id, note.slug),
-      kind: SEARCH_RECORD_KINDS.notes,
-      metaText: [note.data.location ?? "", ...note.data.tags].join(" "),
-      content: stripMarkdown(note.body),
     })),
     ...tags.map(tag => ({
       title: `#${tag.tagName}`,

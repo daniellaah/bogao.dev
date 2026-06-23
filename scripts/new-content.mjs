@@ -11,7 +11,7 @@ import {
   slugifyForContent,
 } from "./content-rules.mjs";
 
-const DEFAULT_CONTENT_TAGS = ["notes"];
+const DEFAULT_CONTENT_TAGS = [];
 
 const today = () => {
   const date = new Date();
@@ -80,7 +80,6 @@ const validateKnownOptions = (kind, values) => {
 const usage = () => {
   console.log(`Usage:
   npm run new:post -- "Post title" [--date YYYY-MM-DD] [--tags tag1,tag2] [--slug custom-slug]
-  npm run new:note -- "Note title" [--date YYYY-MM-DD] [--location "Los Angeles"] [--tags running,life] [--photos /images/notes/photo.webp]
   npm run new:project -- "Project title" [--status ${PROJECT_STATUSES.join("|")}] [--startDate YYYY-MM-DD] [--stack Python,Astro] [--repoUrl https://github.com/...]
 `);
 };
@@ -128,32 +127,6 @@ slug: ${quoteYaml(slug)}
 draft: true
 ${yamlArrayField("tags", tags)}
 description: ${quoteYaml(description)}
----
-
-${templateBody}
-`,
-  };
-};
-
-const makeNote = options => {
-  const date = options.date ?? today();
-  const slug = slugifyForContent(options.slug ?? `${date}-${options.title}`);
-  const filename = `${slug}.md`;
-  const tags = asListWithDefault(options.tags, DEFAULT_CONTENT_TAGS);
-  const photos = asList(options.photos);
-  const templateBody = readTemplateBody(TEMPLATE_FILES.note);
-
-  return {
-    file: `${getContentDir("note")}/${filename}`,
-    content: `---
-title: ${quoteYaml(options.title)}
-slug: ${quoteYaml(slug)}
-description: ${quoteYaml(options.description ?? `Draft note about ${options.title}.`)}
-noteDate: ${date}
-modDatetime:
-draft: true
-${options.location ? `location: ${quoteYaml(options.location)}\n` : ""}${yamlArrayField("tags", tags)}
-${yamlArrayField("photos", photos)}
 ---
 
 ${templateBody}
@@ -212,12 +185,7 @@ const main = () => {
   }
 
   const options = { ...values, title };
-  const draft =
-    kind === "post"
-      ? makePost(options)
-      : kind === "note"
-        ? makeNote(options)
-        : makeProject(options);
+  const draft = kind === "post" ? makePost(options) : makeProject(options);
 
   const file = writeFile(draft.file, draft.content);
   console.log(`Created ${file}`);

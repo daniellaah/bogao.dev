@@ -7,7 +7,6 @@ import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
 import IconArchive from "@/assets/icons/IconArchive.svg";
 import IconBox from "@/assets/icons/IconBox.svg";
 import IconFileText from "@/assets/icons/IconFileText.svg";
-import IconNotebook from "@/assets/icons/IconNotebook.svg";
 import IconTag from "@/assets/icons/IconTag.svg";
 import IconUserCircle from "@/assets/icons/IconUserCircle.svg";
 import LinkButton from "./LinkButton.astro";
@@ -29,7 +28,6 @@ const isActive = (path: string) => {
 const navItems = [
   { href: "/posts", label: "Posts", Icon: IconFileText },
   { href: "/projects", label: "Projects", Icon: IconBox },
-  { href: "/notes", label: "Notes", Icon: IconNotebook },
   { href: "/tags", label: "Tags", Icon: IconTag },
   { href: "/about", label: "About", Icon: IconUserCircle },
   ...(SITE.showArchives

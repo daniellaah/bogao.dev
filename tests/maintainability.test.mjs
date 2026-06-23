@@ -26,7 +26,6 @@ const NEW_CONTENT_FIXTURE_FILES = [
   "src/data/content-rules.json",
   "src/utils/slugifyCore.js",
   "templates/blog-post.md",
-  "templates/note.md",
   "templates/project.md",
 ];
 const GRADIENT_POST_RECORD = {
@@ -37,15 +36,14 @@ const GRADIENT_POST_RECORD = {
   metaText: "machine learning",
   content: "calculus gradient descent article",
 };
-const GRADIENT_NOTE_RECORD = {
-  title: "Gradient note",
-  description: "Daily note",
-  url: "/notes/gradient",
-  kind: "Note",
-  metaText: "running",
-  content: "gradient thought",
+const GRADIENT_PROJECT_RECORD = {
+  title: "Gradient project",
+  description: "Project demo",
+  url: "/projects/gradient",
+  kind: "Project",
+  metaText: "research",
+  content: "gradient prototype",
 };
-
 const readText = relativePath =>
   fs.readFileSync(path.join(ROOT, relativePath), "utf8");
 
@@ -200,39 +198,6 @@ const getSortedPosts = posts =>
     .sort((postA, postB) => postB.data.pubDatetime.getTime() - postA.data.pubDatetime.getTime());
 `;
 
-const loadSearchIndexRoute = async () => {
-  const source = readText("src/pages/search-index.json.ts").replace(
-    /^import .*$/gm,
-    ""
-  );
-  const prelude = `
-const searchKinds = ${JSON.stringify(readJson("src/data/search-kinds.json"))};
-const getCollection = async (collection, filter) => {
-  const entries = globalThis.__searchIndexCollections?.[collection] ?? [];
-  return filter ? entries.filter(filter) : entries;
-};
-${ROUTE_POST_HELPERS}
-const getProjectPath = id => \`/projects/\${stripMarkdownExt(id)}\`;
-const getNotePath = (id, explicitSlug) =>
-  \`/notes/\${explicitSlug ?? stripMarkdownExt(id)}\`;
-const getUniqueTags = entries => {
-  const tagMap = new Map();
-  for (const entry of entries.filter(item => !item.data.draft)) {
-    for (const tagName of new Set(entry.data.tags ?? [])) {
-      const tag = tagName.toLowerCase().replace(/\\s+/g, "-");
-      const current = tagMap.get(tag) ?? { tag, tagName, count: 0 };
-      current.count += 1;
-      tagMap.set(tag, current);
-    }
-  }
-  return Array.from(tagMap.values()).sort((tagA, tagB) => tagA.tag.localeCompare(tagB.tag));
-};
-const isPublishedNote = note => !note.data.draft;
-const isPublishedProject = project => !project.data.draft;
-`;
-  return importTranspiledSource(`${prelude}\n${source}`);
-};
-
 const loadRssRoute = async () => {
   const source = readText("src/pages/rss.xml.ts").replace(/^import .*$/gm, "");
   const prelude = `
@@ -368,15 +333,10 @@ test("content URL helpers preserve public route contracts", async () => {
     "src/utils/contentSlug.ts",
     "src/utils/getPath.ts",
     "src/utils/getPostPath.ts",
-    "src/utils/getNotePath.ts",
     "src/utils/getProjectPath.ts",
   ];
   const { getPostPath } = await loadProjectModule(
     "src/utils/getPostPath.ts",
-    modulePaths
-  );
-  const { getNotePath } = await loadProjectModule(
-    "src/utils/getNotePath.ts",
     modulePaths
   );
   const { getProjectPath } = await loadProjectModule(
@@ -400,10 +360,6 @@ test("content URL helpers preserve public route contracts", async () => {
   assert.equal(
     getPostPath(collectionSlugPost),
     "/posts/ml-notes/collection-slug"
-  );
-  assert.equal(
-    getNotePath("2026-03-07-la-5k-morning.md", "Race Day.md"),
-    "/notes/race-day"
   );
   assert.equal(getProjectPath("BoGaoDev.md"), "/projects/bogaodev");
 });
@@ -470,33 +426,6 @@ test("sorted posts keep production filtering and date ordering", async () => {
   );
 });
 
-test("sorted notes exclude drafts and keep date ordering", async () => {
-  const { default: getSortedNotes } = await loadProjectModule(
-    "src/utils/getSortedNotes.ts",
-    ["src/utils/noteVisibility.ts", "src/utils/getSortedNotes.ts"]
-  );
-
-  const notes = [
-    {
-      id: "older-note.md",
-      data: { noteDate: new Date("2024-01-01"), draft: false },
-    },
-    {
-      id: "draft-note.md",
-      data: { noteDate: new Date("2024-03-01"), draft: true },
-    },
-    {
-      id: "newer-note.md",
-      data: { noteDate: new Date("2024-02-01"), draft: false },
-    },
-  ];
-
-  assert.deepEqual(
-    getSortedNotes(notes).map(note => note.id),
-    ["newer-note.md", "older-note.md"]
-  );
-});
-
 test("search kind contract stays explicit and shared", () => {
   const searchKinds = readJson("src/data/search-kinds.json");
   const searchEndpoint = readText("src/pages/search-index.json.ts");
@@ -506,13 +435,13 @@ test("search kind contract stays explicit and shared", () => {
 
   assert.deepEqual(
     searchKinds.map(kind => kind.filter),
-    ["all", "posts", "notes", "projects", "tags"]
+    ["all", "posts", "projects", "tags"]
   );
   assert.deepEqual(
     searchKinds.map(kind => kind.recordKind),
-    [null, "Post", "Note", "Project", "Tag"]
+    [null, "Post", "Project", "Tag"]
   );
-  assert.equal(new Set(searchKinds.map(kind => kind.filter)).size, 5);
+  assert.equal(new Set(searchKinds.map(kind => kind.filter)).size, 4);
   assert.ok(searchEndpoint.includes("getPostPath(post)"));
   assert.ok(searchPage.includes('from "@/scripts/searchPage"'));
   assert.ok(
@@ -537,52 +466,6 @@ test("search index content strips markdown-only markup", async () => {
       ].join("\n")
     ),
     "Heading Visible link text and . and html text"
-  );
-});
-
-test("search index route preserves note date fallback titles", async () => {
-  const { GET } = await loadSearchIndexRoute();
-
-  await withGlobalMocks(
-    {
-      __searchIndexCollections: {
-        blog: [],
-        projects: [],
-        notes: [
-          {
-            id: "daily-note.md",
-            slug: "daily-note",
-            body: "Daily note body",
-            data: {
-              description: "Daily description",
-              draft: false,
-              location: "Los Angeles",
-              noteDate: new Date("2026-03-07T00:00:00.000Z"),
-              tags: [],
-            },
-          },
-        ],
-      },
-    },
-    async () => {
-      const response = await GET();
-      const records = await response.json();
-
-      assert.equal(
-        response.headers.get("Content-Type"),
-        "application/json; charset=utf-8"
-      );
-      assert.deepEqual(records, [
-        {
-          title: "2026-03-07",
-          description: "Daily description",
-          url: "/notes/daily-note",
-          kind: "Note",
-          metaText: "Los Angeles",
-          content: "Daily note body",
-        },
-      ]);
-    }
   );
 });
 
@@ -673,16 +556,12 @@ test("search UI helpers share ranking and query parsing rules", async () => {
   assert.equal(escapeSearchHtml("<tag>&\"'"), "&lt;tag&gt;&amp;&quot;&#39;");
   assert.equal(SEARCH_LOAD_ERROR_MESSAGE, "Search failed to load.");
   assert.equal(
-    formatSearchEmptyPrompt("posts, notes, projects, and tags"),
-    "Type a keyword to search across posts, notes, projects, and tags."
+    formatSearchEmptyPrompt("posts, projects, and tags"),
+    "Type a keyword to search across posts, projects, and tags."
   );
   assert.equal(
-    formatSearchEmptyPrompt("notes"),
-    "Type a keyword to search across notes."
-  );
-  assert.equal(
-    formatSearchInputPlaceholder("posts, notes, projects, and tags"),
-    "Search posts, notes, projects, and tags"
+    formatSearchInputPlaceholder("posts, projects, and tags"),
+    "Search posts, projects, and tags"
   );
   assert.equal(formatNoSearchResults("gradient"), "No results for gradient");
   assert.equal(
@@ -786,29 +665,28 @@ test("search UI helpers share ranking and query parsing rules", async () => {
   assert.ok(commandPaletteScript.includes("SEARCH_LOAD_ERROR_MESSAGE"));
 });
 
-test("tag aggregation keeps post and note counts in one shared helper", async () => {
+test("tag aggregation keeps post counts in one shared helper", async () => {
   const { collectTagStats } = await loadProjectModule("src/utils/tags.ts", [
     "src/utils/slugifyCore.js",
     "src/utils/tags.ts",
   ]);
 
   const stats = collectTagStats([
-    { kind: "post", tags: ["Machine Learning", "Machine Learning", "LLMs"] },
-    { kind: "note", tags: ["machine learning", "Running"] },
-    { kind: "post", tags: ["Draft"], draft: true },
+    { tags: ["Machine Learning", "Machine Learning", "LLMs"] },
+    { tags: ["machine learning", "Running"] },
+    { tags: ["Draft"], draft: true },
   ]).sort((a, b) => a.slug.localeCompare(b.slug));
 
   assert.deepEqual(
-    stats.map(({ slug, totalCount, postCount, noteCount }) => ({
+    stats.map(({ slug, totalCount, postCount }) => ({
       slug,
       totalCount,
       postCount,
-      noteCount,
     })),
     [
-      { slug: "llms", totalCount: 1, postCount: 1, noteCount: 0 },
-      { slug: "machine-learning", totalCount: 2, postCount: 1, noteCount: 1 },
-      { slug: "running", totalCount: 1, postCount: 0, noteCount: 1 },
+      { slug: "llms", totalCount: 1, postCount: 1 },
+      { slug: "machine-learning", totalCount: 2, postCount: 2 },
+      { slug: "running", totalCount: 1, postCount: 1 },
     ]
   );
 });
@@ -1677,7 +1555,7 @@ test("search page client script preserves URL-backed search behavior", async () 
   const kindData = makeElement({ textContent: JSON.stringify(searchKinds) });
   const allButton = makeElement({ dataset: { searchKind: "all" } });
   const postsButton = makeElement({ dataset: { searchKind: "posts" } });
-  const notesButton = makeElement({ dataset: { searchKind: "notes" } });
+  const projectsButton = makeElement({ dataset: { searchKind: "projects" } });
   const { history, location } = makeUrlState({
     pathname: "/search",
     search: "?q=gradient&type=posts",
@@ -1687,7 +1565,7 @@ test("search page client script preserves URL-backed search behavior", async () 
     {
       fetch: async () => ({
         ok: true,
-        json: async () => [GRADIENT_POST_RECORD, GRADIENT_NOTE_RECORD],
+        json: async () => [GRADIENT_POST_RECORD, GRADIENT_PROJECT_RECORD],
       }),
       window: { location },
       history,
@@ -1701,7 +1579,7 @@ test("search page client script preserves URL-backed search behavior", async () 
           "#search-kind-data": kindData,
         },
         all: {
-          "[data-search-kind]": [allButton, postsButton, notesButton],
+          "[data-search-kind]": [allButton, postsButton, projectsButton],
         },
       }),
     },
@@ -1711,34 +1589,34 @@ test("search page client script preserves URL-backed search behavior", async () 
 
       assert.equal(input.value, "gradient");
       assert.equal(postsButton.getAttribute("aria-pressed"), "true");
-      assert.equal(notesButton.getAttribute("aria-pressed"), "false");
+      assert.equal(projectsButton.getAttribute("aria-pressed"), "false");
       assert.equal(status.textContent, "1 result for gradient in posts");
       assert.ok(results.innerHTML.includes("/posts/gradient"));
       assert.ok(results.innerHTML.includes("Gradient &lt;Descent&gt;"));
-      assert.ok(!results.innerHTML.includes("/notes/gradient"));
+      assert.ok(!results.innerHTML.includes("/projects/gradient"));
 
-      input.value = "note";
+      input.value = "project";
       input.dispatch("input", { currentTarget: input });
       await flushAsyncUpdates();
 
-      assert.equal(history.replacedWith, "/search?q=note&type=posts");
-      assert.equal(status.textContent, "No results for note in posts");
+      assert.equal(history.replacedWith, "/search?q=project&type=posts");
+      assert.equal(status.textContent, "No results for project in posts");
 
-      notesButton.dispatch("click");
+      projectsButton.dispatch("click");
       await flushAsyncUpdates();
 
-      assert.equal(history.replacedWith, "/search?q=note&type=notes");
-      assert.equal(notesButton.getAttribute("aria-pressed"), "true");
-      assert.equal(status.textContent, "1 result for note in notes");
-      assert.ok(results.innerHTML.includes("/notes/gradient"));
+      assert.equal(history.replacedWith, "/search?q=project&type=projects");
+      assert.equal(projectsButton.getAttribute("aria-pressed"), "true");
+      assert.equal(status.textContent, "1 result for project in projects");
+      assert.ok(results.innerHTML.includes("/projects/gradient"));
 
       clearButton.dispatch("click");
 
       assert.equal(input.value, "");
-      assert.equal(history.replacedWith, "/search?type=notes");
+      assert.equal(history.replacedWith, "/search?type=projects");
       assert.equal(
         status.textContent,
-        "Type a keyword to search across notes."
+        "Type a keyword to search across projects."
       );
       assert.equal(results.innerHTML, "");
       assert.equal(globalThis.document.activeElement, input);
@@ -1783,11 +1661,7 @@ test("content scripts share content rule contracts", async () => {
     pathToFileURL(path.join(ROOT, "scripts/content-rules.mjs")).href
   );
 
-  assert.deepEqual(Object.keys(rules.collections), [
-    "blog",
-    "notes",
-    "projects",
-  ]);
+  assert.deepEqual(Object.keys(rules.collections), ["blog", "projects"]);
   assert.deepEqual(rules.collections.blog.frontmatterFields, [
     "author",
     "pubDatetime",
@@ -1850,13 +1724,12 @@ test("content scripts resolve repository root outside the cwd", () => {
   assert.ok(!newContent.includes("const ROOT = process.cwd()"));
 });
 
-test("content check warns when post and note slugs are implicit", () => {
+test("content check warns when post slugs are implicit", () => {
   withNewContentFixture(fixture => {
     fs.copyFileSync(
       path.join(ROOT, "scripts/check-content.mjs"),
       path.join(fixture, "scripts/check-content.mjs")
     );
-    writeFixtureText(fixture, "src/data/public-image-dimensions.json", "{}");
     writeFixtureText(
       fixture,
       "src/content/blog/implicit-post.md",
@@ -1866,19 +1739,6 @@ test("content check warns when post and note slugs are implicit", () => {
         "title: Implicit Post",
         "description: Post without an explicit slug.",
         "tags: []",
-        "---",
-        "Body",
-      ].join("\n")
-    );
-    writeFixtureText(
-      fixture,
-      "src/content/notes/implicit-note.md",
-      [
-        "---",
-        "description: Note without an explicit slug.",
-        "noteDate: 2026-06-22",
-        "tags: []",
-        "photos: []",
         "---",
         "Body",
       ].join("\n")
@@ -1893,10 +1753,6 @@ test("content check warns when post and note slugs are implicit", () => {
     assert.match(
       result.stderr,
       /Warning: src\/content\/blog\/implicit-post\.md: add an explicit slug to keep the URL stable/
-    );
-    assert.match(
-      result.stderr,
-      /Warning: src\/content\/notes\/implicit-note\.md: add an explicit slug to keep the URL stable/
     );
   });
 });
@@ -1939,7 +1795,7 @@ test("new content script generates project drafts without frontmatter slugs", ()
   });
 });
 
-test("new content script preserves post and note tag generation", () => {
+test("new content script preserves post tag generation", () => {
   withNewContentFixture(fixture => {
     runNodeScript(
       [
@@ -1954,22 +1810,12 @@ test("new content script preserves post and note tag generation", () => {
     runNodeScript(
       [
         "scripts/new-content.mjs",
-        "note",
-        "Tagged Note",
+        "post",
+        "Tagged Post",
         "--date",
         "2026-06-22",
         "--tags",
         "running, life",
-      ],
-      { cwd: fixture }
-    );
-    runNodeScript(
-      [
-        "scripts/new-content.mjs",
-        "note",
-        "Default Note Tags",
-        "--date",
-        "2026-06-23",
       ],
       { cwd: fixture }
     );
@@ -1978,18 +1824,13 @@ test("new content script preserves post and note tag generation", () => {
       fixture,
       "src/content/blog/default-tags.md"
     );
-    const noteSource = readFixtureText(
+    const taggedPostSource = readFixtureText(
       fixture,
-      "src/content/notes/2026-06-22-tagged-note.md"
-    );
-    const defaultNoteSource = readFixtureText(
-      fixture,
-      "src/content/notes/2026-06-23-default-note-tags.md"
+      "src/content/blog/tagged-post.md"
     );
 
-    assert.match(postSource, /^tags:\n  - "notes"$/m);
-    assert.match(noteSource, /^tags:\n  - "running"\n  - "life"$/m);
-    assert.match(defaultNoteSource, /^tags:\n  - "notes"$/m);
+    assert.match(postSource, /^tags: \[\]$/m);
+    assert.match(taggedPostSource, /^tags:\n  - "running"\n  - "life"$/m);
   });
 });
 
@@ -2020,20 +1861,6 @@ test("content check frontmatter parser handles current template shapes", async (
   assert.deepEqual(data.tags, ["Machine Learning", "LLMs"]);
   assert.equal(data.modDatetime, "");
   assert.equal(raw.title, '"A title: with punctuation"');
-});
-
-test("public image dimensions point at existing files", () => {
-  const dimensions = readJson("src/data/public-image-dimensions.json");
-
-  for (const [src, size] of Object.entries(dimensions)) {
-    assert.ok(src.startsWith("/images/"), `${src} must be a public image`);
-    assert.ok(
-      fs.existsSync(path.join(ROOT, "public", src)),
-      `${src} must exist under public/`
-    );
-    assert.ok(Number.isInteger(size.width) && size.width > 0);
-    assert.ok(Number.isInteger(size.height) && size.height > 0);
-  }
 });
 
 test("project URLs are filename-driven, not frontmatter slug-driven", () => {
@@ -2134,7 +1961,6 @@ test("vercel redirects point at current generated content routes", () => {
     "/404",
     "/about",
     "/archives",
-    "/notes",
     "/posts",
     "/projects",
     "/search",
@@ -2145,13 +1971,6 @@ test("vercel redirects point at current generated content routes", () => {
     const frontmatter = parseFrontmatter(file);
     knownRoutes.add(
       `/posts/${getFrontmatterField(frontmatter, "slug") ?? stripMarkdownExt(path.basename(file))}`
-    );
-  }
-
-  for (const file of listMarkdownFiles("src/content/notes")) {
-    const frontmatter = parseFrontmatter(file);
-    knownRoutes.add(
-      `/notes/${getFrontmatterField(frontmatter, "slug") ?? stripMarkdownExt(path.basename(file))}`
     );
   }
 

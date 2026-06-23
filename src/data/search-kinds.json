@@ -3,19 +3,13 @@
     "filter": "all",
     "label": "All",
     "recordKind": null,
-    "scope": "posts, notes, projects, and tags"
+    "scope": "posts, projects, and tags"
   },
   {
     "filter": "posts",
     "label": "Posts",
     "recordKind": "Post",
     "scope": "posts"
-  },
-  {
-    "filter": "notes",
-    "label": "Notes",
-    "recordKind": "Note",
-    "scope": "notes"
   },
   {
     "filter": "projects",

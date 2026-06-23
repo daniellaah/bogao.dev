@@ -442,26 +442,6 @@
       "source": "/posts/support-vector-machines-sumup-eeb873/",
       "destination": "/posts/support-vector-machines-sumup/",
       "permanent": true
-    },
-    {
-      "source": "/notes/la-5k-morning",
-      "destination": "/notes/2026-03-07-la-5k-morning",
-      "permanent": true
-    },
-    {
-      "source": "/notes/la-5k-morning/",
-      "destination": "/notes/2026-03-07-la-5k-morning/",
-      "permanent": true
-    },
-    {
-      "source": "/notes/restart-myblog-after-10-years",
-      "destination": "/notes/2026-02-27-restart-myblog-after-10-years",
-      "permanent": true
-    },
-    {
-      "source": "/notes/restart-myblog-after-10-years/",
-      "destination": "/notes/2026-02-27-restart-myblog-after-10-years/",
-      "permanent": true
     }
   ]
 }

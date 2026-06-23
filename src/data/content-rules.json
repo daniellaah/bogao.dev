@@ -15,21 +15,6 @@
         "canonicalURL"
       ]
     },
-    "notes": {
-      "dir": "src/content/notes",
-      "frontmatterFields": [
-        "title",
-        "slug",
-        "description",
-        "noteDate",
-        "modDatetime",
-        "draft",
-        "location",
-        "tags",
-        "photos",
-        "canonicalURL"
-      ]
-    },
     "projects": {
       "dir": "src/content/projects",
       "frontmatterFields": [
@@ -54,19 +39,6 @@
       "collection": "blog",
       "template": "templates/blog-post.md",
       "allowedOptions": ["title", "date", "tags", "slug", "description"]
-    },
-    "note": {
-      "collection": "notes",
-      "template": "templates/note.md",
-      "allowedOptions": [
-        "title",
-        "date",
-        "slug",
-        "description",
-        "location",
-        "tags",
-        "photos"
-      ]
     },
     "project": {
       "collection": "projects",

@@ -9,7 +9,6 @@
     "sync": "astro sync",
     "astro": "astro",
     "new:post": "node scripts/new-content.mjs post",
-    "new:note": "node scripts/new-content.mjs note",
     "new:project": "node scripts/new-content.mjs project",
     "content:check": "node scripts/check-content.mjs",
     "test": "node --test tests/*.test.mjs",

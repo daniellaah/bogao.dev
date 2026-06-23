@@ -1,4 +1,4 @@
-export type SearchRecordKind = "Post" | "Note" | "Project" | "Tag";
+export type SearchRecordKind = "Post" | "Project" | "Tag";
 
 export type SearchRecord = {
   title: string;
@@ -11,7 +11,7 @@ export type SearchRecord = {
 
 export type RankedSearchRecord = SearchRecord & { score: number };
 
-export type SearchKind = "all" | "posts" | "notes" | "projects" | "tags";
+export type SearchKind = "all" | "posts" | "projects" | "tags";
 
 export type SearchKindEntry = {
   filter: SearchKind;

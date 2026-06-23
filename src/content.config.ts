@@ -44,20 +44,4 @@ const projects = defineCollection({
     }),
 });
 
-const notes = defineCollection({
-  schema: () =>
-    z.object({
-      title: z.string().trim().min(1).optional(),
-      slug: z.string().trim().min(1).optional(),
-      description: z.string().trim().min(1),
-      noteDate: z.coerce.date(),
-      modDatetime: z.coerce.date().optional().nullable(),
-      draft: z.boolean().default(false),
-      location: z.string().trim().min(1).optional(),
-      tags: z.array(z.string()).default([]),
-      photos: z.array(z.string()).default([]),
-      canonicalURL: z.string().optional(),
-    }),
-});
-
-export const collections = { blog, projects, notes };
+export const collections = { blog, projects };
