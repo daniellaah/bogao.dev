@@ -180,6 +180,21 @@ const makeMetricButton = (dataset, metrics) => {
   };
 };
 
+const makeUrlState = ({ pathname, search }) => {
+  const location = { pathname, search };
+  const history = {
+    state: { from: "test" },
+    replacedWith: "",
+    replaceState: (_state, _title, url) => {
+      history.replacedWith = url;
+      const [nextPathname, nextSearch = ""] = url.split("?");
+      location.pathname = nextPathname;
+      location.search = nextSearch ? `?${nextSearch}` : "";
+    },
+  };
+  return { history, location };
+};
+
 test("breadcrumb handles indexed routes", async () => {
   const { getBreadcrumbList } = await loadTypeScriptModule(
     "src/utils/breadcrumb.ts"
@@ -980,20 +995,10 @@ test("post filters client script preserves URL-backed filtering", async () => {
         "[data-filter-tag]": [tagAll, tagNotes],
       })[selector] ?? [],
   };
-  const location = {
+  const { history, location } = makeUrlState({
     pathname: "/posts",
     search: "?year=2024&tag=missing",
-  };
-  const history = {
-    state: { from: "test" },
-    replacedWith: "",
-    replaceState: (_state, _title, url) => {
-      history.replacedWith = url;
-      const [pathname, search = ""] = url.split("?");
-      location.pathname = pathname;
-      location.search = search ? `?${search}` : "";
-    },
-  };
+  });
 
   globalThis.window = {
     location,
@@ -1285,20 +1290,10 @@ test("search page client script preserves URL-backed search behavior", async () 
   const allButton = makeElement({ dataset: { searchKind: "all" } });
   const postsButton = makeElement({ dataset: { searchKind: "posts" } });
   const notesButton = makeElement({ dataset: { searchKind: "notes" } });
-  const location = {
+  const { history, location } = makeUrlState({
     pathname: "/search",
     search: "?q=gradient&type=posts",
-  };
-  const history = {
-    state: { from: "test" },
-    replacedWith: "",
-    replaceState: (_state, _title, url) => {
-      history.replacedWith = url;
-      const [pathname, search = ""] = url.split("?");
-      location.pathname = pathname;
-      location.search = search ? `?${search}` : "";
-    },
-  };
+  });
 
   globalThis.fetch = async () => ({
     ok: true,
