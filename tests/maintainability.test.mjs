@@ -124,14 +124,16 @@ const withGlobalMocks = async (mocks, callback) => {
 
 const flushAsyncUpdates = () => new Promise(resolve => setImmediate(resolve));
 
-const loadTypeScriptModule = async relativePath => {
-  const source = readText(relativePath);
+const importTranspiledSource = async source => {
   const { outputText } = ts.transpileModule(source, TRANSPILE_OPTIONS);
 
   return import(
     `data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`
   );
 };
+
+const loadTypeScriptModule = relativePath =>
+  importTranspiledSource(readText(relativePath));
 
 const loadProjectModule = async (entryPath, modulePaths) => {
   fs.mkdirSync(MODULE_TEST_CACHE_DIR, { recursive: true });
@@ -184,11 +186,8 @@ const loadSearchIndexInternals = async () => {
       "const stripMarkdown"
     )
     .replace(/export const GET:[\s\S]*$/m, "export { stripMarkdown };");
-  const { outputText } = ts.transpileModule(source, TRANSPILE_OPTIONS);
 
-  return import(
-    `data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`
-  );
+  return importTranspiledSource(source);
 };
 
 const ROUTE_POST_HELPERS = `
@@ -231,14 +230,7 @@ const getUniqueTags = entries => {
 const isPublishedNote = note => !note.data.draft;
 const isPublishedProject = project => !project.data.draft;
 `;
-  const { outputText } = ts.transpileModule(
-    `${prelude}\n${source}`,
-    TRANSPILE_OPTIONS
-  );
-
-  return import(
-    `data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`
-  );
+  return importTranspiledSource(`${prelude}\n${source}`);
 };
 
 const loadRssRoute = async () => {
@@ -256,14 +248,7 @@ const getCollection = async collection =>
   globalThis.__rssCollections?.[collection] ?? [];
 ${ROUTE_POST_HELPERS}
 `;
-  const { outputText } = ts.transpileModule(
-    `${prelude}\n${source}`,
-    TRANSPILE_OPTIONS
-  );
-
-  return import(
-    `data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`
-  );
+  return importTranspiledSource(`${prelude}\n${source}`);
 };
 
 const makeTestClassList = initial => {
@@ -457,10 +442,7 @@ test("sorted posts keep production filtering and date ordering", async () => {
       "import.meta.env.DEV",
       "false"
     );
-  const { outputText } = ts.transpileModule(source, TRANSPILE_OPTIONS);
-  const { default: getSortedPosts } = await import(
-    `data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`
-  );
+  const { default: getSortedPosts } = await importTranspiledSource(source);
 
   const posts = [
     {
