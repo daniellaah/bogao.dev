@@ -85,7 +85,6 @@ export function setupTagsIndexPage() {
       for (const card of sortedCards) {
         cardGrid.append(card);
       }
-      if (animate && !reduceMotion.matches) pulseBadges();
       return;
     }
 
