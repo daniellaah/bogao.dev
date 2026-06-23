@@ -169,6 +169,7 @@ npm run new:project -- "My project" --stack Python,Astro --repoUrl https://githu
 ```bash
 npm run content:check
 npm test
+npm run lint
 npm run format:check
 npm run build
 ```
