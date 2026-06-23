@@ -97,6 +97,9 @@ const withNewContentFixture = callback => {
 const runNodeScript = (args, options = {}) =>
   execFileSync(process.execPath, args, { encoding: "utf8", ...options });
 
+const readFixtureText = (fixture, relativePath) =>
+  fs.readFileSync(path.join(fixture, relativePath), "utf8");
+
 const withGlobalMocks = async (mocks, callback) => {
   const originals = Object.fromEntries(
     Object.keys(mocks).map(key => [key, globalThis[key]])
@@ -1632,7 +1635,7 @@ test("new content script generates project drafts without frontmatter slugs", ()
       { cwd: fixture }
     );
     const generatedFile = "src/content/projects/agent-notes.md";
-    const source = fs.readFileSync(path.join(fixture, generatedFile), "utf8");
+    const source = readFixtureText(fixture, generatedFile);
     const frontmatter = getFrontmatterFromSource(source);
 
     assert.match(output, new RegExp(`Created ${generatedFile}`));
@@ -1686,17 +1689,17 @@ test("new content script preserves post and note tag generation", () => {
       { cwd: fixture }
     );
 
-    const postSource = fs.readFileSync(
-      path.join(fixture, "src/content/blog/default-tags.md"),
-      "utf8"
+    const postSource = readFixtureText(
+      fixture,
+      "src/content/blog/default-tags.md"
     );
-    const noteSource = fs.readFileSync(
-      path.join(fixture, "src/content/notes/2026-06-22-tagged-note.md"),
-      "utf8"
+    const noteSource = readFixtureText(
+      fixture,
+      "src/content/notes/2026-06-22-tagged-note.md"
     );
-    const defaultNoteSource = fs.readFileSync(
-      path.join(fixture, "src/content/notes/2026-06-23-default-note-tags.md"),
-      "utf8"
+    const defaultNoteSource = readFixtureText(
+      fixture,
+      "src/content/notes/2026-06-23-default-note-tags.md"
     );
 
     assert.match(postSource, /^tags:\n  - "notes"$/m);
