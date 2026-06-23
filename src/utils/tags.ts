@@ -1,8 +1,8 @@
 import { slugifyStr } from "./slugifyCore";
 
-export type TagKind = "post" | "note";
+type TagKind = "post" | "note";
 
-export type TagSource = {
+type TagSource = {
   tags: string[];
   kind?: TagKind;
   draft?: boolean;
