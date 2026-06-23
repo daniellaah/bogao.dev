@@ -94,6 +94,9 @@ const withNewContentFixture = callback => {
   }
 };
 
+const runNodeScript = (args, options = {}) =>
+  execFileSync(process.execPath, args, { encoding: "utf8", ...options });
+
 const withGlobalMocks = async (mocks, callback) => {
   const originals = Object.fromEntries(
     Object.keys(mocks).map(key => [key, globalThis[key]])
@@ -1578,11 +1581,7 @@ test("content scripts share content rule contracts", async () => {
     "custom-slug.md"
   );
   assert.throws(
-    () =>
-      execFileSync(process.execPath, ["scripts/new-content.mjs", "project"], {
-        cwd: ROOT,
-        encoding: "utf8",
-      }),
+    () => runNodeScript(["scripts/new-content.mjs", "project"], { cwd: ROOT }),
     error => {
       assert.match(error.stdout, /Usage:/);
       assert.match(
@@ -1598,14 +1597,9 @@ test("content scripts share content rule contracts", async () => {
 });
 
 test("content scripts resolve repository root outside the cwd", () => {
-  const output = execFileSync(
-    process.execPath,
-    ["../scripts/check-content.mjs"],
-    {
-      cwd: path.join(ROOT, "src"),
-      encoding: "utf8",
-    }
-  );
+  const output = runNodeScript(["../scripts/check-content.mjs"], {
+    cwd: path.join(ROOT, "src"),
+  });
   const contentRules = readText("scripts/content-rules.mjs");
   const checkContent = readText("scripts/check-content.mjs");
   const newContent = readText("scripts/new-content.mjs");
@@ -1621,8 +1615,7 @@ test("content scripts resolve repository root outside the cwd", () => {
 
 test("new content script generates project drafts without frontmatter slugs", () => {
   withNewContentFixture(fixture => {
-    const output = execFileSync(
-      process.execPath,
+    const output = runNodeScript(
       [
         "scripts/new-content.mjs",
         "project",
@@ -1636,7 +1629,7 @@ test("new content script generates project drafts without frontmatter slugs", ()
         "--slug",
         "Agent Notes",
       ],
-      { cwd: fixture, encoding: "utf8" }
+      { cwd: fixture }
     );
     const generatedFile = "src/content/projects/agent-notes.md";
     const source = fs.readFileSync(path.join(fixture, generatedFile), "utf8");
@@ -1660,8 +1653,7 @@ test("new content script generates project drafts without frontmatter slugs", ()
 
 test("new content script preserves post and note tag generation", () => {
   withNewContentFixture(fixture => {
-    execFileSync(
-      process.execPath,
+    runNodeScript(
       [
         "scripts/new-content.mjs",
         "post",
@@ -1669,10 +1661,9 @@ test("new content script preserves post and note tag generation", () => {
         "--date",
         "2026-06-22",
       ],
-      { cwd: fixture, encoding: "utf8" }
+      { cwd: fixture }
     );
-    execFileSync(
-      process.execPath,
+    runNodeScript(
       [
         "scripts/new-content.mjs",
         "note",
@@ -1682,10 +1673,9 @@ test("new content script preserves post and note tag generation", () => {
         "--tags",
         "running, life",
       ],
-      { cwd: fixture, encoding: "utf8" }
+      { cwd: fixture }
     );
-    execFileSync(
-      process.execPath,
+    runNodeScript(
       [
         "scripts/new-content.mjs",
         "note",
@@ -1693,7 +1683,7 @@ test("new content script preserves post and note tag generation", () => {
         "--date",
         "2026-06-23",
       ],
-      { cwd: fixture, encoding: "utf8" }
+      { cwd: fixture }
     );
 
     const postSource = fs.readFileSync(
