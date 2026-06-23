@@ -254,6 +254,17 @@ const makeUrlState = ({ pathname, search }) => {
   return { history, location };
 };
 
+const makeImmediateFrameWindow = (overrides = {}) => ({
+  requestAnimationFrame: callback => {
+    callback();
+    return 1;
+  },
+  cancelAnimationFrame: () => {},
+  addEventListener: () => {},
+  removeEventListener: () => {},
+  ...overrides,
+});
+
 const selectOneFrom = selectorMap => selector => selectorMap[selector] ?? null;
 
 const selectAllFrom = selectorMap => selector => selectorMap[selector] ?? [];
@@ -1058,16 +1069,9 @@ test("tags index client script preserves sort state behavior", async () => {
 
   await withGlobalMocks(
     {
-      window: {
+      window: makeImmediateFrameWindow({
         matchMedia: () => ({ matches: true }),
-        requestAnimationFrame: callback => {
-          callback();
-          return 1;
-        },
-        cancelAnimationFrame: () => {},
-        addEventListener: () => {},
-        removeEventListener: () => {},
-      },
+      }),
       document: {
         querySelector: selector =>
           selector === "[data-tags-index]" ? root : null,
@@ -1180,16 +1184,9 @@ test("post filters client script preserves URL-backed filtering", async () => {
 
   await withGlobalMocks(
     {
-      window: {
+      window: makeImmediateFrameWindow({
         location,
-        requestAnimationFrame: callback => {
-          callback();
-          return 1;
-        },
-        cancelAnimationFrame: () => {},
-        addEventListener: () => {},
-        removeEventListener: () => {},
-      },
+      }),
       document: {
         querySelector: selectOneFrom({ "[data-post-filters]": root }),
         querySelectorAll: selectAllFrom({
@@ -1319,11 +1316,7 @@ test("command palette client script opens, searches, and closes", async () => {
         ok: true,
         json: async () => [GRADIENT_POST_RECORD],
       }),
-      window: {
-        requestAnimationFrame: callback => {
-          callback();
-          return 1;
-        },
+      window: makeImmediateFrameWindow({
         clearTimeout: () => {},
         setTimeout: callback => {
           callback();
@@ -1332,9 +1325,7 @@ test("command palette client script opens, searches, and closes", async () => {
         matchMedia: query => ({
           matches: query === "(prefers-reduced-motion: reduce)",
         }),
-        addEventListener: () => {},
-        removeEventListener: () => {},
-      },
+      }),
       document: {
         activeElement: previousActiveElement,
         addEventListener: (event, handler) =>
