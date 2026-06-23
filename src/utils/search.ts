@@ -36,7 +36,7 @@ export const escapeSearchHtml = (value: string) =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 
-export const normalizeSearchText = (value: string) =>
+const normalizeSearchText = (value: string) =>
   value.toLowerCase().replace(/\s+/g, " ").trim();
 
 const isCjk = (value: string) => /[\u3400-\u9fff]/.test(value);
