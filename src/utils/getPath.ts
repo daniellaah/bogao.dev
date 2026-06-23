@@ -3,11 +3,12 @@ import { getPathSegmentSlug, getResolvedSlug } from "./contentSlug";
 const BLOG_PATH = "src/content/blog";
 
 /**
- * Get full path of a blog post
- * @param id - id of the blog post (aka slug)
- * @param filePath - the blog post full file location
+ * Build a blog post URL path from Astro content metadata.
+ * @param id - Astro content id for the blog post
+ * @param filePath - optional source file path used to preserve nested folders
  * @param includeBase - whether to include `/posts` in return value
- * @returns blog post path
+ * @param explicitSlug - frontmatter slug that overrides the id-derived slug
+ * @returns blog post URL path
  */
 export function getPath(
   id: string,
@@ -26,7 +27,7 @@ export function getPath(
   const basePath = includeBase ? "/posts" : "";
   const slug = getResolvedSlug(id, explicitSlug);
 
-  // If not inside the sub-dir, simply return the file path
+  // If not inside a nested content directory, return only the post slug.
   if (!pathSegments || pathSegments.length < 1) {
     return [basePath, slug].join("/");
   }
