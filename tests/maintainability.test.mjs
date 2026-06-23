@@ -423,6 +423,7 @@ test("search UI helpers share ranking and query parsing rules", async () => {
     SEARCH_LOAD_ERROR_MESSAGE,
     createSearchIndexLoader,
     escapeSearchHtml,
+    formatNoSearchResults,
     rankSearchRecords,
     scoreSearchRecord,
     splitSearchTerms,
@@ -439,6 +440,7 @@ test("search UI helpers share ranking and query parsing rules", async () => {
   assert.deepEqual(splitSearchTerms("机器学习"), ["机器学习"]);
   assert.equal(escapeSearchHtml("<tag>&\"'"), "&lt;tag&gt;&amp;&quot;&#39;");
   assert.equal(SEARCH_LOAD_ERROR_MESSAGE, "Search failed to load.");
+  assert.equal(formatNoSearchResults("gradient"), "No results for gradient");
   assert.equal(
     scoreSearchRecord(
       {
@@ -519,9 +521,11 @@ test("search UI helpers share ranking and query parsing rules", async () => {
   }
   assert.ok(searchPage.includes('from "@/scripts/searchPage"'));
   assert.ok(searchPageScript.includes('from "../utils/search"'));
+  assert.ok(searchPageScript.includes("formatNoSearchResults"));
   assert.ok(searchPageScript.includes("SEARCH_LOAD_ERROR_MESSAGE"));
   assert.ok(commandPalette.includes('from "@/scripts/commandPalette"'));
   assert.ok(commandPaletteScript.includes('from "../utils/search"'));
+  assert.ok(commandPaletteScript.includes("formatNoSearchResults"));
   assert.ok(commandPaletteScript.includes("SEARCH_LOAD_ERROR_MESSAGE"));
 });
 

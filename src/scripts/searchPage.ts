@@ -2,6 +2,7 @@ import {
   SEARCH_LOAD_ERROR_MESSAGE,
   createSearchIndexLoader,
   escapeSearchHtml,
+  formatNoSearchResults,
   formatSearchResultSummary,
   normalizeSearchText,
   rankSearchRecords,
@@ -100,7 +101,7 @@ export function setupSearchPage() {
     const sorted = rankSearchRecords(visibleRecords, terms);
 
     if (!sorted.length) {
-      status.textContent = `No results for ${query} in ${getScopeText(kind)}`;
+      status.textContent = `${formatNoSearchResults(query)} in ${getScopeText(kind)}`;
       results.innerHTML = "";
       return;
     }

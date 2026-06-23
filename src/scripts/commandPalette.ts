@@ -2,6 +2,7 @@ import {
   SEARCH_LOAD_ERROR_MESSAGE,
   createSearchIndexLoader,
   escapeSearchHtml,
+  formatNoSearchResults,
   formatSearchResultSummary,
   rankSearchRecords,
   splitSearchTerms,
@@ -106,7 +107,7 @@ export function setupCommandPalettePage() {
     setThinking(false);
 
     if (!sorted.length) {
-      status.textContent = `No results for ${query}`;
+      status.textContent = formatNoSearchResults(query);
       results.innerHTML = "";
       return;
     }

@@ -52,6 +52,9 @@ export const splitSearchTerms = (value: string) => {
 export const formatSearchResultSummary = (count: number, query: string) =>
   `${count} result${count > 1 ? "s" : ""} for ${query}`;
 
+export const formatNoSearchResults = (query: string) =>
+  `No results for ${query}`;
+
 export const scoreSearchRecord = (
   record: SearchRecord,
   terms: string[]
