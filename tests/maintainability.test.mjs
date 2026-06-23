@@ -269,6 +269,12 @@ const selectOneFrom = selectorMap => selector => selectorMap[selector] ?? null;
 
 const selectAllFrom = selectorMap => selector => selectorMap[selector] ?? [];
 
+const makeQueryDocument = ({ one = {}, all = {}, extra = {} }) => ({
+  ...extra,
+  querySelector: selectOneFrom(one),
+  querySelectorAll: selectAllFrom(all),
+});
+
 test("breadcrumb handles indexed routes", async () => {
   const { getBreadcrumbList } = await loadTypeScriptModule(
     "src/utils/breadcrumb.ts"
@@ -749,15 +755,15 @@ test("home page client script preserves back link and avatar replay behavior", a
           setItem: (key, value) => storage.set(key, value),
         },
         performance: { now: () => currentNow },
-        document: {
-          querySelector: selectOneFrom({
+        document: makeQueryDocument({
+          one: {
             "#main-content": mainContent,
             ".hero-avatar": avatar,
-          }),
-          querySelectorAll: selectAllFrom({
+          },
+          all: {
             ".hero-avatar__image": [lightAvatar, darkAvatar],
-          }),
-        },
+          },
+        }),
       },
       async () => {
         setupHomePage();
@@ -869,14 +875,14 @@ test("header nav client script preserves menu toggle behavior", async () => {
 
   await withGlobalMocks(
     {
-      document: {
-        querySelector: selectOneFrom({
+      document: makeQueryDocument({
+        one: {
           "#menu-btn": menuBtn,
           "#menu-items": menuItems,
           "#menu-icon": menuIcon,
           "#close-icon": closeIcon,
-        }),
-      },
+        },
+      }),
     },
     async () => {
       setupHeaderNav();
@@ -1187,12 +1193,12 @@ test("post filters client script preserves URL-backed filtering", async () => {
       window: makeImmediateFrameWindow({
         location,
       }),
-      document: {
-        querySelector: selectOneFrom({ "[data-post-filters]": root }),
-        querySelectorAll: selectAllFrom({
+      document: makeQueryDocument({
+        one: { "[data-post-filters]": root },
+        all: {
           "[data-post-list-item]": [postA, postB],
-        }),
-      },
+        },
+      }),
       history,
     },
     async () => {
@@ -1326,12 +1332,14 @@ test("command palette client script opens, searches, and closes", async () => {
           matches: query === "(prefers-reduced-motion: reduce)",
         }),
       }),
-      document: {
-        activeElement: previousActiveElement,
-        addEventListener: (event, handler) =>
-          documentHandlers.set(event, handler),
-        removeEventListener: event => documentHandlers.delete(event),
-        querySelector: selectOneFrom({
+      document: makeQueryDocument({
+        extra: {
+          activeElement: previousActiveElement,
+          addEventListener: (event, handler) =>
+            documentHandlers.set(event, handler),
+          removeEventListener: event => documentHandlers.delete(event),
+        },
+        one: {
           "#command-palette": root,
           ".command-palette__panel": panel,
           "#command-palette-input": input,
@@ -1343,12 +1351,12 @@ test("command palette client script opens, searches, and closes", async () => {
           ".site-brand": siteBrand,
           "[data-nav-item]": firstNavItem,
           "[data-command-open]": openButton,
-        }),
-        querySelectorAll: selectAllFrom({
+        },
+        all: {
           "[data-command-close]": [closeButton],
           "[data-command-open]": [openButton],
-        }),
-      },
+        },
+      }),
     },
     async () => {
       setupCommandPalettePage();
@@ -1443,19 +1451,19 @@ test("search page client script preserves URL-backed search behavior", async () 
       }),
       window: { location },
       history,
-      document: {
-        activeElement: null,
-        querySelector: selectOneFrom({
+      document: makeQueryDocument({
+        extra: { activeElement: null },
+        one: {
           "#search-input": input,
           "#search-clear": clearButton,
           "#search-status": status,
           "#search-results": results,
           "#search-kind-data": kindData,
-        }),
-        querySelectorAll: selectAllFrom({
+        },
+        all: {
           "[data-search-kind]": [allButton, postsButton, notesButton],
-        }),
-      },
+        },
+      }),
     },
     async () => {
       setupSearchPage();
