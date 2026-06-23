@@ -1,5 +1,11 @@
 ---
 import IconSearch from "@/assets/icons/IconSearch.svg";
+import searchKinds from "@/data/search-kinds.json";
+import { formatSearchInputPlaceholder } from "@/utils/search";
+
+const searchInputPlaceholder = formatSearchInputPlaceholder(
+  searchKinds[0].scope
+);
 ---
 
 <div
@@ -46,7 +52,7 @@ import IconSearch from "@/assets/icons/IconSearch.svg";
       <input
         id="command-palette-input"
         type="search"
-        placeholder="Search posts, notes, projects, and tags"
+        placeholder={searchInputPlaceholder}
         autocomplete="off"
         aria-busy="false"
         aria-controls="command-palette-results"

@@ -55,6 +55,9 @@ export const formatSearchResultSummary = (count: number, query: string) =>
 export const formatSearchEmptyPrompt = (scope: string) =>
   `Type a keyword to search across ${scope}.`;
 
+export const formatSearchInputPlaceholder = (scope: string) =>
+  `Search ${scope}`;
+
 export const formatNoSearchResults = (query: string) =>
   `No results for ${query}`;
 

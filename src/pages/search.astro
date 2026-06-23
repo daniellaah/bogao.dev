@@ -5,12 +5,18 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import searchKinds from "@/data/search-kinds.json";
 import { SITE } from "@/config";
-import { formatSearchEmptyPrompt } from "@/utils/search";
+import {
+  formatSearchEmptyPrompt,
+  formatSearchInputPlaceholder,
+} from "@/utils/search";
+
+const searchAllScope = searchKinds[0].scope;
+const searchInputPlaceholder = formatSearchInputPlaceholder(searchAllScope);
 ---
 
 <Layout title={`Search | ${SITE.title}`}>
   <Header />
-  <Main pageTitle="Search" pageDesc="Search posts, notes, projects, and tags.">
+  <Main pageTitle="Search" pageDesc={`${searchInputPlaceholder}.`}>
     <section class="space-y-5">
       <div
         class="sketch-box sketch-border sketch-border-thin search-box relative"
@@ -19,7 +25,7 @@ import { formatSearchEmptyPrompt } from "@/utils/search";
         <input
           id="search-input"
           type="search"
-          placeholder="Search posts, notes, projects, and tags"
+          placeholder={searchInputPlaceholder}
           class="search-input w-full border-0 bg-transparent px-5 py-4 pe-24 text-lg outline-hidden placeholder:text-graphite/75"
           autocomplete="off"
         />
@@ -60,7 +66,7 @@ import { formatSearchEmptyPrompt } from "@/utils/search";
       />
 
       <p id="search-status" class="font-code text-xs text-graphite">
-        {formatSearchEmptyPrompt(searchKinds[0].scope)}
+        {formatSearchEmptyPrompt(searchAllScope)}
       </p>
 
       <ul id="search-results"></ul>

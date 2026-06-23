@@ -424,6 +424,7 @@ test("search UI helpers share ranking and query parsing rules", async () => {
     createSearchIndexLoader,
     escapeSearchHtml,
     formatSearchEmptyPrompt,
+    formatSearchInputPlaceholder,
     formatNoSearchResults,
     rankSearchRecords,
     scoreSearchRecord,
@@ -448,6 +449,10 @@ test("search UI helpers share ranking and query parsing rules", async () => {
   assert.equal(
     formatSearchEmptyPrompt("notes"),
     "Type a keyword to search across notes."
+  );
+  assert.equal(
+    formatSearchInputPlaceholder("posts, notes, projects, and tags"),
+    "Search posts, notes, projects, and tags"
   );
   assert.equal(formatNoSearchResults("gradient"), "No results for gradient");
   assert.equal(
@@ -529,10 +534,12 @@ test("search UI helpers share ranking and query parsing rules", async () => {
     assert.equal(calls, 2);
   }
   assert.ok(searchPage.includes('from "@/scripts/searchPage"'));
+  assert.ok(searchPage.includes("formatSearchInputPlaceholder"));
   assert.ok(searchPageScript.includes('from "../utils/search"'));
   assert.ok(searchPageScript.includes("formatNoSearchResults"));
   assert.ok(searchPageScript.includes("SEARCH_LOAD_ERROR_MESSAGE"));
   assert.ok(commandPalette.includes('from "@/scripts/commandPalette"'));
+  assert.ok(commandPalette.includes("formatSearchInputPlaceholder"));
   assert.ok(commandPaletteScript.includes('from "../utils/search"'));
   assert.ok(commandPaletteScript.includes("formatNoSearchResults"));
   assert.ok(commandPaletteScript.includes("SEARCH_LOAD_ERROR_MESSAGE"));
