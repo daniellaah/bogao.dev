@@ -120,6 +120,43 @@ const loadSearchIndexInternals = async () => {
   );
 };
 
+const makeTestClassList = initial => {
+  const classes = new Set(initial);
+  return {
+    contains: name => classes.has(name),
+    toggle: (name, active) => {
+      if (active === undefined) {
+        if (classes.has(name)) classes.delete(name);
+        else classes.add(name);
+      } else if (active) classes.add(name);
+      else classes.delete(name);
+    },
+  };
+};
+
+const makeEventElement = ({ classNames = [] } = {}) => {
+  const attributes = new Map();
+  const handlers = new Map();
+  return {
+    classList: makeTestClassList(classNames),
+    dataset: {},
+    addEventListener: (event, handler) => {
+      const eventHandlers = handlers.get(event) ?? new Set();
+      eventHandlers.add(handler);
+      handlers.set(event, eventHandlers);
+    },
+    removeEventListener: (event, handler) => {
+      handlers.get(event)?.delete(handler);
+    },
+    dispatch: event => {
+      for (const handler of handlers.get(event) ?? []) handler();
+    },
+    handlerCount: event => handlers.get(event)?.size ?? 0,
+    getAttribute: name => attributes.get(name),
+    setAttribute: (name, value) => attributes.set(name, value),
+  };
+};
+
 test("breadcrumb handles indexed routes", async () => {
   const { getBreadcrumbList } = await loadTypeScriptModule(
     "src/utils/breadcrumb.ts"
@@ -606,39 +643,10 @@ test("header nav client script preserves menu toggle behavior", async () => {
     ["src/scripts/headerNav.ts"]
   );
   const originalDocument = globalThis.document;
-  const makeClassList = initial => {
-    const classes = new Set(initial);
-    return {
-      contains: name => classes.has(name),
-      toggle: name => {
-        if (classes.has(name)) classes.delete(name);
-        else classes.add(name);
-      },
-    };
-  };
-  const makeElement = ({ classNames = [] } = {}) => {
-    const attributes = new Map();
-    const handlers = new Map();
-    return {
-      classList: makeClassList(classNames),
-      dataset: {},
-      addEventListener: (event, handler) => {
-        const eventHandlers = handlers.get(event) ?? new Set();
-        eventHandlers.add(handler);
-        handlers.set(event, eventHandlers);
-      },
-      dispatch: event => {
-        for (const handler of handlers.get(event) ?? []) handler();
-      },
-      handlerCount: event => handlers.get(event)?.size ?? 0,
-      getAttribute: name => attributes.get(name),
-      setAttribute: (name, value) => attributes.set(name, value),
-    };
-  };
-  const menuBtn = makeElement();
-  const menuItems = makeElement({ classNames: ["hidden"] });
-  const menuIcon = makeElement();
-  const closeIcon = makeElement({ classNames: ["hidden"] });
+  const menuBtn = makeEventElement();
+  const menuItems = makeEventElement({ classNames: ["hidden"] });
+  const menuIcon = makeEventElement();
+  const closeIcon = makeEventElement({ classNames: ["hidden"] });
   menuBtn.setAttribute("aria-expanded", "false");
   menuBtn.setAttribute("aria-label", "Open Menu");
   globalThis.document = {
@@ -688,38 +696,6 @@ test("back-to-top client script preserves scroll and cleanup behavior", async ()
   );
   const originalWindow = globalThis.window;
   const originalDocument = globalThis.document;
-  const makeClassList = initial => {
-    const classes = new Set(initial);
-    return {
-      contains: name => classes.has(name),
-      toggle: (name, active) => {
-        if (active === undefined) {
-          if (classes.has(name)) classes.delete(name);
-          else classes.add(name);
-        } else if (active) classes.add(name);
-        else classes.delete(name);
-      },
-    };
-  };
-  const makeElement = ({ classNames = [] } = {}) => {
-    const handlers = new Map();
-    return {
-      classList: makeClassList(classNames),
-      dataset: {},
-      addEventListener: (event, handler) => {
-        const eventHandlers = handlers.get(event) ?? new Set();
-        eventHandlers.add(handler);
-        handlers.set(event, eventHandlers);
-      },
-      removeEventListener: (event, handler) => {
-        handlers.get(event)?.delete(handler);
-      },
-      dispatch: event => {
-        for (const handler of handlers.get(event) ?? []) handler();
-      },
-      handlerCount: event => handlers.get(event)?.size ?? 0,
-    };
-  };
   const documentHandlers = new Map();
   const addDocumentHandler = (event, handler) => {
     const handlers = documentHandlers.get(event) ?? new Set();
@@ -739,10 +715,10 @@ test("back-to-top client script preserves scroll and cleanup behavior", async ()
     scrollTop: 0,
   };
   const body = { scrollTop: 0 };
-  const btnContainer = makeElement({
+  const btnContainer = makeEventElement({
     classNames: ["opacity-0", "translate-y-14"],
   });
-  const backToTopBtn = makeElement();
+  const backToTopBtn = makeEventElement();
   const animationFrameCallbacks = [];
   const windowMock = {
     requestAnimationFrame: callback => {
