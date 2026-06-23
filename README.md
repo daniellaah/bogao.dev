@@ -160,7 +160,7 @@ npm run new:project -- "My project" --stack Python,Astro --repoUrl https://githu
 
 - 新内容默认 `draft: true`
 - 日期默认使用当天，格式为 `YYYY-MM-DD`
-- 新内容会写入显式 `slug`，后续修改标题或文件名不会改变 URL
+- Post / Note 会写入显式 `slug`，后续修改标题或文件名不会改变 URL
 - 如果标题生成的 slug 不理想，可以用 `--slug your-custom-slug` 指定
 - Project URL 固定由文件名生成；`new:project --slug` 只用于控制生成的文件名，不会写入 frontmatter `slug`
 
