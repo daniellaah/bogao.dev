@@ -12,7 +12,7 @@ export const REPO_ROOT = path.resolve(
 );
 const rulesPath = path.join(REPO_ROOT, "src/data/content-rules.json");
 
-export const contentRules = JSON.parse(fs.readFileSync(rulesPath, "utf8"));
+const contentRules = JSON.parse(fs.readFileSync(rulesPath, "utf8"));
 
 export const COLLECTIONS = Object.entries(contentRules.collections).map(
   ([name, config]) => ({ name, dir: config.dir })
