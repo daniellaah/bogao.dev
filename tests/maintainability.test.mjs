@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -99,6 +99,15 @@ const runNodeScript = (args, options = {}) =>
 
 const readFixtureText = (fixture, relativePath) =>
   fs.readFileSync(path.join(fixture, relativePath), "utf8");
+
+const writeFixtureText = (fixture, relativePath, content) => {
+  const file = path.join(fixture, relativePath);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, content);
+};
+
+const runNodeScriptResult = (args, options = {}) =>
+  spawnSync(process.execPath, args, { encoding: "utf8", ...options });
 
 const withGlobalMocks = async (mocks, callback) => {
   const originals = Object.fromEntries(
@@ -1614,6 +1623,57 @@ test("content scripts resolve repository root outside the cwd", () => {
   assert.ok(newContent.includes("REPO_ROOT"));
   assert.ok(!checkContent.includes("const ROOT = process.cwd()"));
   assert.ok(!newContent.includes("const ROOT = process.cwd()"));
+});
+
+test("content check warns when post and note slugs are implicit", () => {
+  withNewContentFixture(fixture => {
+    fs.copyFileSync(
+      path.join(ROOT, "scripts/check-content.mjs"),
+      path.join(fixture, "scripts/check-content.mjs")
+    );
+    writeFixtureText(fixture, "src/data/public-image-dimensions.json", "{}");
+    writeFixtureText(
+      fixture,
+      "src/content/blog/implicit-post.md",
+      [
+        "---",
+        "pubDatetime: 2026-06-22",
+        "title: Implicit Post",
+        "description: Post without an explicit slug.",
+        "tags: []",
+        "---",
+        "Body",
+      ].join("\n")
+    );
+    writeFixtureText(
+      fixture,
+      "src/content/notes/implicit-note.md",
+      [
+        "---",
+        "description: Note without an explicit slug.",
+        "noteDate: 2026-06-22",
+        "tags: []",
+        "photos: []",
+        "---",
+        "Body",
+      ].join("\n")
+    );
+
+    const result = runNodeScriptResult(["scripts/check-content.mjs"], {
+      cwd: fixture,
+    });
+
+    assert.equal(result.status, 0);
+    assert.match(result.stdout, /Content check passed\./);
+    assert.match(
+      result.stderr,
+      /Warning: src\/content\/blog\/implicit-post\.md: add an explicit slug to keep the URL stable/
+    );
+    assert.match(
+      result.stderr,
+      /Warning: src\/content\/notes\/implicit-note\.md: add an explicit slug to keep the URL stable/
+    );
+  });
 });
 
 test("new content script generates project drafts without frontmatter slugs", () => {

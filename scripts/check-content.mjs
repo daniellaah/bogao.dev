@@ -149,6 +149,12 @@ const addSlug = (seenSlugs, collection, file, explicitSlug) => {
   }
 };
 
+const warnImplicitSlug = (file, data) => {
+  if (!isPresent(data.slug)) {
+    warnings.push(`${file}: add an explicit slug to keep the URL stable`);
+  }
+};
+
 const validateUrl = (file, data, field) => {
   const value = data[field];
   if (!isPresent(value)) return;
@@ -200,10 +206,7 @@ const validateBlog = (file, data, raw, seenSlugs) => {
   validateDate(file, raw, "modDatetime");
   validateStringArray(file, data, "tags", true);
   addSlug(seenSlugs, "blog", file, data.slug);
-
-  if (!isPresent(data.slug)) {
-    warnings.push(`${file}: add an explicit slug to keep the URL stable`);
-  }
+  warnImplicitSlug(file, data);
 };
 
 const validateNote = (file, data, raw, seenSlugs) => {
@@ -213,10 +216,7 @@ const validateNote = (file, data, raw, seenSlugs) => {
   validateStringArray(file, data, "tags");
   validatePhotoPaths(file, validateStringArray(file, data, "photos"));
   addSlug(seenSlugs, "note", file, data.slug);
-
-  if (!isPresent(data.slug)) {
-    warnings.push(`${file}: add an explicit slug to keep the URL stable`);
-  }
+  warnImplicitSlug(file, data);
 };
 
 const validateProject = (file, data, raw, seenSlugs) => {
