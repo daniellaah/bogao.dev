@@ -1,18 +1,25 @@
 import type { CollectionEntry } from "astro:content";
-import postFilter from "./postFilter";
+import { SITE } from "@/config";
 
 export type SortedBlogPost = CollectionEntry<"blog"> & {
   data: CollectionEntry<"blog">["data"] & { pubDatetime: Date };
 };
 
-const hasPublishDate = (
+const isPublishablePost = (
   post: CollectionEntry<"blog">
-): post is SortedBlogPost => Boolean(post.data.pubDatetime);
+): post is SortedBlogPost => {
+  const { data } = post;
+  if (!data.pubDatetime) return false;
+
+  const isPublishTimePassed =
+    Date.now() >
+    new Date(data.pubDatetime).getTime() - SITE.scheduledPostMargin;
+  return !data.draft && (import.meta.env.DEV || isPublishTimePassed);
+};
 
 const getSortedPosts = (posts: CollectionEntry<"blog">[]) =>
   posts
-    .filter(postFilter)
-    .filter(hasPublishDate)
+    .filter(isPublishablePost)
     .sort(
       (a, b) => b.data.pubDatetime.getTime() - a.data.pubDatetime.getTime()
     );

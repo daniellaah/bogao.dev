@@ -278,6 +278,52 @@ test("post detail routes use standard post paths", () => {
   assert.deepEqual(postRouteEntries, ["[...page].astro", "[...slug]"]);
 });
 
+test("sorted posts keep production filtering and date ordering", async () => {
+  const sortedPostsSource = readText("src/utils/getSortedPosts.ts").replace(
+    /^import .*$/gm,
+    ""
+  );
+  const source =
+    `const SITE = { scheduledPostMargin: 0 };\n${sortedPostsSource}`.replaceAll(
+      "import.meta.env.DEV",
+      "false"
+    );
+  const { outputText } = ts.transpileModule(source, {
+    compilerOptions: {
+      module: ts.ModuleKind.ES2022,
+      target: ts.ScriptTarget.ES2022,
+    },
+  });
+  const { default: getSortedPosts } = await import(
+    `data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`
+  );
+
+  const posts = [
+    {
+      id: "older.md",
+      data: { pubDatetime: new Date("2024-01-01"), draft: false },
+    },
+    {
+      id: "draft.md",
+      data: { pubDatetime: new Date("2024-03-01"), draft: true },
+    },
+    { id: "missing-date.md", data: { draft: false } },
+    {
+      id: "future.md",
+      data: { pubDatetime: new Date("2999-01-01"), draft: false },
+    },
+    {
+      id: "newer.md",
+      data: { pubDatetime: new Date("2024-02-01"), draft: false },
+    },
+  ];
+
+  assert.deepEqual(
+    getSortedPosts(posts).map(post => post.id),
+    ["newer.md", "older.md"]
+  );
+});
+
 test("search kind contract stays explicit and shared", () => {
   const searchKinds = readJson("src/data/search-kinds.json");
   const searchEndpoint = readText("src/pages/search-index.json.ts");
