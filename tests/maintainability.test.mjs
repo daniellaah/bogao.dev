@@ -639,58 +639,58 @@ test("toggle controls resize sync registers and cleans up one listener", async (
   const { addToggleIndicatorResizeSync } = await loadTypeScriptModule(
     "src/scripts/toggleControls.ts"
   );
-  const originalWindow = globalThis.window;
   const resizeHandlers = new Set();
   const frameCallbacks = new Map();
   const listenerOptions = [];
   let nextFrame = 1;
 
-  globalThis.window = {
-    requestAnimationFrame: callback => {
-      const frame = nextFrame;
-      nextFrame += 1;
-      frameCallbacks.set(frame, callback);
-      return frame;
+  await withGlobalMocks(
+    {
+      window: {
+        requestAnimationFrame: callback => {
+          const frame = nextFrame;
+          nextFrame += 1;
+          frameCallbacks.set(frame, callback);
+          return frame;
+        },
+        cancelAnimationFrame: frame => {
+          frameCallbacks.delete(frame);
+        },
+        addEventListener: (event, handler, options) => {
+          if (event !== "resize") return;
+          resizeHandlers.add(handler);
+          listenerOptions.push(options);
+        },
+        removeEventListener: (event, handler) => {
+          if (event === "resize") resizeHandlers.delete(handler);
+        },
+      },
     },
-    cancelAnimationFrame: frame => {
-      frameCallbacks.delete(frame);
-    },
-    addEventListener: (event, handler, options) => {
-      if (event !== "resize") return;
-      resizeHandlers.add(handler);
-      listenerOptions.push(options);
-    },
-    removeEventListener: (event, handler) => {
-      if (event === "resize") resizeHandlers.delete(handler);
-    },
-  };
+    async () => {
+      let syncCount = 0;
+      const cleanup = addToggleIndicatorResizeSync(() => {
+        syncCount += 1;
+      });
+      const [handleResize] = resizeHandlers;
 
-  try {
-    let syncCount = 0;
-    const cleanup = addToggleIndicatorResizeSync(() => {
-      syncCount += 1;
-    });
-    const [handleResize] = resizeHandlers;
+      assert.equal(resizeHandlers.size, 1);
+      assert.deepEqual(listenerOptions, [{ passive: true }]);
 
-    assert.equal(resizeHandlers.size, 1);
-    assert.deepEqual(listenerOptions, [{ passive: true }]);
+      handleResize();
+      const firstFrame = nextFrame - 1;
+      assert.equal(syncCount, 0);
+      frameCallbacks.get(firstFrame)();
+      frameCallbacks.delete(firstFrame);
+      assert.equal(syncCount, 1);
 
-    handleResize();
-    const firstFrame = nextFrame - 1;
-    assert.equal(syncCount, 0);
-    frameCallbacks.get(firstFrame)();
-    frameCallbacks.delete(firstFrame);
-    assert.equal(syncCount, 1);
+      handleResize();
+      const secondFrame = nextFrame - 1;
+      cleanup();
 
-    handleResize();
-    const secondFrame = nextFrame - 1;
-    cleanup();
-
-    assert.equal(resizeHandlers.size, 0);
-    assert.equal(frameCallbacks.has(secondFrame), false);
-  } finally {
-    globalThis.window = originalWindow;
-  }
+      assert.equal(resizeHandlers.size, 0);
+      assert.equal(frameCallbacks.has(secondFrame), false);
+    }
+  );
 });
 
 test("home page client script preserves back link and avatar replay behavior", async () => {
