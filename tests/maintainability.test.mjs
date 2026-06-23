@@ -697,10 +697,6 @@ test("home page client script preserves back link and avatar replay behavior", a
   const { setupHomePage } = await loadProjectModule("src/scripts/homePage.ts", [
     "src/scripts/homePage.ts",
   ]);
-  const originalWindow = globalThis.window;
-  const originalDocument = globalThis.document;
-  const originalSessionStorage = globalThis.sessionStorage;
-  const originalPerformance = globalThis.performance;
   const originalDateNow = Date.now;
   const storage = new Map();
   let currentNow = 1000;
@@ -733,68 +729,73 @@ test("home page client script preserves back link and avatar replay behavior", a
   const homeWindow = {};
 
   Date.now = () => currentDateNow;
-  globalThis.window = homeWindow;
-  globalThis.sessionStorage = {
-    setItem: (key, value) => storage.set(key, value),
-  };
-  globalThis.performance = { now: () => currentNow };
-  globalThis.document = {
-    querySelector: selectOneFrom({
-      "#main-content": mainContent,
-      ".hero-avatar": avatar,
-    }),
-    querySelectorAll: selectAllFrom({
-      ".hero-avatar__image": [lightAvatar, darkAvatar],
-    }),
-  };
 
   try {
-    setupHomePage();
+    await withGlobalMocks(
+      {
+        window: homeWindow,
+        sessionStorage: {
+          setItem: (key, value) => storage.set(key, value),
+        },
+        performance: { now: () => currentNow },
+        document: {
+          querySelector: selectOneFrom({
+            "#main-content": mainContent,
+            ".hero-avatar": avatar,
+          }),
+          querySelectorAll: selectAllFrom({
+            ".hero-avatar__image": [lightAvatar, darkAvatar],
+          }),
+        },
+      },
+      async () => {
+        setupHomePage();
 
-    assert.equal(storage.get("backUrl"), "/");
-    assert.equal(lightAvatar.dataset.avatarSrc, "/images/site/avatar.svg");
-    assert.equal(darkAvatar.dataset.avatarSrc, "/images/site/avatar-dark.svg");
-    assert.equal(
-      lightAvatar.src,
-      "/images/site/avatar.svg?replay=1700000000000-1000-0"
+        assert.equal(storage.get("backUrl"), "/");
+        assert.equal(lightAvatar.dataset.avatarSrc, "/images/site/avatar.svg");
+        assert.equal(
+          darkAvatar.dataset.avatarSrc,
+          "/images/site/avatar-dark.svg"
+        );
+        assert.equal(
+          lightAvatar.src,
+          "/images/site/avatar.svg?replay=1700000000000-1000-0"
+        );
+        assert.equal(
+          darkAvatar.src,
+          "/images/site/avatar-dark.svg?replay=1700000000000-1000-1"
+        );
+        assert.equal(avatar.handlerCount("pointerenter"), 1);
+
+        currentNow = 1100;
+        currentDateNow = 1700000000100;
+        avatar.dispatch("pointerenter");
+
+        assert.equal(
+          lightAvatar.src,
+          "/images/site/avatar.svg?replay=1700000000000-1000-0"
+        );
+
+        currentNow = 1401;
+        currentDateNow = 1700000000401;
+        avatar.dispatch("pointerenter");
+
+        assert.equal(
+          lightAvatar.src,
+          "/images/site/avatar.svg?replay=1700000000401-1401-0"
+        );
+
+        setupHomePage();
+
+        assert.equal(avatar.handlerCount("pointerenter"), 1);
+
+        homeWindow.__homeAvatarHoverCleanup();
+
+        assert.equal(avatar.handlerCount("pointerenter"), 0);
+      }
     );
-    assert.equal(
-      darkAvatar.src,
-      "/images/site/avatar-dark.svg?replay=1700000000000-1000-1"
-    );
-    assert.equal(avatar.handlerCount("pointerenter"), 1);
-
-    currentNow = 1100;
-    currentDateNow = 1700000000100;
-    avatar.dispatch("pointerenter");
-
-    assert.equal(
-      lightAvatar.src,
-      "/images/site/avatar.svg?replay=1700000000000-1000-0"
-    );
-
-    currentNow = 1401;
-    currentDateNow = 1700000000401;
-    avatar.dispatch("pointerenter");
-
-    assert.equal(
-      lightAvatar.src,
-      "/images/site/avatar.svg?replay=1700000000401-1401-0"
-    );
-
-    setupHomePage();
-
-    assert.equal(avatar.handlerCount("pointerenter"), 1);
-
-    homeWindow.__homeAvatarHoverCleanup();
-
-    assert.equal(avatar.handlerCount("pointerenter"), 0);
   } finally {
     Date.now = originalDateNow;
-    globalThis.window = originalWindow;
-    globalThis.document = originalDocument;
-    globalThis.sessionStorage = originalSessionStorage;
-    globalThis.performance = originalPerformance;
   }
 });
 
