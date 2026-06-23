@@ -74,22 +74,25 @@ const loadProjectModule = async (entryPath, modulePaths) => {
           })
         : { outputText: source };
       const withResolvableImports = outputText.replace(
-        /(from\s+["'])(\.\/[^"']+)(["'])/g,
-        "$1$2.mjs$3"
+        /(from\s+["'])(\.{1,2}\/[^"']+)(["'])/g,
+        (_match, prefix, specifier, suffix) => {
+          const resolvedSpecifier = /\.(mjs|js|ts)$/.test(specifier)
+            ? specifier.replace(/\.(mjs|js|ts)$/, ".mjs")
+            : `${specifier}.mjs`;
+          return `${prefix}${resolvedSpecifier}${suffix}`;
+        }
       );
       const outputFile = path.join(
         tempDir,
-        path.basename(modulePath).replace(/\.(ts|js|mjs)$/, ".mjs")
+        modulePath.replace(/\.(ts|js|mjs)$/, ".mjs")
       );
+      fs.mkdirSync(path.dirname(outputFile), { recursive: true });
       fs.writeFileSync(outputFile, withResolvableImports);
     }
 
     return await import(
       pathToFileURL(
-        path.join(
-          tempDir,
-          path.basename(entryPath).replace(/\.(ts|js|mjs)$/, ".mjs")
-        )
+        path.join(tempDir, entryPath.replace(/\.(ts|js|mjs)$/, ".mjs"))
       ).href
     );
   } finally {
@@ -254,6 +257,7 @@ test("search UI helpers share ranking and query parsing rules", async () => {
   } = await loadTypeScriptModule("src/utils/search.ts");
   const searchPage = readText("src/pages/search.astro");
   const commandPalette = readText("src/components/CommandPalette.astro");
+  const commandPaletteScript = readText("src/scripts/commandPalette.ts");
 
   assert.deepEqual(splitSearchTerms(" Machine   Learning "), [
     "machine",
@@ -340,7 +344,8 @@ test("search UI helpers share ranking and query parsing rules", async () => {
     assert.equal(calls, 2);
   }
   assert.ok(searchPage.includes('from "@/utils/search"'));
-  assert.ok(commandPalette.includes('from "@/utils/search"'));
+  assert.ok(commandPalette.includes('from "@/scripts/commandPalette"'));
+  assert.ok(commandPaletteScript.includes('from "../utils/search"'));
 });
 
 test("tag aggregation keeps post and note counts in one shared helper", async () => {
@@ -696,6 +701,210 @@ test("post filters client script preserves URL-backed filtering", async () => {
     globalThis.window = originalWindow;
     globalThis.document = originalDocument;
     globalThis.history = originalHistory;
+  }
+});
+
+test("command palette client script opens, searches, and closes", async () => {
+  const { setupCommandPalettePage } = await loadProjectModule(
+    "src/scripts/commandPalette.ts",
+    ["src/utils/search.ts", "src/scripts/commandPalette.ts"]
+  );
+  const originalWindow = globalThis.window;
+  const originalDocument = globalThis.document;
+  const originalFetch = globalThis.fetch;
+  const originalHTMLElement = globalThis.HTMLElement;
+  const makeClassList = initial => {
+    const classes = new Set(initial);
+    return {
+      add: (...names) => names.forEach(name => classes.add(name)),
+      remove: (...names) => names.forEach(name => classes.delete(name)),
+      contains: name => classes.has(name),
+      toggle: (name, active) => {
+        if (active) classes.add(name);
+        else classes.delete(name);
+      },
+    };
+  };
+
+  class MockElement {
+    constructor({ classNames = [], dataset = {}, rect = {} } = {}) {
+      this.attributes = new Map();
+      this.classList = makeClassList(classNames);
+      this.dataset = dataset;
+      this.eventHandlers = new Map();
+      this.hidden = false;
+      this.innerHTML = "";
+      this.offsetParent = {};
+      this.style = {
+        setProperty: (name, value) => this.attributes.set(name, value),
+      };
+      this.tabIndex = 0;
+      this.value = "";
+      this.rect = {
+        left: 0,
+        right: 120,
+        top: 0,
+        width: 120,
+        height: 40,
+        ...rect,
+      };
+    }
+
+    addEventListener(event, handler) {
+      this.eventHandlers.set(event, handler);
+    }
+
+    removeEventListener(event) {
+      this.eventHandlers.delete(event);
+    }
+
+    dispatch(event, payload = {}) {
+      this.eventHandlers.get(event)?.(payload);
+    }
+
+    setAttribute(name, value) {
+      this.attributes.set(name, value);
+    }
+
+    getAttribute(name) {
+      return this.attributes.get(name);
+    }
+
+    toggleAttribute(name, active) {
+      if (active) this.attributes.set(name, "");
+      else this.attributes.delete(name);
+    }
+
+    focus() {
+      this.focused = true;
+      globalThis.document.activeElement = this;
+    }
+
+    blur() {
+      this.blurred = true;
+    }
+
+    getBoundingClientRect() {
+      return this.rect;
+    }
+  }
+
+  const root = new MockElement({ classNames: ["hidden"] });
+  root.hidden = true;
+  root.setAttribute("aria-hidden", "true");
+  const panel = new MockElement();
+  const input = new MockElement();
+  const status = new MockElement();
+  const results = new MockElement();
+  const resultsPanel = new MockElement();
+  const thinking = new MockElement();
+  const closeButton = new MockElement();
+  const navWrap = new MockElement({ rect: { left: 10, right: 600 } });
+  const siteBrand = new MockElement({ rect: { right: 80 } });
+  const firstNavItem = new MockElement({ rect: { left: 120 } });
+  const searchMark = new MockElement({ rect: { width: 24 } });
+  const openButton = new MockElement({
+    rect: { left: 500, right: 560, top: 20, width: 60, height: 40 },
+  });
+  openButton.querySelector = selector =>
+    selector === ".search-nav-mark" ? searchMark : null;
+  const previousActiveElement = new MockElement();
+  const documentHandlers = new Map();
+
+  globalThis.HTMLElement = MockElement;
+  globalThis.fetch = async () => ({
+    ok: true,
+    json: async () => [
+      {
+        title: "Gradient <Descent>",
+        description: "Optimization",
+        url: "/posts/gradient",
+        kind: "Post",
+        metaText: "machine learning",
+        content: "",
+      },
+    ],
+  });
+  globalThis.window = {
+    requestAnimationFrame: callback => {
+      callback();
+      return 1;
+    },
+    clearTimeout: () => {},
+    setTimeout: callback => {
+      callback();
+      return 1;
+    },
+    matchMedia: query => ({
+      matches: query === "(prefers-reduced-motion: reduce)",
+    }),
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  };
+  globalThis.document = {
+    activeElement: previousActiveElement,
+    addEventListener: (event, handler) => documentHandlers.set(event, handler),
+    removeEventListener: event => documentHandlers.delete(event),
+    querySelector: selector =>
+      ({
+        "#command-palette": root,
+        ".command-palette__panel": panel,
+        "#command-palette-input": input,
+        "#command-palette-status": status,
+        "#command-palette-results": results,
+        "#command-palette-results-panel": resultsPanel,
+        "#command-palette-thinking": thinking,
+        "#top-nav-wrap": navWrap,
+        ".site-brand": siteBrand,
+        "[data-nav-item]": firstNavItem,
+        "[data-command-open]": openButton,
+      })[selector] ?? null,
+    querySelectorAll: selector =>
+      ({
+        "[data-command-close]": [closeButton],
+        "[data-command-open]": [openButton],
+      })[selector] ?? [],
+  };
+
+  try {
+    setupCommandPalettePage();
+
+    let openPrevented = false;
+    openButton.dispatch("click", {
+      preventDefault: () => {
+        openPrevented = true;
+      },
+    });
+
+    assert.equal(openPrevented, true);
+    assert.equal(root.hidden, false);
+    assert.equal(root.getAttribute("aria-hidden"), "false");
+    assert.equal(openButton.attributes.has("data-command-active"), true);
+    assert.equal(input.focused, true);
+
+    input.value = "gradient";
+    input.dispatch("input");
+    await new Promise(resolve => setImmediate(resolve));
+
+    assert.equal(status.textContent, "1 result for gradient");
+    assert.ok(results.innerHTML.includes("/posts/gradient"));
+    assert.ok(results.innerHTML.includes("Gradient &lt;Descent&gt;"));
+
+    closeButton.dispatch("click");
+
+    assert.equal(root.hidden, true);
+    assert.equal(root.getAttribute("aria-hidden"), "true");
+    assert.equal(openButton.attributes.has("data-command-active"), false);
+    assert.equal(input.value, "");
+    assert.equal(results.innerHTML, "");
+    assert.equal(status.textContent, "");
+    assert.equal(previousActiveElement.focused, true);
+    assert.ok(documentHandlers.has("keydown"));
+  } finally {
+    globalThis.window = originalWindow;
+    globalThis.document = originalDocument;
+    globalThis.fetch = originalFetch;
+    globalThis.HTMLElement = originalHTMLElement;
   }
 });
 
