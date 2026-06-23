@@ -27,9 +27,12 @@ Use the global CSS tokens in `src/styles/global.css`:
 - `--motion-duration-medium`: close timing and medium UI state changes.
 - `--motion-duration-slow`: larger opacity blends.
 - `--motion-duration-morph`: theme icon morphs.
+- `--motion-duration-thinking`: command-palette thinking indicator.
 - `--motion-ease-standard`: simple state changes.
+- `--motion-ease-out`: short one-way fades.
 - `--motion-ease-smooth`: smooth icon morphs.
 - `--motion-ease-snappy`: search and command-palette expansion.
+- `--motion-ease-thinking`: command-palette thinking indicator.
 
 All new motion must respect `prefers-reduced-motion: reduce`.
 
