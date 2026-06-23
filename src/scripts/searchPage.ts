@@ -1,4 +1,5 @@
 import {
+  SEARCH_LOAD_ERROR_MESSAGE,
   createSearchIndexLoader,
   escapeSearchHtml,
   formatSearchResultSummary,
@@ -157,7 +158,7 @@ export function setupSearchPage() {
       const records = await loadRecords(true);
       renderResults(records, input.value, getSearchKind());
     } catch {
-      status.textContent = "Search failed to load.";
+      status.textContent = SEARCH_LOAD_ERROR_MESSAGE;
     }
   };
 

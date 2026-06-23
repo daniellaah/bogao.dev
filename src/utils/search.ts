@@ -26,6 +26,8 @@ export type SearchRankOptions = {
   getDedupeKey?: (record: RankedSearchRecord) => string;
 };
 
+export const SEARCH_LOAD_ERROR_MESSAGE = "Search failed to load.";
+
 export const escapeSearchHtml = (value: string) =>
   value
     .replaceAll("&", "&amp;")

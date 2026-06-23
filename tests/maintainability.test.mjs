@@ -420,6 +420,7 @@ test("search index content strips markdown-only markup", async () => {
 
 test("search UI helpers share ranking and query parsing rules", async () => {
   const {
+    SEARCH_LOAD_ERROR_MESSAGE,
     createSearchIndexLoader,
     escapeSearchHtml,
     rankSearchRecords,
@@ -437,6 +438,7 @@ test("search UI helpers share ranking and query parsing rules", async () => {
   ]);
   assert.deepEqual(splitSearchTerms("机器学习"), ["机器学习"]);
   assert.equal(escapeSearchHtml("<tag>&\"'"), "&lt;tag&gt;&amp;&quot;&#39;");
+  assert.equal(SEARCH_LOAD_ERROR_MESSAGE, "Search failed to load.");
   assert.equal(
     scoreSearchRecord(
       {
@@ -517,8 +519,10 @@ test("search UI helpers share ranking and query parsing rules", async () => {
   }
   assert.ok(searchPage.includes('from "@/scripts/searchPage"'));
   assert.ok(searchPageScript.includes('from "../utils/search"'));
+  assert.ok(searchPageScript.includes("SEARCH_LOAD_ERROR_MESSAGE"));
   assert.ok(commandPalette.includes('from "@/scripts/commandPalette"'));
   assert.ok(commandPaletteScript.includes('from "../utils/search"'));
+  assert.ok(commandPaletteScript.includes("SEARCH_LOAD_ERROR_MESSAGE"));
 });
 
 test("tag aggregation keeps post and note counts in one shared helper", async () => {

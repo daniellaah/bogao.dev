@@ -1,4 +1,5 @@
 import {
+  SEARCH_LOAD_ERROR_MESSAGE,
   createSearchIndexLoader,
   escapeSearchHtml,
   formatSearchResultSummary,
@@ -156,7 +157,7 @@ export function setupCommandPalettePage() {
     } catch {
       if (currentRunId !== searchRunId) return;
       setThinking(false);
-      status.textContent = "Search failed to load.";
+      status.textContent = SEARCH_LOAD_ERROR_MESSAGE;
     }
   };
 
