@@ -37,8 +37,7 @@ const {
 } = note.data;
 
 const heading = title ?? dayjs.utc(noteDate).format("MMM D, YYYY");
-const heroImage = photos[0];
-const heroImageSrc = heroImage;
+const heroImageSrc = photos[0];
 const heroImageDimensions = getPublicImageDimensions(heroImageSrc);
 const createdDate = dayjs.utc(noteDate).format("YYYY-MM-DD");
 const updatedDate = modDatetime
