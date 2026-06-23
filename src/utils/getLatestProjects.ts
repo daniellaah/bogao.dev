@@ -1,12 +1,11 @@
 import type { CollectionEntry } from "astro:content";
-import { isPublishedProject } from "./projectVisibility";
+import { getPublishedProjects } from "./projectVisibility";
 
 export default function getLatestProjects(
   projects: CollectionEntry<"projects">[],
   limit = 4
 ) {
-  return projects
-    .filter(isPublishedProject)
+  return getPublishedProjects(projects)
     .sort(
       (a, b) =>
         (b.data.startDate?.getTime() ?? 0) - (a.data.startDate?.getTime() ?? 0)

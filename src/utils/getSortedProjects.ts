@@ -1,5 +1,5 @@
 import type { CollectionEntry } from "astro:content";
-import { isPublishedProject } from "./projectVisibility";
+import { getPublishedProjects } from "./projectVisibility";
 
 const statusRank = {
   shipping: 0,
@@ -11,7 +11,7 @@ const statusRank = {
 export default function getSortedProjects(
   projects: CollectionEntry<"projects">[]
 ) {
-  return projects.filter(isPublishedProject).sort((a, b) => {
+  return getPublishedProjects(projects).sort((a, b) => {
     const aUsesAutoDate = a.data.order === -1;
     const bUsesAutoDate = b.data.order === -1;
 
