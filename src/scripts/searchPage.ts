@@ -14,7 +14,7 @@ import {
   type SearchRecord,
   type SearchRecordKind,
 } from "../utils/search";
-import { replaceCurrentUrlSearch } from "./urlState";
+import { getCurrentUrlSearchParams, replaceCurrentUrlSearch } from "./urlState";
 
 export function setupSearchPage() {
   const input = document.querySelector<HTMLInputElement>("#search-input");
@@ -57,7 +57,7 @@ export function setupSearchPage() {
   };
 
   const getSearchKind = () => {
-    const rawKind = new URLSearchParams(window.location.search).get("type");
+    const rawKind = getCurrentUrlSearchParams().get("type");
     return rawKind &&
       Object.prototype.hasOwnProperty.call(searchKindToRecordKind, rawKind)
       ? (rawKind as SearchKind)
@@ -134,7 +134,7 @@ export function setupSearchPage() {
   };
 
   const updateUrl = (query: string, kind: SearchKind) => {
-    const params = new URLSearchParams(window.location.search);
+    const params = getCurrentUrlSearchParams();
     if (query.trim()) params.set("q", query);
     else params.delete("q");
     if (kind === "all") params.delete("type");
@@ -164,8 +164,7 @@ export function setupSearchPage() {
     }
   };
 
-  const initialQuery =
-    new URLSearchParams(window.location.search).get("q") ?? "";
+  const initialQuery = getCurrentUrlSearchParams().get("q") ?? "";
   const initialKind = getSearchKind();
 
   input.value = initialQuery;

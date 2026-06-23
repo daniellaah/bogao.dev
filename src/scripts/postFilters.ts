@@ -2,7 +2,7 @@ import {
   addToggleIndicatorResizeSync,
   setActiveToggleButton,
 } from "./toggleControls";
-import { replaceCurrentUrlSearch } from "./urlState";
+import { getCurrentUrlSearchParams, replaceCurrentUrlSearch } from "./urlState";
 
 let cleanupPostFiltersInstance = () => {};
 
@@ -40,10 +40,8 @@ export function setupPostFiltersPage() {
 
   root.dataset.initialized = "true";
 
-  const getParams = () => new URLSearchParams(window.location.search);
-
   const getFilter = () => {
-    const params = getParams();
+    const params = getCurrentUrlSearchParams();
     const requestedTag = params.get("tag") || "all";
     return {
       year: params.get("year") || "all",
@@ -53,7 +51,7 @@ export function setupPostFiltersPage() {
   };
 
   const updateUrl = (year: string, tag: string) => {
-    const params = getParams();
+    const params = getCurrentUrlSearchParams();
     if (year === "all") params.delete("year");
     else params.set("year", year);
     if (tag === "all") params.delete("tag");
