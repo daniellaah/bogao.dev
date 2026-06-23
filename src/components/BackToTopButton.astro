@@ -26,66 +26,21 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
   </button>
 </div>
 
-<script is:inline data-astro-rerun>
-  /** Scrolls the document to the top when
-   * the "Back to Top" button is clicked. */
-  function backToTop() {
-    const rootElement = document.documentElement;
-    const btnContainer = document.querySelector("#btt-btn-container");
-    const backToTopBtn = document.querySelector("[data-button='back-to-top']");
-    if (!rootElement || !btnContainer || !backToTopBtn) return;
-    if (backToTopBtn.dataset.backToTopBound === "true") return;
+<script>
+  import { setupBackToTopButton } from "@/scripts/backToTop";
 
-    window.__backToTopCleanup?.();
-    backToTopBtn.dataset.backToTopBound = "true";
+  type BackToTopWindow = Window & {
+    __backToTopCleanup?: () => void;
+    __backToTopLifecycleCleanup?: () => void;
+  };
 
-    // Attach click event handler for back-to-top button
-    const scrollToTop = () => {
-      document.body.scrollTop = 0; // For Safari
-      document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
-    };
-    backToTopBtn.addEventListener("click", scrollToTop);
-
-    // Handle button visibility according to scroll position
-    let lastVisible = null;
-    function handleScroll() {
-      const scrollTotal = rootElement.scrollHeight - rootElement.clientHeight;
-      const scrollTop = rootElement.scrollTop;
-      const isVisible = scrollTotal > 0 && scrollTop / scrollTotal > 0.3;
-
-      if (isVisible !== lastVisible) {
-        btnContainer.classList.toggle("opacity-100", isVisible);
-        btnContainer.classList.toggle("translate-y-0", isVisible);
-        btnContainer.classList.toggle("opacity-0", !isVisible);
-        btnContainer.classList.toggle("translate-y-14", !isVisible);
-        lastVisible = isVisible;
-      }
-    }
-
-    let ticking = false;
-    const requestScrollUpdate = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          handleScroll();
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    document.addEventListener("scroll", requestScrollUpdate, { passive: true });
-    window.__backToTopCleanup = () => {
-      backToTopBtn.removeEventListener("click", scrollToTop);
-      document.removeEventListener("scroll", requestScrollUpdate);
-      document.removeEventListener(
-        "astro:before-swap",
-        window.__backToTopCleanup
-      );
-      delete backToTopBtn.dataset.backToTopBound;
-      window.__backToTopCleanup = undefined;
-    };
-    document.addEventListener("astro:before-swap", window.__backToTopCleanup, {
-      once: true,
-    });
-  }
-  backToTop();
+  (window as BackToTopWindow).__backToTopLifecycleCleanup?.();
+  document.addEventListener("astro:page-load", setupBackToTopButton);
+  document.addEventListener("astro:after-swap", setupBackToTopButton);
+  (window as BackToTopWindow).__backToTopLifecycleCleanup = () => {
+    document.removeEventListener("astro:page-load", setupBackToTopButton);
+    document.removeEventListener("astro:after-swap", setupBackToTopButton);
+    (window as BackToTopWindow).__backToTopCleanup?.();
+  };
+  setupBackToTopButton();
 </script>

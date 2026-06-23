@@ -666,6 +666,141 @@ test("header nav client script preserves menu toggle behavior", async () => {
   }
 });
 
+test("back-to-top client script preserves scroll and cleanup behavior", async () => {
+  const { setupBackToTopButton } = await loadProjectModule(
+    "src/scripts/backToTop.ts",
+    ["src/scripts/backToTop.ts"]
+  );
+  const originalWindow = globalThis.window;
+  const originalDocument = globalThis.document;
+  const makeClassList = initial => {
+    const classes = new Set(initial);
+    return {
+      contains: name => classes.has(name),
+      toggle: (name, active) => {
+        if (active === undefined) {
+          if (classes.has(name)) classes.delete(name);
+          else classes.add(name);
+        } else if (active) classes.add(name);
+        else classes.delete(name);
+      },
+    };
+  };
+  const makeElement = ({ classNames = [] } = {}) => {
+    const handlers = new Map();
+    return {
+      classList: makeClassList(classNames),
+      dataset: {},
+      addEventListener: (event, handler) => {
+        const eventHandlers = handlers.get(event) ?? new Set();
+        eventHandlers.add(handler);
+        handlers.set(event, eventHandlers);
+      },
+      removeEventListener: (event, handler) => {
+        handlers.get(event)?.delete(handler);
+      },
+      dispatch: event => {
+        for (const handler of handlers.get(event) ?? []) handler();
+      },
+      handlerCount: event => handlers.get(event)?.size ?? 0,
+    };
+  };
+  const documentHandlers = new Map();
+  const addDocumentHandler = (event, handler) => {
+    const handlers = documentHandlers.get(event) ?? new Set();
+    handlers.add(handler);
+    documentHandlers.set(event, handlers);
+  };
+  const removeDocumentHandler = (event, handler) => {
+    documentHandlers.get(event)?.delete(handler);
+  };
+  const dispatchDocument = event => {
+    for (const handler of documentHandlers.get(event) ?? []) handler();
+  };
+  const documentHandlerCount = event => documentHandlers.get(event)?.size ?? 0;
+  const rootElement = {
+    clientHeight: 500,
+    scrollHeight: 1000,
+    scrollTop: 0,
+  };
+  const body = { scrollTop: 0 };
+  const btnContainer = makeElement({
+    classNames: ["opacity-0", "translate-y-14"],
+  });
+  const backToTopBtn = makeElement();
+  const animationFrameCallbacks = [];
+  const windowMock = {
+    requestAnimationFrame: callback => {
+      animationFrameCallbacks.push(callback);
+      return 1;
+    },
+  };
+  const flushAnimationFrame = () => animationFrameCallbacks.shift()?.();
+
+  globalThis.window = windowMock;
+  globalThis.document = {
+    body,
+    documentElement: rootElement,
+    addEventListener: addDocumentHandler,
+    removeEventListener: removeDocumentHandler,
+    querySelector: selector =>
+      ({
+        "#btt-btn-container": btnContainer,
+        "[data-button='back-to-top']": backToTopBtn,
+      })[selector] ?? null,
+  };
+
+  try {
+    setupBackToTopButton();
+
+    assert.equal(backToTopBtn.dataset.backToTopBound, "true");
+    assert.equal(backToTopBtn.handlerCount("click"), 1);
+    assert.equal(documentHandlerCount("scroll"), 1);
+    assert.equal(documentHandlerCount("astro:before-swap"), 1);
+
+    rootElement.scrollTop = 200;
+    dispatchDocument("scroll");
+    flushAnimationFrame();
+
+    assert.equal(btnContainer.classList.contains("opacity-100"), true);
+    assert.equal(btnContainer.classList.contains("translate-y-0"), true);
+    assert.equal(btnContainer.classList.contains("opacity-0"), false);
+    assert.equal(btnContainer.classList.contains("translate-y-14"), false);
+
+    rootElement.scrollTop = 100;
+    dispatchDocument("scroll");
+    flushAnimationFrame();
+
+    assert.equal(btnContainer.classList.contains("opacity-100"), false);
+    assert.equal(btnContainer.classList.contains("translate-y-0"), false);
+    assert.equal(btnContainer.classList.contains("opacity-0"), true);
+    assert.equal(btnContainer.classList.contains("translate-y-14"), true);
+
+    rootElement.scrollTop = 320;
+    body.scrollTop = 240;
+    backToTopBtn.dispatch("click");
+
+    assert.equal(rootElement.scrollTop, 0);
+    assert.equal(body.scrollTop, 0);
+
+    setupBackToTopButton();
+
+    assert.equal(backToTopBtn.handlerCount("click"), 1);
+    assert.equal(documentHandlerCount("scroll"), 1);
+
+    windowMock.__backToTopCleanup();
+
+    assert.equal(backToTopBtn.handlerCount("click"), 0);
+    assert.equal(documentHandlerCount("scroll"), 0);
+    assert.equal(documentHandlerCount("astro:before-swap"), 0);
+    assert.equal(backToTopBtn.dataset.backToTopBound, undefined);
+    assert.equal(windowMock.__backToTopCleanup, undefined);
+  } finally {
+    globalThis.window = originalWindow;
+    globalThis.document = originalDocument;
+  }
+});
+
 test("tags index client script preserves sort state behavior", async () => {
   const { setupTagsIndexPage } = await loadProjectModule(
     "src/scripts/tagsIndex.ts",
