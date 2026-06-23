@@ -28,6 +28,22 @@ const NEW_CONTENT_FIXTURE_FILES = [
   "templates/note.md",
   "templates/project.md",
 ];
+const GRADIENT_POST_RECORD = {
+  title: "Gradient <Descent>",
+  description: "Optimization",
+  url: "/posts/gradient",
+  kind: "Post",
+  metaText: "machine learning",
+  content: "calculus gradient descent article",
+};
+const GRADIENT_NOTE_RECORD = {
+  title: "Gradient note",
+  description: "Daily note",
+  url: "/notes/gradient",
+  kind: "Note",
+  metaText: "running",
+  content: "gradient thought",
+};
 
 const readText = relativePath =>
   fs.readFileSync(path.join(ROOT, relativePath), "utf8");
@@ -1284,16 +1300,7 @@ test("command palette client script opens, searches, and closes", async () => {
       HTMLElement: MockElement,
       fetch: async () => ({
         ok: true,
-        json: async () => [
-          {
-            title: "Gradient <Descent>",
-            description: "Optimization",
-            url: "/posts/gradient",
-            kind: "Post",
-            metaText: "machine learning",
-            content: "",
-          },
-        ],
+        json: async () => [GRADIENT_POST_RECORD],
       }),
       window: {
         requestAnimationFrame: callback => {
@@ -1424,24 +1431,7 @@ test("search page client script preserves URL-backed search behavior", async () 
     {
       fetch: async () => ({
         ok: true,
-        json: async () => [
-          {
-            title: "Gradient <Descent>",
-            description: "Optimization",
-            url: "/posts/gradient",
-            kind: "Post",
-            metaText: "machine learning",
-            content: "calculus gradient descent article",
-          },
-          {
-            title: "Gradient note",
-            description: "Daily note",
-            url: "/notes/gradient",
-            kind: "Note",
-            metaText: "running",
-            content: "gradient thought",
-          },
-        ],
+        json: async () => [GRADIENT_POST_RECORD, GRADIENT_NOTE_RECORD],
       }),
       window: { location },
       history,
