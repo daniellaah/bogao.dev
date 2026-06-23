@@ -5,11 +5,12 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
+import { getPublishedNotes } from "@/utils/noteVisibility";
 import { collectTagStats, type TagStat } from "@/utils/tags";
 import { SITE } from "@/config";
 
 const posts = getSortedPosts(await getCollection("blog"));
-const notes = (await getCollection("notes")).filter(note => !note.data.draft);
+const notes = getPublishedNotes(await getCollection("notes"));
 
 const tagCollator = new Intl.Collator(undefined, {
   sensitivity: "base",

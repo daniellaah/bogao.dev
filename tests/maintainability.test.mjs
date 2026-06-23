@@ -414,6 +414,33 @@ test("sorted posts keep production filtering and date ordering", async () => {
   );
 });
 
+test("sorted notes exclude drafts and keep date ordering", async () => {
+  const { default: getSortedNotes } = await loadProjectModule(
+    "src/utils/getSortedNotes.ts",
+    ["src/utils/noteVisibility.ts", "src/utils/getSortedNotes.ts"]
+  );
+
+  const notes = [
+    {
+      id: "older-note.md",
+      data: { noteDate: new Date("2024-01-01"), draft: false },
+    },
+    {
+      id: "draft-note.md",
+      data: { noteDate: new Date("2024-03-01"), draft: true },
+    },
+    {
+      id: "newer-note.md",
+      data: { noteDate: new Date("2024-02-01"), draft: false },
+    },
+  ];
+
+  assert.deepEqual(
+    getSortedNotes(notes).map(note => note.id),
+    ["newer-note.md", "older-note.md"]
+  );
+});
+
 test("search kind contract stays explicit and shared", () => {
   const searchKinds = readJson("src/data/search-kinds.json");
   const searchEndpoint = readText("src/pages/search-index.json.ts");

@@ -5,6 +5,7 @@ import { getNotePath } from "@/utils/getNotePath";
 import { getPostPath } from "@/utils/getPostPath";
 import getSortedPosts from "@/utils/getSortedPosts";
 import getUniqueTags from "@/utils/getUniqueTags";
+import { isPublishedNote } from "@/utils/noteVisibility";
 import searchKinds from "@/data/search-kinds.json";
 
 const SEARCH_RECORD_KINDS = Object.fromEntries(
@@ -34,7 +35,7 @@ export const GET: APIRoute = async () => {
   const blogEntries = await getCollection("blog");
   const posts = getSortedPosts(blogEntries);
   const projects = await getCollection("projects", ({ data }) => !data.draft);
-  const notes = await getCollection("notes", ({ data }) => !data.draft);
+  const notes = await getCollection("notes", isPublishedNote);
   const tags = getUniqueTags([...posts, ...notes]);
 
   const records = [
