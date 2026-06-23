@@ -1557,6 +1557,70 @@ test("content scripts resolve repository root outside the cwd", () => {
   assert.ok(!newContent.includes("const ROOT = process.cwd()"));
 });
 
+test("new content script generates project drafts without frontmatter slugs", () => {
+  const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "new-content-script-"));
+  const fixtureFiles = [
+    "scripts/content-rules.mjs",
+    "scripts/new-content.mjs",
+    "src/data/content-rules.json",
+    "src/utils/slugifyCore.js",
+    "templates/blog-post.md",
+    "templates/note.md",
+    "templates/project.md",
+  ];
+
+  try {
+    fs.symlinkSync(
+      path.join(ROOT, "node_modules"),
+      path.join(fixture, "node_modules"),
+      "dir"
+    );
+
+    for (const file of fixtureFiles) {
+      const target = path.join(fixture, file);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(path.join(ROOT, file), target);
+    }
+
+    const output = execFileSync(
+      process.execPath,
+      [
+        "scripts/new-content.mjs",
+        "project",
+        "Agent Notes",
+        "--date",
+        "2026-06-22",
+        "--stack",
+        "Astro, Tests",
+        "--repoUrl",
+        "https://github.com/example/repo",
+        "--slug",
+        "Agent Notes",
+      ],
+      { cwd: fixture, encoding: "utf8" }
+    );
+    const generatedFile = "src/content/projects/agent-notes.md";
+    const source = fs.readFileSync(path.join(fixture, generatedFile), "utf8");
+    const frontmatter = source.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? "";
+
+    assert.match(output, new RegExp(`Created ${generatedFile}`));
+    assert.match(frontmatter, /^title: "Agent Notes"$/m);
+    assert.match(frontmatter, /^status: "active"$/m);
+    assert.match(frontmatter, /^startDate: 2026-06-22$/m);
+    assert.match(frontmatter, /^draft: true$/m);
+    assert.match(frontmatter, /^year: 2026$/m);
+    assert.match(frontmatter, /^  - "Astro"$/m);
+    assert.match(frontmatter, /^  - "Tests"$/m);
+    assert.match(
+      frontmatter,
+      /^repoUrl: "https:\/\/github\.com\/example\/repo"$/m
+    );
+    assert.ok(!/^slug:/m.test(frontmatter));
+  } finally {
+    fs.rmSync(fixture, { recursive: true, force: true });
+  }
+});
+
 test("content check frontmatter parser handles current template shapes", async () => {
   const { parseFrontmatter } = await import(
     pathToFileURL(path.join(ROOT, "scripts/check-content.mjs")).href
