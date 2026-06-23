@@ -179,36 +179,15 @@ const navItems = [
 </header>
 
 <script>
-  function toggleNav() {
-    const menuBtn = document.querySelector<HTMLButtonElement>("#menu-btn");
-    const menuItems = document.querySelector<HTMLElement>("#menu-items");
-    const menuIcon = document.querySelector<HTMLElement>("#menu-icon");
-    const closeIcon = document.querySelector<HTMLElement>("#close-icon");
-
-    if (!menuBtn || !menuItems || !menuIcon || !closeIcon) return;
-    if (menuBtn.dataset.navBound === "true") return;
-
-    menuBtn.dataset.navBound = "true";
-
-    menuBtn.addEventListener("click", () => {
-      const openMenu = menuBtn.getAttribute("aria-expanded") === "true";
-
-      menuBtn.setAttribute("aria-expanded", openMenu ? "false" : "true");
-      menuBtn.setAttribute("aria-label", openMenu ? "Open Menu" : "Close Menu");
-
-      menuItems.classList.toggle("hidden");
-      menuIcon.classList.toggle("hidden");
-      closeIcon.classList.toggle("hidden");
-    });
-  }
+  import { setupHeaderNav } from "@/scripts/headerNav";
 
   (
     window as Window & { __headerNavCleanup?: () => void }
   ).__headerNavCleanup?.();
-  document.addEventListener("astro:after-swap", toggleNav);
+  document.addEventListener("astro:after-swap", setupHeaderNav);
   (window as Window & { __headerNavCleanup?: () => void }).__headerNavCleanup =
     () => {
-      document.removeEventListener("astro:after-swap", toggleNav);
+      document.removeEventListener("astro:after-swap", setupHeaderNav);
     };
-  toggleNav();
+  setupHeaderNav();
 </script>

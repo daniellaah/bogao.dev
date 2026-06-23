@@ -539,6 +539,87 @@ test("home page client script preserves back link and avatar replay behavior", a
   }
 });
 
+test("header nav client script preserves menu toggle behavior", async () => {
+  const { setupHeaderNav } = await loadProjectModule(
+    "src/scripts/headerNav.ts",
+    ["src/scripts/headerNav.ts"]
+  );
+  const originalDocument = globalThis.document;
+  const makeClassList = initial => {
+    const classes = new Set(initial);
+    return {
+      contains: name => classes.has(name),
+      toggle: name => {
+        if (classes.has(name)) classes.delete(name);
+        else classes.add(name);
+      },
+    };
+  };
+  const makeElement = ({ classNames = [] } = {}) => {
+    const attributes = new Map();
+    const handlers = new Map();
+    return {
+      classList: makeClassList(classNames),
+      dataset: {},
+      addEventListener: (event, handler) => {
+        const eventHandlers = handlers.get(event) ?? new Set();
+        eventHandlers.add(handler);
+        handlers.set(event, eventHandlers);
+      },
+      dispatch: event => {
+        for (const handler of handlers.get(event) ?? []) handler();
+      },
+      handlerCount: event => handlers.get(event)?.size ?? 0,
+      getAttribute: name => attributes.get(name),
+      setAttribute: (name, value) => attributes.set(name, value),
+    };
+  };
+  const menuBtn = makeElement();
+  const menuItems = makeElement({ classNames: ["hidden"] });
+  const menuIcon = makeElement();
+  const closeIcon = makeElement({ classNames: ["hidden"] });
+  menuBtn.setAttribute("aria-expanded", "false");
+  menuBtn.setAttribute("aria-label", "Open Menu");
+  globalThis.document = {
+    querySelector: selector =>
+      ({
+        "#menu-btn": menuBtn,
+        "#menu-items": menuItems,
+        "#menu-icon": menuIcon,
+        "#close-icon": closeIcon,
+      })[selector] ?? null,
+  };
+
+  try {
+    setupHeaderNav();
+
+    assert.equal(menuBtn.dataset.navBound, "true");
+    assert.equal(menuBtn.handlerCount("click"), 1);
+
+    menuBtn.dispatch("click");
+
+    assert.equal(menuBtn.getAttribute("aria-expanded"), "true");
+    assert.equal(menuBtn.getAttribute("aria-label"), "Close Menu");
+    assert.equal(menuItems.classList.contains("hidden"), false);
+    assert.equal(menuIcon.classList.contains("hidden"), true);
+    assert.equal(closeIcon.classList.contains("hidden"), false);
+
+    setupHeaderNav();
+
+    assert.equal(menuBtn.handlerCount("click"), 1);
+
+    menuBtn.dispatch("click");
+
+    assert.equal(menuBtn.getAttribute("aria-expanded"), "false");
+    assert.equal(menuBtn.getAttribute("aria-label"), "Open Menu");
+    assert.equal(menuItems.classList.contains("hidden"), true);
+    assert.equal(menuIcon.classList.contains("hidden"), false);
+    assert.equal(closeIcon.classList.contains("hidden"), true);
+  } finally {
+    globalThis.document = originalDocument;
+  }
+});
+
 test("tags index client script preserves sort state behavior", async () => {
   const { setupTagsIndexPage } = await loadProjectModule(
     "src/scripts/tagsIndex.ts",
