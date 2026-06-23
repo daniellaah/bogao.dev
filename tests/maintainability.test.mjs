@@ -75,6 +75,20 @@ const withNewContentFixture = callback => {
   }
 };
 
+const withGlobalMocks = async (mocks, callback) => {
+  const originals = Object.fromEntries(
+    Object.keys(mocks).map(key => [key, globalThis[key]])
+  );
+
+  Object.assign(globalThis, mocks);
+
+  try {
+    return await callback();
+  } finally {
+    Object.assign(globalThis, originals);
+  }
+};
+
 const loadTypeScriptModule = async relativePath => {
   const source = readText(relativePath);
   const { outputText } = ts.transpileModule(source, TRANSPILE_OPTIONS);
@@ -1044,9 +1058,6 @@ test("post filters client script preserves URL-backed filtering", async () => {
       "src/scripts/postFilters.ts",
     ]
   );
-  const originalWindow = globalThis.window;
-  const originalDocument = globalThis.document;
-  const originalHistory = globalThis.history;
   const indicatorStyles = new Map();
   const yearAll = makeMetricButton(
     { filterYear: "all" },
@@ -1122,48 +1133,47 @@ test("post filters client script preserves URL-backed filtering", async () => {
     search: "?year=2024&tag=missing",
   });
 
-  globalThis.window = {
-    location,
-    requestAnimationFrame: callback => {
-      callback();
-      return 1;
+  await withGlobalMocks(
+    {
+      window: {
+        location,
+        requestAnimationFrame: callback => {
+          callback();
+          return 1;
+        },
+        cancelAnimationFrame: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      },
+      document: {
+        querySelector: selectOneFrom({ "[data-post-filters]": root }),
+        querySelectorAll: selectAllFrom({
+          "[data-post-list-item]": [postA, postB],
+        }),
+      },
+      history,
     },
-    cancelAnimationFrame: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-  };
-  globalThis.document = {
-    querySelector: selectOneFrom({ "[data-post-filters]": root }),
-    querySelectorAll: selectAllFrom({
-      "[data-post-list-item]": [postA, postB],
-    }),
-  };
-  globalThis.history = history;
+    async () => {
+      setupPostFiltersPage();
 
-  try {
-    setupPostFiltersPage();
+      assert.equal(history.replacedWith, "/posts?year=2024");
+      assert.equal(postA.hidden, false);
+      assert.equal(postB.hidden, true);
+      assert.equal(status.textContent, "Showing 1 post.");
+      assert.equal(year2024.getAttribute("aria-pressed"), "true");
+      assert.equal(tagAll.getAttribute("aria-pressed"), "true");
+      assert.equal(yearToggle.getAttribute("data-ink-ready"), "true");
 
-    assert.equal(history.replacedWith, "/posts?year=2024");
-    assert.equal(postA.hidden, false);
-    assert.equal(postB.hidden, true);
-    assert.equal(status.textContent, "Showing 1 post.");
-    assert.equal(year2024.getAttribute("aria-pressed"), "true");
-    assert.equal(tagAll.getAttribute("aria-pressed"), "true");
-    assert.equal(yearToggle.getAttribute("data-ink-ready"), "true");
+      tagNotes.click();
 
-    tagNotes.click();
-
-    assert.equal(history.replacedWith, "/posts?year=2024&tag=notes");
-    assert.equal(postA.hidden, true);
-    assert.equal(postB.hidden, true);
-    assert.equal(status.textContent, "Showing 0 posts.");
-    assert.equal(tagNotes.getAttribute("aria-pressed"), "true");
-    assert.equal(indicatorStyles.get("--sort-indicator-x"), "52px");
-  } finally {
-    globalThis.window = originalWindow;
-    globalThis.document = originalDocument;
-    globalThis.history = originalHistory;
-  }
+      assert.equal(history.replacedWith, "/posts?year=2024&tag=notes");
+      assert.equal(postA.hidden, true);
+      assert.equal(postB.hidden, true);
+      assert.equal(status.textContent, "Showing 0 posts.");
+      assert.equal(tagNotes.getAttribute("aria-pressed"), "true");
+      assert.equal(indicatorStyles.get("--sort-indicator-x"), "52px");
+    }
+  );
 });
 
 test("command palette client script opens, searches, and closes", async () => {
@@ -1377,10 +1387,6 @@ test("search page client script preserves URL-backed search behavior", async () 
       "src/scripts/searchPage.ts",
     ]
   );
-  const originalWindow = globalThis.window;
-  const originalDocument = globalThis.document;
-  const originalHistory = globalThis.history;
-  const originalFetch = globalThis.fetch;
   const searchKinds = readJson("src/data/search-kinds.json");
   const makeElement = ({ dataset = {}, textContent = "" } = {}) => {
     const attributes = new Map();
@@ -1419,83 +1425,84 @@ test("search page client script preserves URL-backed search behavior", async () 
     search: "?q=gradient&type=posts",
   });
 
-  globalThis.fetch = async () => ({
-    ok: true,
-    json: async () => [
-      {
-        title: "Gradient <Descent>",
-        description: "Optimization",
-        url: "/posts/gradient",
-        kind: "Post",
-        metaText: "machine learning",
-        content: "calculus gradient descent article",
+  await withGlobalMocks(
+    {
+      fetch: async () => ({
+        ok: true,
+        json: async () => [
+          {
+            title: "Gradient <Descent>",
+            description: "Optimization",
+            url: "/posts/gradient",
+            kind: "Post",
+            metaText: "machine learning",
+            content: "calculus gradient descent article",
+          },
+          {
+            title: "Gradient note",
+            description: "Daily note",
+            url: "/notes/gradient",
+            kind: "Note",
+            metaText: "running",
+            content: "gradient thought",
+          },
+        ],
+      }),
+      window: { location },
+      history,
+      document: {
+        activeElement: null,
+        querySelector: selectOneFrom({
+          "#search-input": input,
+          "#search-clear": clearButton,
+          "#search-status": status,
+          "#search-results": results,
+          "#search-kind-data": kindData,
+        }),
+        querySelectorAll: selectAllFrom({
+          "[data-search-kind]": [allButton, postsButton, notesButton],
+        }),
       },
-      {
-        title: "Gradient note",
-        description: "Daily note",
-        url: "/notes/gradient",
-        kind: "Note",
-        metaText: "running",
-        content: "gradient thought",
-      },
-    ],
-  });
-  globalThis.window = { location };
-  globalThis.history = history;
-  globalThis.document = {
-    activeElement: null,
-    querySelector: selectOneFrom({
-      "#search-input": input,
-      "#search-clear": clearButton,
-      "#search-status": status,
-      "#search-results": results,
-      "#search-kind-data": kindData,
-    }),
-    querySelectorAll: selectAllFrom({
-      "[data-search-kind]": [allButton, postsButton, notesButton],
-    }),
-  };
+    },
+    async () => {
+      setupSearchPage();
+      await new Promise(resolve => setImmediate(resolve));
 
-  try {
-    setupSearchPage();
-    await new Promise(resolve => setImmediate(resolve));
+      assert.equal(input.value, "gradient");
+      assert.equal(postsButton.getAttribute("aria-pressed"), "true");
+      assert.equal(notesButton.getAttribute("aria-pressed"), "false");
+      assert.equal(status.textContent, "1 result for gradient in posts");
+      assert.ok(results.innerHTML.includes("/posts/gradient"));
+      assert.ok(results.innerHTML.includes("Gradient &lt;Descent&gt;"));
+      assert.ok(!results.innerHTML.includes("/notes/gradient"));
 
-    assert.equal(input.value, "gradient");
-    assert.equal(postsButton.getAttribute("aria-pressed"), "true");
-    assert.equal(notesButton.getAttribute("aria-pressed"), "false");
-    assert.equal(status.textContent, "1 result for gradient in posts");
-    assert.ok(results.innerHTML.includes("/posts/gradient"));
-    assert.ok(results.innerHTML.includes("Gradient &lt;Descent&gt;"));
-    assert.ok(!results.innerHTML.includes("/notes/gradient"));
+      input.value = "note";
+      input.dispatch("input", { currentTarget: input });
+      await new Promise(resolve => setImmediate(resolve));
 
-    input.value = "note";
-    input.dispatch("input", { currentTarget: input });
-    await new Promise(resolve => setImmediate(resolve));
+      assert.equal(history.replacedWith, "/search?q=note&type=posts");
+      assert.equal(status.textContent, "No results for note in posts");
 
-    assert.equal(history.replacedWith, "/search?q=note&type=posts");
-    assert.equal(status.textContent, "No results for note in posts");
+      notesButton.dispatch("click");
+      await new Promise(resolve => setImmediate(resolve));
 
-    notesButton.dispatch("click");
-    await new Promise(resolve => setImmediate(resolve));
+      assert.equal(history.replacedWith, "/search?q=note&type=notes");
+      assert.equal(notesButton.getAttribute("aria-pressed"), "true");
+      assert.equal(status.textContent, "1 result for note in notes");
+      assert.ok(results.innerHTML.includes("/notes/gradient"));
 
-    assert.equal(history.replacedWith, "/search?q=note&type=notes");
-    assert.equal(notesButton.getAttribute("aria-pressed"), "true");
-    assert.equal(status.textContent, "1 result for note in notes");
-    assert.ok(results.innerHTML.includes("/notes/gradient"));
+      clearButton.dispatch("click");
 
-    clearButton.dispatch("click");
-
-    assert.equal(input.value, "");
-    assert.equal(history.replacedWith, "/search?type=notes");
-    assert.equal(status.textContent, "Type a keyword to search across notes.");
-    assert.equal(results.innerHTML, "");
-    assert.equal(globalThis.document.activeElement, input);
-  } finally {
-    globalThis.window = originalWindow;
-    globalThis.document = originalDocument;
-    globalThis.history = originalHistory;
-    globalThis.fetch = originalFetch;
-  }
+      assert.equal(input.value, "");
+      assert.equal(history.replacedWith, "/search?type=notes");
+      assert.equal(
+        status.textContent,
+        "Type a keyword to search across notes."
+      );
+      assert.equal(results.innerHTML, "");
+      assert.equal(globalThis.document.activeElement, input);
+    }
+  );
 });
 
 test("OG image resolution is shared by post and project detail pages", async () => {
