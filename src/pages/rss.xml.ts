@@ -15,7 +15,7 @@ export async function GET() {
       link: getPostPath(post),
       title: post.data.title,
       description: post.data.description,
-      pubDate: new Date(post.data.pubDatetime),
+      pubDate: post.data.pubDatetime,
     })),
   });
 }

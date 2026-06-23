@@ -240,6 +240,40 @@ const isPublishedProject = project => !project.data.draft;
   );
 };
 
+const loadRssRoute = async () => {
+  const source = readText("src/pages/rss.xml.ts").replace(/^import .*$/gm, "");
+  const prelude = `
+const SITE = {
+  title: "BoGao.Dev",
+  desc: "Bo's blog about machine learning notes, LLM workflows, and personal experiments.",
+  website: "https://bogao.dev/",
+};
+const rss = options => new Response(JSON.stringify(options), {
+  headers: { "Content-Type": "application/json" },
+});
+const getCollection = async collection =>
+  globalThis.__rssCollections?.[collection] ?? [];
+const stripMarkdownExt = value => value.replace(/\\.(md|mdx)$/i, "");
+const getPostPath = post =>
+  \`/posts/\${stripMarkdownExt(post.data.slug ?? post.slug ?? post.id)}\`;
+const getSortedPosts = posts =>
+  posts
+    .filter(post => !post.data.draft && post.data.pubDatetime)
+    .sort((postA, postB) => postB.data.pubDatetime.getTime() - postA.data.pubDatetime.getTime());
+`;
+  const { outputText } = ts.transpileModule(`${prelude}\n${source}`, {
+    ...TRANSPILE_OPTIONS,
+    compilerOptions: {
+      ...TRANSPILE_OPTIONS.compilerOptions,
+      module: ts.ModuleKind.ES2022,
+    },
+  });
+
+  return import(
+    `data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`
+  );
+};
+
 const makeTestClassList = initial => {
   const classes = new Set(initial);
   return {
@@ -574,6 +608,67 @@ test("search index route preserves note date fallback titles", async () => {
           content: "Daily note body",
         },
       ]);
+    }
+  );
+});
+
+test("rss route preserves post publication dates", async () => {
+  const { GET } = await loadRssRoute();
+
+  await withGlobalMocks(
+    {
+      __rssCollections: {
+        blog: [
+          {
+            id: "older.md",
+            slug: "older",
+            data: {
+              description: "Older post",
+              draft: false,
+              pubDatetime: new Date("2024-01-01T00:00:00.000Z"),
+              title: "Older",
+            },
+          },
+          {
+            id: "newer.md",
+            slug: "newer",
+            data: {
+              description: "Newer post",
+              draft: false,
+              pubDatetime: new Date("2024-02-01T00:00:00.000Z"),
+              title: "Newer",
+            },
+          },
+        ],
+      },
+    },
+    async () => {
+      const response = await GET();
+      const rssOptions = await response.json();
+
+      assert.equal(rssOptions.site, "https://bogao.dev/");
+      assert.deepEqual(
+        rssOptions.items.map(item => ({
+          link: item.link,
+          title: item.title,
+          description: item.description,
+          pubDate: item.pubDate,
+        })),
+        [
+          {
+            link: "/posts/newer",
+            title: "Newer",
+            description: "Newer post",
+            pubDate: "2024-02-01T00:00:00.000Z",
+          },
+          {
+            link: "/posts/older",
+            title: "Older",
+            description: "Older post",
+            pubDate: "2024-01-01T00:00:00.000Z",
+          },
+        ]
+      );
     }
   );
 });
