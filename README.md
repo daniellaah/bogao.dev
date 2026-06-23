@@ -48,7 +48,7 @@ templates/          内容创建模板
 - `Posts` 页面当前每页最多显示 `100` 篇文章，并支持年份 / 标签轻量筛选
 - 已自托管 `LXGW WenKai` WOFF2 字体并应用到正文和标题
 - 文章页已切换到 KaTeX 编译期数学公式渲染
-- 站内搜索使用自定义 `/search-index.json`，覆盖 posts、notes 和 projects
+- 站内搜索使用自定义 `/search-index.json`，覆盖 posts、notes、projects 和 tags
 - 已写入基础站点信息与首页文案
 - 已导入一批旧博客文章
 - 旧文章已统一迁移到新的 `pubDatetime` / `modDatetime`
