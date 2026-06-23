@@ -49,6 +49,20 @@ export const splitSearchTerms = (value: string) => {
     : normalized.split(" ").filter(Boolean);
 };
 
+export const buildSearchExcerpt = (content: string, terms: string[]) => {
+  const normalized = normalizeSearchText(content);
+  const firstTerm = terms.find((term: string) => normalized.includes(term));
+  if (!firstTerm) return content.slice(0, 160);
+
+  const index = normalized.indexOf(firstTerm);
+  const start = Math.max(0, index - 48);
+  const end = Math.min(content.length, index + 112);
+  const prefix = start > 0 ? "..." : "";
+  const suffix = end < content.length ? "..." : "";
+
+  return `${prefix}${content.slice(start, end).trim()}${suffix}`;
+};
+
 export const formatSearchResultSummary = (count: number, query: string) =>
   `${count} result${count > 1 ? "s" : ""} for ${query}`;
 

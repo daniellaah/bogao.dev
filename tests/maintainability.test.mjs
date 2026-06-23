@@ -486,6 +486,7 @@ test("search index content strips markdown-only markup", async () => {
 test("search UI helpers share ranking and query parsing rules", async () => {
   const {
     SEARCH_LOAD_ERROR_MESSAGE,
+    buildSearchExcerpt,
     createSearchIndexLoader,
     escapeSearchHtml,
     formatSearchEmptyPrompt,
@@ -520,6 +521,17 @@ test("search UI helpers share ranking and query parsing rules", async () => {
     "Search posts, notes, projects, and tags"
   );
   assert.equal(formatNoSearchResults("gradient"), "No results for gradient");
+  assert.equal(
+    buildSearchExcerpt(
+      "Intro text before a longer setup paragraph with enough words before gradient descent notes and more context after.",
+      ["gradient"]
+    ),
+    "...longer setup paragraph with enough words before gradient descent notes and more context after."
+  );
+  assert.equal(
+    buildSearchExcerpt("Short content", ["missing"]),
+    "Short content"
+  );
   assert.equal(
     scoreSearchRecord(
       {

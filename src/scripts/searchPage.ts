@@ -1,11 +1,11 @@
 import {
   SEARCH_LOAD_ERROR_MESSAGE,
+  buildSearchExcerpt,
   createSearchIndexLoader,
   escapeSearchHtml,
   formatSearchEmptyPrompt,
   formatNoSearchResults,
   formatSearchResultSummary,
-  normalizeSearchText,
   rankSearchRecords,
   splitSearchTerms,
   type RankedSearchRecord,
@@ -41,20 +41,6 @@ export function setupSearchPage() {
   const searchKindToScope = Object.fromEntries(
     searchKindEntries.map(kind => [kind.filter, kind.scope])
   ) as Record<SearchKind, string>;
-
-  const buildExcerpt = (content: string, terms: string[]) => {
-    const normalized = normalizeSearchText(content);
-    const firstTerm = terms.find((term: string) => normalized.includes(term));
-    if (!firstTerm) return content.slice(0, 160);
-
-    const index = normalized.indexOf(firstTerm);
-    const start = Math.max(0, index - 48);
-    const end = Math.min(content.length, index + 112);
-    const prefix = start > 0 ? "..." : "";
-    const suffix = end < content.length ? "..." : "";
-
-    return `${prefix}${content.slice(start, end).trim()}${suffix}`;
-  };
 
   const getSearchKind = () => {
     const rawKind = getCurrentUrlSearchParams().get("type");
@@ -111,7 +97,7 @@ export function setupSearchPage() {
 
     results.innerHTML = sorted
       .map((record: RankedSearchRecord) => {
-        const excerpt = buildExcerpt(
+        const excerpt = buildSearchExcerpt(
           record.content || record.description,
           terms
         );
