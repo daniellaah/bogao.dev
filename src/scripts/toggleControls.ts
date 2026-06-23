@@ -1,4 +1,4 @@
-export const syncToggleIndicator = (
+const syncToggleIndicator = (
   toggle: HTMLElement | null,
   activeButton: HTMLButtonElement | undefined
 ) => {

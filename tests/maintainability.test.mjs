@@ -371,6 +371,58 @@ test("tag aggregation keeps post and note counts in one shared helper", async ()
   );
 });
 
+test("toggle controls update active state and indicator geometry", async () => {
+  const { setActiveToggleButton } = await loadTypeScriptModule(
+    "src/scripts/toggleControls.ts"
+  );
+  const indicatorStyles = new Map();
+  const toggle = {
+    style: {
+      setProperty: (name, value) => indicatorStyles.set(name, value),
+    },
+  };
+  const makeButton = (value, metrics) => {
+    const attributes = new Map();
+    return {
+      dataset: { tagSort: value },
+      offsetLeft: metrics.left,
+      offsetTop: metrics.top,
+      offsetWidth: metrics.width,
+      offsetHeight: metrics.height,
+      toggleAttribute: (name, active) => {
+        if (active) attributes.set(name, "");
+        else attributes.delete(name);
+      },
+      setAttribute: (name, value) => attributes.set(name, value),
+      getAttribute: name => attributes.get(name),
+      hasAttribute: name => attributes.has(name),
+    };
+  };
+  const popularButton = makeButton("popular", {
+    left: 0,
+    top: 0,
+    width: 48,
+    height: 32,
+  });
+  const azButton = makeButton("az", {
+    left: 56,
+    top: 4,
+    width: 36,
+    height: 28,
+  });
+
+  setActiveToggleButton([popularButton, azButton], "tagSort", "az", toggle);
+
+  assert.equal(popularButton.hasAttribute("data-active"), false);
+  assert.equal(popularButton.getAttribute("aria-pressed"), "false");
+  assert.equal(azButton.hasAttribute("data-active"), true);
+  assert.equal(azButton.getAttribute("aria-pressed"), "true");
+  assert.equal(indicatorStyles.get("--sort-indicator-x"), "56px");
+  assert.equal(indicatorStyles.get("--sort-indicator-y"), "4px");
+  assert.equal(indicatorStyles.get("--sort-indicator-width"), "36px");
+  assert.equal(indicatorStyles.get("--sort-indicator-height"), "28px");
+});
+
 test("OG image resolution is shared by post and project detail pages", async () => {
   const { resolveOgImage } = await loadTypeScriptModule("src/utils/ogImage.ts");
   const postDetails = readText("src/layouts/PostDetails.astro");

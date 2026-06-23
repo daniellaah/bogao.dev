@@ -36,7 +36,7 @@ const listMarkdownFiles = dir => {
   });
 };
 
-export const parseScalar = value => {
+const parseScalar = value => {
   const trimmed = value.trim();
   if (trimmed === "") return "";
   if (trimmed === "null") return null;

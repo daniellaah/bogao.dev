@@ -1,9 +1,6 @@
 import { defineCollection, z } from "astro:content";
 import { SITE } from "@/config";
 import contentRules from "@/data/content-rules.json";
-import { BLOG_PATH } from "@/utils/contentPaths";
-
-export { BLOG_PATH };
 
 const projectStatuses = contentRules.projectStatuses as [
   "active",

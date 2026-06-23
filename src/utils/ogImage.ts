@@ -1,6 +1,6 @@
 type ImageLike = string | { src?: string } | undefined | null;
 
-export const getOgImageUrl = (image: ImageLike) => {
+const getOgImageUrl = (image: ImageLike) => {
   if (typeof image === "string") return image;
   return image?.src;
 };
