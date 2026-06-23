@@ -1,7 +1,5 @@
-const trimTrailingSlash = (pathname: string) => pathname.replace(/\/+$/, "");
-
 export function getBreadcrumbList(pathname: string) {
-  const segments = trimTrailingSlash(pathname).split("/").slice(1);
+  const segments = pathname.replace(/\/+$/, "").split("/").slice(1);
 
   if (segments[0] === "posts") {
     return [`Posts (page ${segments[1] || 1})`];
