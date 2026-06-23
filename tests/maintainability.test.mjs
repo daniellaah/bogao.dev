@@ -803,45 +803,44 @@ test("back navigation client script preserves stored back link behavior", async 
     "src/scripts/backNavigation.ts",
     ["src/scripts/backNavigation.ts"]
   );
-  const originalDocument = globalThis.document;
-  const originalSessionStorage = globalThis.sessionStorage;
   const storage = new Map();
   const backButton = { href: "/" };
   let mainContent = { dataset: { backurl: "/posts/example/" } };
-  globalThis.sessionStorage = {
-    getItem: key => storage.get(key) ?? null,
-    setItem: (key, value) => storage.set(key, value),
-  };
-  globalThis.document = {
-    querySelector: selector =>
-      ({
-        "#main-content": mainContent,
-        "#back-button": backButton,
-      })[selector] ?? null,
-  };
 
-  try {
-    storeBackUrl();
+  await withGlobalMocks(
+    {
+      sessionStorage: {
+        getItem: key => storage.get(key) ?? null,
+        setItem: (key, value) => storage.set(key, value),
+      },
+      document: {
+        querySelector: selector =>
+          ({
+            "#main-content": mainContent,
+            "#back-button": backButton,
+          })[selector] ?? null,
+      },
+    },
+    async () => {
+      storeBackUrl();
 
-    assert.equal(storage.get("backUrl"), "/posts/example/");
+      assert.equal(storage.get("backUrl"), "/posts/example/");
 
-    updateBackButtonUrl();
+      updateBackButtonUrl();
 
-    assert.equal(backButton.href, "/posts/example/");
+      assert.equal(backButton.href, "/posts/example/");
 
-    mainContent = { dataset: {} };
-    storage.clear();
-    backButton.href = "/";
+      mainContent = { dataset: {} };
+      storage.clear();
+      backButton.href = "/";
 
-    storeBackUrl();
-    updateBackButtonUrl();
+      storeBackUrl();
+      updateBackButtonUrl();
 
-    assert.equal(storage.has("backUrl"), false);
-    assert.equal(backButton.href, "/");
-  } finally {
-    globalThis.document = originalDocument;
-    globalThis.sessionStorage = originalSessionStorage;
-  }
+      assert.equal(storage.has("backUrl"), false);
+      assert.equal(backButton.href, "/");
+    }
+  );
 });
 
 test("header nav client script preserves menu toggle behavior", async () => {
@@ -849,50 +848,51 @@ test("header nav client script preserves menu toggle behavior", async () => {
     "src/scripts/headerNav.ts",
     ["src/scripts/headerNav.ts"]
   );
-  const originalDocument = globalThis.document;
   const menuBtn = makeEventElement();
   const menuItems = makeEventElement({ classNames: ["hidden"] });
   const menuIcon = makeEventElement();
   const closeIcon = makeEventElement({ classNames: ["hidden"] });
   menuBtn.setAttribute("aria-expanded", "false");
   menuBtn.setAttribute("aria-label", "Open Menu");
-  globalThis.document = {
-    querySelector: selectOneFrom({
-      "#menu-btn": menuBtn,
-      "#menu-items": menuItems,
-      "#menu-icon": menuIcon,
-      "#close-icon": closeIcon,
-    }),
-  };
 
-  try {
-    setupHeaderNav();
+  await withGlobalMocks(
+    {
+      document: {
+        querySelector: selectOneFrom({
+          "#menu-btn": menuBtn,
+          "#menu-items": menuItems,
+          "#menu-icon": menuIcon,
+          "#close-icon": closeIcon,
+        }),
+      },
+    },
+    async () => {
+      setupHeaderNav();
 
-    assert.equal(menuBtn.dataset.navBound, "true");
-    assert.equal(menuBtn.handlerCount("click"), 1);
+      assert.equal(menuBtn.dataset.navBound, "true");
+      assert.equal(menuBtn.handlerCount("click"), 1);
 
-    menuBtn.dispatch("click");
+      menuBtn.dispatch("click");
 
-    assert.equal(menuBtn.getAttribute("aria-expanded"), "true");
-    assert.equal(menuBtn.getAttribute("aria-label"), "Close Menu");
-    assert.equal(menuItems.classList.contains("hidden"), false);
-    assert.equal(menuIcon.classList.contains("hidden"), true);
-    assert.equal(closeIcon.classList.contains("hidden"), false);
+      assert.equal(menuBtn.getAttribute("aria-expanded"), "true");
+      assert.equal(menuBtn.getAttribute("aria-label"), "Close Menu");
+      assert.equal(menuItems.classList.contains("hidden"), false);
+      assert.equal(menuIcon.classList.contains("hidden"), true);
+      assert.equal(closeIcon.classList.contains("hidden"), false);
 
-    setupHeaderNav();
+      setupHeaderNav();
 
-    assert.equal(menuBtn.handlerCount("click"), 1);
+      assert.equal(menuBtn.handlerCount("click"), 1);
 
-    menuBtn.dispatch("click");
+      menuBtn.dispatch("click");
 
-    assert.equal(menuBtn.getAttribute("aria-expanded"), "false");
-    assert.equal(menuBtn.getAttribute("aria-label"), "Open Menu");
-    assert.equal(menuItems.classList.contains("hidden"), true);
-    assert.equal(menuIcon.classList.contains("hidden"), false);
-    assert.equal(closeIcon.classList.contains("hidden"), true);
-  } finally {
-    globalThis.document = originalDocument;
-  }
+      assert.equal(menuBtn.getAttribute("aria-expanded"), "false");
+      assert.equal(menuBtn.getAttribute("aria-label"), "Open Menu");
+      assert.equal(menuItems.classList.contains("hidden"), true);
+      assert.equal(menuIcon.classList.contains("hidden"), false);
+      assert.equal(closeIcon.classList.contains("hidden"), true);
+    }
+  );
 });
 
 test("back-to-top client script preserves scroll and cleanup behavior", async () => {
