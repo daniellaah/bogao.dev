@@ -1616,11 +1616,13 @@ test("project URLs are filename-driven, not frontmatter slug-driven", () => {
 });
 
 test("project list and latest-project ordering contracts stay distinct", async () => {
-  const { default: getSortedProjects } = await loadTypeScriptModule(
-    "src/utils/getSortedProjects.ts"
+  const { default: getSortedProjects } = await loadProjectModule(
+    "src/utils/getSortedProjects.ts",
+    ["src/utils/getSortedProjects.ts", "src/utils/projectVisibility.ts"]
   );
-  const { default: getLatestProjects } = await loadTypeScriptModule(
-    "src/utils/getLatestProjects.ts"
+  const { default: getLatestProjects } = await loadProjectModule(
+    "src/utils/getLatestProjects.ts",
+    ["src/utils/getLatestProjects.ts", "src/utils/projectVisibility.ts"]
   );
   const projects = [
     {
@@ -1654,6 +1656,17 @@ test("project list and latest-project ordering contracts stay distinct", async (
         startDate: new Date("2026-03-01"),
         year: 2026,
         status: "lab",
+      },
+    },
+    {
+      id: "draft-project.md",
+      data: {
+        draft: true,
+        featured: true,
+        order: 0,
+        startDate: new Date("2026-12-01"),
+        year: 2026,
+        status: "shipping",
       },
     },
   ];
