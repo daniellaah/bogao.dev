@@ -382,6 +382,21 @@ test("tag aggregation keeps post and note counts in one shared helper", async ()
   );
 });
 
+test("shared dayjs utility preserves UTC content date formatting", async () => {
+  const { default: dayjs } = await loadProjectModule("src/utils/dayjs.ts", [
+    "src/utils/dayjs.ts",
+  ]);
+
+  assert.equal(
+    dayjs.utc("2026-03-07T00:30:00-08:00").format("YYYY-MM-DD"),
+    "2026-03-07"
+  );
+  assert.equal(
+    dayjs.utc("2026-03-07T00:30:00-08:00").format("D MMM YYYY"),
+    "7 Mar 2026"
+  );
+});
+
 test("toggle controls update active state and indicator geometry", async () => {
   const { setActiveToggleButton } = await loadTypeScriptModule(
     "src/scripts/toggleControls.ts"

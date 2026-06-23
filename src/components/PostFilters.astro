@@ -1,6 +1,5 @@
 ---
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
+import dayjs from "@/utils/dayjs";
 import { SITE } from "@/config";
 import type { SortedBlogPost } from "@/utils/getSortedPosts";
 import { slugifyStr } from "@/utils/slugify";
@@ -10,8 +9,6 @@ type Props = {
 };
 
 const { posts } = Astro.props;
-
-dayjs.extend(utc);
 
 const years = Array.from(
   new Set(posts.map(post => dayjs.utc(post.data.pubDatetime).format("YYYY")))

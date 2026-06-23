@@ -1,6 +1,5 @@
 ---
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
+import dayjs from "@/utils/dayjs";
 import type { SortedBlogPost } from "@/utils/getSortedPosts";
 import { getPostPath } from "@/utils/getPostPath";
 import { slugifyStr } from "@/utils/slugify";
@@ -11,8 +10,6 @@ type Props = {
 };
 
 const { post, filterable = false } = Astro.props;
-
-dayjs.extend(utc);
 
 const pubDatetime = dayjs.utc(post.data.pubDatetime);
 ---

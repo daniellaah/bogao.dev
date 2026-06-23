@@ -1,11 +1,8 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
+import dayjs from "@/utils/dayjs";
 import { getNotePath } from "@/utils/getNotePath";
 import { getPublicImageDimensions } from "@/utils/imageDimensions";
-
-dayjs.extend(utc);
 
 type Props = CollectionEntry<"notes"> & {
   compact?: boolean;
