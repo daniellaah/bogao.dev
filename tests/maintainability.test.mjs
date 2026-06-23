@@ -211,7 +211,6 @@ test("breadcrumb handles indexed routes", async () => {
 test("content URL helpers preserve public route contracts", async () => {
   const modulePaths = [
     "src/utils/slugifyCore.js",
-    "src/utils/slugify.ts",
     "src/utils/contentSlug.ts",
     "src/utils/getPath.ts",
     "src/utils/getPostPath.ts",
@@ -428,7 +427,6 @@ test("search UI helpers share ranking and query parsing rules", async () => {
 test("tag aggregation keeps post and note counts in one shared helper", async () => {
   const { collectTagStats } = await loadProjectModule("src/utils/tags.ts", [
     "src/utils/slugifyCore.js",
-    "src/utils/slugify.ts",
     "src/utils/tags.ts",
   ]);
 

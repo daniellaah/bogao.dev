@@ -1,4 +1,4 @@
-import { slugifyStr } from "./slugify";
+import { slugifyStr } from "./slugifyCore";
 
 export type TagKind = "post" | "note";
 
