@@ -10,6 +10,7 @@ import {
   type SearchRecord,
   type SearchRecordKind,
 } from "../utils/search";
+import { replaceCurrentUrlSearch } from "./urlState";
 
 export function setupSearchPage() {
   const input = document.querySelector<HTMLInputElement>("#search-input");
@@ -135,14 +136,7 @@ export function setupSearchPage() {
     if (kind === "all") params.delete("type");
     else params.set("type", kind);
 
-    const suffix = params.toString();
-    history.replaceState(
-      history.state,
-      "",
-      suffix
-        ? `${window.location.pathname}?${suffix}`
-        : window.location.pathname
-    );
+    replaceCurrentUrlSearch(params);
   };
 
   const loadSearchRecords = createSearchIndexLoader();

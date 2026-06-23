@@ -1038,7 +1038,11 @@ test("tags index client script preserves sort state behavior", async () => {
 test("post filters client script preserves URL-backed filtering", async () => {
   const { setupPostFiltersPage } = await loadProjectModule(
     "src/scripts/postFilters.ts",
-    ["src/scripts/toggleControls.ts", "src/scripts/postFilters.ts"]
+    [
+      "src/scripts/toggleControls.ts",
+      "src/scripts/urlState.ts",
+      "src/scripts/postFilters.ts",
+    ]
   );
   const originalWindow = globalThis.window;
   const originalDocument = globalThis.document;
@@ -1367,7 +1371,11 @@ test("command palette client script opens, searches, and closes", async () => {
 test("search page client script preserves URL-backed search behavior", async () => {
   const { setupSearchPage } = await loadProjectModule(
     "src/scripts/searchPage.ts",
-    ["src/utils/search.ts", "src/scripts/searchPage.ts"]
+    [
+      "src/utils/search.ts",
+      "src/scripts/urlState.ts",
+      "src/scripts/searchPage.ts",
+    ]
   );
   const originalWindow = globalThis.window;
   const originalDocument = globalThis.document;

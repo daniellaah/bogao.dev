@@ -2,6 +2,7 @@ import {
   addToggleIndicatorResizeSync,
   setActiveToggleButton,
 } from "./toggleControls";
+import { replaceCurrentUrlSearch } from "./urlState";
 
 let cleanupPostFiltersInstance = () => {};
 
@@ -58,14 +59,7 @@ export function setupPostFiltersPage() {
     if (tag === "all") params.delete("tag");
     else params.set("tag", tag);
 
-    const suffix = params.toString();
-    history.replaceState(
-      history.state,
-      "",
-      suffix
-        ? `${window.location.pathname}?${suffix}`
-        : window.location.pathname
-    );
+    replaceCurrentUrlSearch(params);
   };
 
   const applyFilter = () => {
