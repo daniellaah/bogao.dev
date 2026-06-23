@@ -76,6 +76,11 @@ export function setupSearchPage() {
 
   const getScopeText = (kind: SearchKind) => searchKindToScope[kind];
 
+  const renderEmptyPrompt = (kind: SearchKind) => {
+    status.textContent = `Type a keyword to search across ${getScopeText(kind)}.`;
+    results.innerHTML = "";
+  };
+
   const renderResults = (
     records: SearchRecord[],
     query: string,
@@ -85,8 +90,7 @@ export function setupSearchPage() {
     const visibleRecords = getVisibleRecords(records, kind);
 
     if (!terms.length) {
-      status.textContent = `Type a keyword to search across ${getScopeText(kind)}.`;
-      results.innerHTML = "";
+      renderEmptyPrompt(kind);
       return;
     }
 
@@ -146,11 +150,6 @@ export function setupSearchPage() {
   const loadRecords = async (showLoading = false) => {
     if (showLoading) status.textContent = "Loading search index...";
     return loadSearchRecords();
-  };
-
-  const renderEmptyPrompt = (kind: SearchKind) => {
-    status.textContent = `Type a keyword to search across ${getScopeText(kind)}.`;
-    results.innerHTML = "";
   };
 
   const runSearch = async (query: string, kind: SearchKind) => {
