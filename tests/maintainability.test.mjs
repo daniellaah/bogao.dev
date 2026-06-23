@@ -195,6 +195,10 @@ const makeUrlState = ({ pathname, search }) => {
   return { history, location };
 };
 
+const selectOneFrom = selectorMap => selector => selectorMap[selector] ?? null;
+
+const selectAllFrom = selectorMap => selector => selectorMap[selector] ?? [];
+
 test("breadcrumb handles indexed routes", async () => {
   const { getBreadcrumbList } = await loadTypeScriptModule(
     "src/utils/breadcrumb.ts"
@@ -599,13 +603,13 @@ test("home page client script preserves back link and avatar replay behavior", a
   };
   globalThis.performance = { now: () => currentNow };
   globalThis.document = {
-    querySelector: selector =>
-      ({
-        "#main-content": mainContent,
-        ".hero-avatar": avatar,
-      })[selector] ?? null,
-    querySelectorAll: selector =>
-      selector === ".hero-avatar__image" ? [lightAvatar, darkAvatar] : [],
+    querySelector: selectOneFrom({
+      "#main-content": mainContent,
+      ".hero-avatar": avatar,
+    }),
+    querySelectorAll: selectAllFrom({
+      ".hero-avatar__image": [lightAvatar, darkAvatar],
+    }),
   };
 
   try {
@@ -717,13 +721,12 @@ test("header nav client script preserves menu toggle behavior", async () => {
   menuBtn.setAttribute("aria-expanded", "false");
   menuBtn.setAttribute("aria-label", "Open Menu");
   globalThis.document = {
-    querySelector: selector =>
-      ({
-        "#menu-btn": menuBtn,
-        "#menu-items": menuItems,
-        "#menu-icon": menuIcon,
-        "#close-icon": closeIcon,
-      })[selector] ?? null,
+    querySelector: selectOneFrom({
+      "#menu-btn": menuBtn,
+      "#menu-items": menuItems,
+      "#menu-icon": menuIcon,
+      "#close-icon": closeIcon,
+    }),
   };
 
   try {
@@ -909,17 +912,15 @@ test("tags index client script preserves sort state behavior", async () => {
   const root = {
     dataset: {},
     removeAttribute: name => delete root.dataset[name],
-    querySelector: selector =>
-      ({
-        "[data-tags-status]": status,
-        "[data-tags-sort-toggle]": sortToggle,
-        "[data-tags-card-grid]": cardGrid,
-      })[selector] ?? null,
-    querySelectorAll: selector =>
-      ({
-        "[data-tag-sort]": [popularButton, azButton],
-        "[data-tag-card]": cards,
-      })[selector] ?? [],
+    querySelector: selectOneFrom({
+      "[data-tags-status]": status,
+      "[data-tags-sort-toggle]": sortToggle,
+      "[data-tags-card-grid]": cardGrid,
+    }),
+    querySelectorAll: selectAllFrom({
+      "[data-tag-sort]": [popularButton, azButton],
+      "[data-tag-card]": cards,
+    }),
   };
 
   globalThis.window = {
@@ -1027,17 +1028,15 @@ test("post filters client script preserves URL-backed filtering", async () => {
   const tagToggle = makeToggle();
   const root = {
     dataset: {},
-    querySelector: selector =>
-      ({
-        "[data-filter-status]": status,
-        '[data-filter-toggle="year"]': yearToggle,
-        '[data-filter-toggle="tag"]': tagToggle,
-      })[selector] ?? null,
-    querySelectorAll: selector =>
-      ({
-        "[data-filter-year]": [yearAll, year2024],
-        "[data-filter-tag]": [tagAll, tagNotes],
-      })[selector] ?? [],
+    querySelector: selectOneFrom({
+      "[data-filter-status]": status,
+      '[data-filter-toggle="year"]': yearToggle,
+      '[data-filter-toggle="tag"]': tagToggle,
+    }),
+    querySelectorAll: selectAllFrom({
+      "[data-filter-year]": [yearAll, year2024],
+      "[data-filter-tag]": [tagAll, tagNotes],
+    }),
   };
   const { history, location } = makeUrlState({
     pathname: "/posts",
@@ -1055,10 +1054,10 @@ test("post filters client script preserves URL-backed filtering", async () => {
     removeEventListener: () => {},
   };
   globalThis.document = {
-    querySelector: selector =>
-      selector === "[data-post-filters]" ? root : null,
-    querySelectorAll: selector =>
-      selector === "[data-post-list-item]" ? [postA, postB] : [],
+    querySelector: selectOneFrom({ "[data-post-filters]": root }),
+    querySelectorAll: selectAllFrom({
+      "[data-post-list-item]": [postA, postB],
+    }),
   };
   globalThis.history = history;
 
@@ -1229,25 +1228,23 @@ test("command palette client script opens, searches, and closes", async () => {
     activeElement: previousActiveElement,
     addEventListener: (event, handler) => documentHandlers.set(event, handler),
     removeEventListener: event => documentHandlers.delete(event),
-    querySelector: selector =>
-      ({
-        "#command-palette": root,
-        ".command-palette__panel": panel,
-        "#command-palette-input": input,
-        "#command-palette-status": status,
-        "#command-palette-results": results,
-        "#command-palette-results-panel": resultsPanel,
-        "#command-palette-thinking": thinking,
-        "#top-nav-wrap": navWrap,
-        ".site-brand": siteBrand,
-        "[data-nav-item]": firstNavItem,
-        "[data-command-open]": openButton,
-      })[selector] ?? null,
-    querySelectorAll: selector =>
-      ({
-        "[data-command-close]": [closeButton],
-        "[data-command-open]": [openButton],
-      })[selector] ?? [],
+    querySelector: selectOneFrom({
+      "#command-palette": root,
+      ".command-palette__panel": panel,
+      "#command-palette-input": input,
+      "#command-palette-status": status,
+      "#command-palette-results": results,
+      "#command-palette-results-panel": resultsPanel,
+      "#command-palette-thinking": thinking,
+      "#top-nav-wrap": navWrap,
+      ".site-brand": siteBrand,
+      "[data-nav-item]": firstNavItem,
+      "[data-command-open]": openButton,
+    }),
+    querySelectorAll: selectAllFrom({
+      "[data-command-close]": [closeButton],
+      "[data-command-open]": [openButton],
+    }),
   };
 
   try {
@@ -1364,18 +1361,16 @@ test("search page client script preserves URL-backed search behavior", async () 
   globalThis.history = history;
   globalThis.document = {
     activeElement: null,
-    querySelector: selector =>
-      ({
-        "#search-input": input,
-        "#search-clear": clearButton,
-        "#search-status": status,
-        "#search-results": results,
-        "#search-kind-data": kindData,
-      })[selector] ?? null,
-    querySelectorAll: selector =>
-      selector === "[data-search-kind]"
-        ? [allButton, postsButton, notesButton]
-        : [],
+    querySelector: selectOneFrom({
+      "#search-input": input,
+      "#search-clear": clearButton,
+      "#search-status": status,
+      "#search-results": results,
+      "#search-kind-data": kindData,
+    }),
+    querySelectorAll: selectAllFrom({
+      "[data-search-kind]": [allButton, postsButton, notesButton],
+    }),
   };
 
   try {
