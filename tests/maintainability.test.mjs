@@ -539,6 +539,166 @@ test("tags index client script preserves sort state behavior", async () => {
   }
 });
 
+test("post filters client script preserves URL-backed filtering", async () => {
+  const { setupPostFiltersPage } = await loadProjectModule(
+    "src/scripts/postFilters.ts",
+    ["src/scripts/toggleControls.ts", "src/scripts/postFilters.ts"]
+  );
+  const originalWindow = globalThis.window;
+  const originalDocument = globalThis.document;
+  const originalHistory = globalThis.history;
+  const indicatorStyles = new Map();
+  const makeButton = (dataset, metrics) => {
+    const attributes = new Map();
+    let clickHandler = () => {};
+    return {
+      dataset,
+      offsetLeft: metrics.left,
+      offsetTop: metrics.top,
+      offsetWidth: metrics.width,
+      offsetHeight: metrics.height,
+      addEventListener: (event, handler) => {
+        if (event === "click") clickHandler = handler;
+      },
+      click: () => clickHandler(),
+      toggleAttribute: (name, active) => {
+        if (active) attributes.set(name, "");
+        else attributes.delete(name);
+      },
+      setAttribute: (name, value) => attributes.set(name, value),
+      getAttribute: name => attributes.get(name),
+    };
+  };
+  const yearAll = makeButton(
+    { filterYear: "all" },
+    {
+      left: 0,
+      top: 0,
+      width: 44,
+      height: 32,
+    }
+  );
+  const year2024 = makeButton(
+    { filterYear: "2024" },
+    {
+      left: 52,
+      top: 0,
+      width: 56,
+      height: 32,
+    }
+  );
+  const tagAll = makeButton(
+    { filterTag: "all" },
+    {
+      left: 0,
+      top: 0,
+      width: 44,
+      height: 32,
+    }
+  );
+  const tagNotes = makeButton(
+    { filterTag: "notes" },
+    {
+      left: 52,
+      top: 0,
+      width: 64,
+      height: 32,
+    }
+  );
+  const postA = {
+    dataset: { postYear: "2024", postTags: "ml ai" },
+    hidden: false,
+  };
+  const postB = {
+    dataset: { postYear: "2023", postTags: "notes" },
+    hidden: false,
+  };
+  const status = { textContent: "" };
+  const makeToggle = () => {
+    const attributes = new Map();
+    return {
+      style: {
+        setProperty: (name, value) => indicatorStyles.set(name, value),
+      },
+      setAttribute: (name, value) => attributes.set(name, value),
+      getAttribute: name => attributes.get(name),
+    };
+  };
+  const yearToggle = makeToggle();
+  const tagToggle = makeToggle();
+  const root = {
+    dataset: {},
+    querySelector: selector =>
+      ({
+        "[data-filter-status]": status,
+        '[data-filter-toggle="year"]': yearToggle,
+        '[data-filter-toggle="tag"]': tagToggle,
+      })[selector] ?? null,
+    querySelectorAll: selector =>
+      ({
+        "[data-filter-year]": [yearAll, year2024],
+        "[data-filter-tag]": [tagAll, tagNotes],
+      })[selector] ?? [],
+  };
+  const location = {
+    pathname: "/posts",
+    search: "?year=2024&tag=missing",
+  };
+  const history = {
+    state: { from: "test" },
+    replacedWith: "",
+    replaceState: (_state, _title, url) => {
+      history.replacedWith = url;
+      const [pathname, search = ""] = url.split("?");
+      location.pathname = pathname;
+      location.search = search ? `?${search}` : "";
+    },
+  };
+
+  globalThis.window = {
+    location,
+    requestAnimationFrame: callback => {
+      callback();
+      return 1;
+    },
+    cancelAnimationFrame: () => {},
+    addEventListener: () => {},
+    removeEventListener: () => {},
+  };
+  globalThis.document = {
+    querySelector: selector =>
+      selector === "[data-post-filters]" ? root : null,
+    querySelectorAll: selector =>
+      selector === "[data-post-list-item]" ? [postA, postB] : [],
+  };
+  globalThis.history = history;
+
+  try {
+    setupPostFiltersPage();
+
+    assert.equal(history.replacedWith, "/posts?year=2024");
+    assert.equal(postA.hidden, false);
+    assert.equal(postB.hidden, true);
+    assert.equal(status.textContent, "Showing 1 post.");
+    assert.equal(year2024.getAttribute("aria-pressed"), "true");
+    assert.equal(tagAll.getAttribute("aria-pressed"), "true");
+    assert.equal(yearToggle.getAttribute("data-ink-ready"), "true");
+
+    tagNotes.click();
+
+    assert.equal(history.replacedWith, "/posts?year=2024&tag=notes");
+    assert.equal(postA.hidden, true);
+    assert.equal(postB.hidden, true);
+    assert.equal(status.textContent, "Showing 0 posts.");
+    assert.equal(tagNotes.getAttribute("aria-pressed"), "true");
+    assert.equal(indicatorStyles.get("--sort-indicator-x"), "52px");
+  } finally {
+    globalThis.window = originalWindow;
+    globalThis.document = originalDocument;
+    globalThis.history = originalHistory;
+  }
+});
+
 test("OG image resolution is shared by post and project detail pages", async () => {
   const { resolveOgImage } = await loadTypeScriptModule("src/utils/ogImage.ts");
   const postDetails = readText("src/layouts/PostDetails.astro");
