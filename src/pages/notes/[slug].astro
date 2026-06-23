@@ -157,12 +157,11 @@ const showUpdatedDate = Boolean(updatedDate && updatedDate !== createdDate);
           <h2 class="text-2xl font-semibold">More Photos</h2>
           <div class="mt-6 grid gap-4 md:grid-cols-2">
             {photos.slice(1).map(photo => {
-              const src = photo;
-              const dimensions = getPublicImageDimensions(src);
+              const dimensions = getPublicImageDimensions(photo);
               return (
                 <div class="overflow-hidden border border-border">
                   <img
-                    src={src}
+                    src={photo}
                     alt={heading}
                     width={dimensions?.width}
                     height={dimensions?.height}
