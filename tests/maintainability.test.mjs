@@ -13,6 +13,12 @@ const MODULE_TEST_CACHE_DIR = path.join(
   "daniellaah-tech-blog",
   "maintainability-tests"
 );
+const TRANSPILE_OPTIONS = {
+  compilerOptions: {
+    module: ts.ModuleKind.ES2022,
+    target: ts.ScriptTarget.ES2022,
+  },
+};
 
 const readText = relativePath =>
   fs.readFileSync(path.join(ROOT, relativePath), "utf8");
@@ -40,12 +46,7 @@ const stripMarkdownExt = value => value.replace(/\.(md|mdx)$/i, "");
 
 const loadTypeScriptModule = async relativePath => {
   const source = readText(relativePath);
-  const { outputText } = ts.transpileModule(source, {
-    compilerOptions: {
-      module: ts.ModuleKind.ES2022,
-      target: ts.ScriptTarget.ES2022,
-    },
-  });
+  const { outputText } = ts.transpileModule(source, TRANSPILE_OPTIONS);
 
   return import(
     `data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`
@@ -66,12 +67,7 @@ const loadProjectModule = async (entryPath, modulePaths) => {
       const source = readText(modulePath);
 
       const { outputText } = modulePath.endsWith(".ts")
-        ? ts.transpileModule(source, {
-            compilerOptions: {
-              module: ts.ModuleKind.ES2022,
-              target: ts.ScriptTarget.ES2022,
-            },
-          })
+        ? ts.transpileModule(source, TRANSPILE_OPTIONS)
         : { outputText: source };
       const withResolvableImports = outputText.replace(
         /(from\s+["'])(\.{1,2}\/[^"']+)(["'])/g,
@@ -108,12 +104,7 @@ const loadSearchIndexInternals = async () => {
       "const stripMarkdown"
     )
     .replace(/export const GET:[\s\S]*$/m, "export { stripMarkdown };");
-  const { outputText } = ts.transpileModule(source, {
-    compilerOptions: {
-      module: ts.ModuleKind.ES2022,
-      target: ts.ScriptTarget.ES2022,
-    },
-  });
+  const { outputText } = ts.transpileModule(source, TRANSPILE_OPTIONS);
 
   return import(
     `data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`
@@ -292,12 +283,7 @@ test("sorted posts keep production filtering and date ordering", async () => {
       "import.meta.env.DEV",
       "false"
     );
-  const { outputText } = ts.transpileModule(source, {
-    compilerOptions: {
-      module: ts.ModuleKind.ES2022,
-      target: ts.ScriptTarget.ES2022,
-    },
-  });
+  const { outputText } = ts.transpileModule(source, TRANSPILE_OPTIONS);
   const { default: getSortedPosts } = await import(
     `data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`
   );
