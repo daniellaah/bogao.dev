@@ -231,13 +231,10 @@ const getUniqueTags = entries => {
 const isPublishedNote = note => !note.data.draft;
 const isPublishedProject = project => !project.data.draft;
 `;
-  const { outputText } = ts.transpileModule(`${prelude}\n${source}`, {
-    ...TRANSPILE_OPTIONS,
-    compilerOptions: {
-      ...TRANSPILE_OPTIONS.compilerOptions,
-      module: ts.ModuleKind.ES2022,
-    },
-  });
+  const { outputText } = ts.transpileModule(
+    `${prelude}\n${source}`,
+    TRANSPILE_OPTIONS
+  );
 
   return import(
     `data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`
@@ -259,13 +256,10 @@ const getCollection = async collection =>
   globalThis.__rssCollections?.[collection] ?? [];
 ${ROUTE_POST_HELPERS}
 `;
-  const { outputText } = ts.transpileModule(`${prelude}\n${source}`, {
-    ...TRANSPILE_OPTIONS,
-    compilerOptions: {
-      ...TRANSPILE_OPTIONS.compilerOptions,
-      module: ts.ModuleKind.ES2022,
-    },
-  });
+  const { outputText } = ts.transpileModule(
+    `${prelude}\n${source}`,
+    TRANSPILE_OPTIONS
+  );
 
   return import(
     `data:text/javascript;charset=utf-8,${encodeURIComponent(outputText)}`
