@@ -434,6 +434,111 @@ test("toggle controls update active state and indicator geometry", async () => {
   assert.equal(indicatorStyles.get("--sort-indicator-height"), "28px");
 });
 
+test("home page client script preserves back link and avatar replay behavior", async () => {
+  const { setupHomePage } = await loadProjectModule("src/scripts/homePage.ts", [
+    "src/scripts/homePage.ts",
+  ]);
+  const originalWindow = globalThis.window;
+  const originalDocument = globalThis.document;
+  const originalSessionStorage = globalThis.sessionStorage;
+  const originalPerformance = globalThis.performance;
+  const originalDateNow = Date.now;
+  const storage = new Map();
+  let currentNow = 1000;
+  let currentDateNow = 1700000000000;
+  const makeImage = src => ({
+    dataset: {},
+    src,
+    getAttribute: name => (name === "src" ? src : null),
+  });
+  const avatar = {
+    handlers: new Map(),
+    addEventListener(event, handler) {
+      const handlers = this.handlers.get(event) ?? new Set();
+      handlers.add(handler);
+      this.handlers.set(event, handlers);
+    },
+    removeEventListener(event, handler) {
+      this.handlers.get(event)?.delete(handler);
+    },
+    dispatch(event) {
+      for (const handler of this.handlers.get(event) ?? []) handler();
+    },
+    handlerCount(event) {
+      return this.handlers.get(event)?.size ?? 0;
+    },
+  };
+  const lightAvatar = makeImage("/images/site/avatar.svg");
+  const darkAvatar = makeImage("/images/site/avatar-dark.svg?old=1");
+  const mainContent = { dataset: { layout: "index" } };
+  const homeWindow = {};
+
+  Date.now = () => currentDateNow;
+  globalThis.window = homeWindow;
+  globalThis.sessionStorage = {
+    setItem: (key, value) => storage.set(key, value),
+  };
+  globalThis.performance = { now: () => currentNow };
+  globalThis.document = {
+    querySelector: selector =>
+      ({
+        "#main-content": mainContent,
+        ".hero-avatar": avatar,
+      })[selector] ?? null,
+    querySelectorAll: selector =>
+      selector === ".hero-avatar__image" ? [lightAvatar, darkAvatar] : [],
+  };
+
+  try {
+    setupHomePage();
+
+    assert.equal(storage.get("backUrl"), "/");
+    assert.equal(lightAvatar.dataset.avatarSrc, "/images/site/avatar.svg");
+    assert.equal(darkAvatar.dataset.avatarSrc, "/images/site/avatar-dark.svg");
+    assert.equal(
+      lightAvatar.src,
+      "/images/site/avatar.svg?replay=1700000000000-1000-0"
+    );
+    assert.equal(
+      darkAvatar.src,
+      "/images/site/avatar-dark.svg?replay=1700000000000-1000-1"
+    );
+    assert.equal(avatar.handlerCount("pointerenter"), 1);
+
+    currentNow = 1100;
+    currentDateNow = 1700000000100;
+    avatar.dispatch("pointerenter");
+
+    assert.equal(
+      lightAvatar.src,
+      "/images/site/avatar.svg?replay=1700000000000-1000-0"
+    );
+
+    currentNow = 1401;
+    currentDateNow = 1700000000401;
+    avatar.dispatch("pointerenter");
+
+    assert.equal(
+      lightAvatar.src,
+      "/images/site/avatar.svg?replay=1700000000401-1401-0"
+    );
+
+    setupHomePage();
+
+    assert.equal(avatar.handlerCount("pointerenter"), 1);
+
+    homeWindow.__homeAvatarHoverCleanup();
+
+    assert.equal(avatar.handlerCount("pointerenter"), 0);
+  } finally {
+    Date.now = originalDateNow;
+    globalThis.window = originalWindow;
+    globalThis.document = originalDocument;
+    globalThis.sessionStorage = originalSessionStorage;
+    globalThis.performance = originalPerformance;
+  }
+});
+
 test("tags index client script preserves sort state behavior", async () => {
   const { setupTagsIndexPage } = await loadProjectModule(
     "src/scripts/tagsIndex.ts",
