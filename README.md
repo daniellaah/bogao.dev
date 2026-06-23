@@ -181,7 +181,8 @@ npm run build
 - `public/images/posts/`：博客文章配图
 - `public/images/notes/`：notes / memo 照片
 - `public/images/projects/`：项目封面与截图
-- `public/images/site/`：站点级素材，例如 favicon、OG 图、装饰图
+- `public/images/site/`：站点级图片，例如头像和装饰图
+- `public/`：根级站点资源，例如 favicon、app icon 和默认 OG 图
 
 命名建议：
 
