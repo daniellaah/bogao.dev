@@ -1181,10 +1181,6 @@ test("command palette client script opens, searches, and closes", async () => {
     "src/scripts/commandPalette.ts",
     ["src/utils/search.ts", "src/scripts/commandPalette.ts"]
   );
-  const originalWindow = globalThis.window;
-  const originalDocument = globalThis.document;
-  const originalFetch = globalThis.fetch;
-  const originalHTMLElement = globalThis.HTMLElement;
   const makeClassList = initial => {
     const classes = new Set(initial);
     return {
@@ -1283,99 +1279,98 @@ test("command palette client script opens, searches, and closes", async () => {
   const previousActiveElement = new MockElement();
   const documentHandlers = new Map();
 
-  globalThis.HTMLElement = MockElement;
-  globalThis.fetch = async () => ({
-    ok: true,
-    json: async () => [
-      {
-        title: "Gradient <Descent>",
-        description: "Optimization",
-        url: "/posts/gradient",
-        kind: "Post",
-        metaText: "machine learning",
-        content: "",
+  await withGlobalMocks(
+    {
+      HTMLElement: MockElement,
+      fetch: async () => ({
+        ok: true,
+        json: async () => [
+          {
+            title: "Gradient <Descent>",
+            description: "Optimization",
+            url: "/posts/gradient",
+            kind: "Post",
+            metaText: "machine learning",
+            content: "",
+          },
+        ],
+      }),
+      window: {
+        requestAnimationFrame: callback => {
+          callback();
+          return 1;
+        },
+        clearTimeout: () => {},
+        setTimeout: callback => {
+          callback();
+          return 1;
+        },
+        matchMedia: query => ({
+          matches: query === "(prefers-reduced-motion: reduce)",
+        }),
+        addEventListener: () => {},
+        removeEventListener: () => {},
       },
-    ],
-  });
-  globalThis.window = {
-    requestAnimationFrame: callback => {
-      callback();
-      return 1;
-    },
-    clearTimeout: () => {},
-    setTimeout: callback => {
-      callback();
-      return 1;
-    },
-    matchMedia: query => ({
-      matches: query === "(prefers-reduced-motion: reduce)",
-    }),
-    addEventListener: () => {},
-    removeEventListener: () => {},
-  };
-  globalThis.document = {
-    activeElement: previousActiveElement,
-    addEventListener: (event, handler) => documentHandlers.set(event, handler),
-    removeEventListener: event => documentHandlers.delete(event),
-    querySelector: selectOneFrom({
-      "#command-palette": root,
-      ".command-palette__panel": panel,
-      "#command-palette-input": input,
-      "#command-palette-status": status,
-      "#command-palette-results": results,
-      "#command-palette-results-panel": resultsPanel,
-      "#command-palette-thinking": thinking,
-      "#top-nav-wrap": navWrap,
-      ".site-brand": siteBrand,
-      "[data-nav-item]": firstNavItem,
-      "[data-command-open]": openButton,
-    }),
-    querySelectorAll: selectAllFrom({
-      "[data-command-close]": [closeButton],
-      "[data-command-open]": [openButton],
-    }),
-  };
-
-  try {
-    setupCommandPalettePage();
-
-    let openPrevented = false;
-    openButton.dispatch("click", {
-      preventDefault: () => {
-        openPrevented = true;
+      document: {
+        activeElement: previousActiveElement,
+        addEventListener: (event, handler) =>
+          documentHandlers.set(event, handler),
+        removeEventListener: event => documentHandlers.delete(event),
+        querySelector: selectOneFrom({
+          "#command-palette": root,
+          ".command-palette__panel": panel,
+          "#command-palette-input": input,
+          "#command-palette-status": status,
+          "#command-palette-results": results,
+          "#command-palette-results-panel": resultsPanel,
+          "#command-palette-thinking": thinking,
+          "#top-nav-wrap": navWrap,
+          ".site-brand": siteBrand,
+          "[data-nav-item]": firstNavItem,
+          "[data-command-open]": openButton,
+        }),
+        querySelectorAll: selectAllFrom({
+          "[data-command-close]": [closeButton],
+          "[data-command-open]": [openButton],
+        }),
       },
-    });
+    },
+    async () => {
+      setupCommandPalettePage();
 
-    assert.equal(openPrevented, true);
-    assert.equal(root.hidden, false);
-    assert.equal(root.getAttribute("aria-hidden"), "false");
-    assert.equal(openButton.attributes.has("data-command-active"), true);
-    assert.equal(input.focused, true);
+      let openPrevented = false;
+      openButton.dispatch("click", {
+        preventDefault: () => {
+          openPrevented = true;
+        },
+      });
 
-    input.value = "gradient";
-    input.dispatch("input");
-    await new Promise(resolve => setImmediate(resolve));
+      assert.equal(openPrevented, true);
+      assert.equal(root.hidden, false);
+      assert.equal(root.getAttribute("aria-hidden"), "false");
+      assert.equal(openButton.attributes.has("data-command-active"), true);
+      assert.equal(input.focused, true);
 
-    assert.equal(status.textContent, "1 result for gradient");
-    assert.ok(results.innerHTML.includes("/posts/gradient"));
-    assert.ok(results.innerHTML.includes("Gradient &lt;Descent&gt;"));
+      input.value = "gradient";
+      input.dispatch("input");
+      await new Promise(resolve => setImmediate(resolve));
 
-    closeButton.dispatch("click");
+      assert.equal(status.textContent, "1 result for gradient");
+      assert.ok(results.innerHTML.includes("/posts/gradient"));
+      assert.ok(results.innerHTML.includes("Gradient &lt;Descent&gt;"));
 
-    assert.equal(root.hidden, true);
-    assert.equal(root.getAttribute("aria-hidden"), "true");
-    assert.equal(openButton.attributes.has("data-command-active"), false);
-    assert.equal(input.value, "");
-    assert.equal(results.innerHTML, "");
-    assert.equal(status.textContent, "");
-    assert.equal(previousActiveElement.focused, true);
-    assert.ok(documentHandlers.has("keydown"));
-  } finally {
-    globalThis.window = originalWindow;
-    globalThis.document = originalDocument;
-    globalThis.fetch = originalFetch;
-    globalThis.HTMLElement = originalHTMLElement;
-  }
+      closeButton.dispatch("click");
+
+      assert.equal(root.hidden, true);
+      assert.equal(root.getAttribute("aria-hidden"), "true");
+      assert.equal(openButton.attributes.has("data-command-active"), false);
+      assert.equal(input.value, "");
+      assert.equal(results.innerHTML, "");
+      assert.equal(status.textContent, "");
+      assert.equal(previousActiveElement.focused, true);
+      assert.ok(documentHandlers.has("keydown"));
+    }
+  );
 });
 
 test("search page client script preserves URL-backed search behavior", async () => {
