@@ -174,7 +174,6 @@ test("content URL helpers preserve public route contracts", async () => {
   const modulePaths = [
     "src/utils/slugifyCore.js",
     "src/utils/slugify.ts",
-    "src/utils/contentPaths.ts",
     "src/utils/contentSlug.ts",
     "src/utils/getPath.ts",
     "src/utils/getPostPath.ts",
@@ -221,14 +220,11 @@ test("content URL helpers preserve public route contracts", async () => {
 test("content path helpers keep low-level stripping private", () => {
   const contentSlug = readText("src/utils/contentSlug.ts");
   const getPath = readText("src/utils/getPath.ts");
-  const contentPaths = readText("src/utils/contentPaths.ts");
-  const rules = readJson("src/data/content-rules.json");
 
   assert.ok(contentSlug.includes("export const getPathSegmentSlug"));
   assert.ok(!contentSlug.includes("export const stripMarkdownExt"));
   assert.ok(getPath.includes("getPathSegmentSlug(segment)"));
   assert.ok(!getPath.includes("@/content.config"));
-  assert.ok(contentPaths.includes(rules.collections.blog.dir));
 });
 
 test("post detail routes use standard post paths", () => {

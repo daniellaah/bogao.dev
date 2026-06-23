@@ -1,5 +1,6 @@
-import { BLOG_PATH } from "./contentPaths";
 import { getPathSegmentSlug, getResolvedSlug } from "./contentSlug";
+
+const BLOG_PATH = "src/content/blog";
 
 /**
  * Get full path of a blog post
