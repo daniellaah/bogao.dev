@@ -900,8 +900,6 @@ test("back-to-top client script preserves scroll and cleanup behavior", async ()
     "src/scripts/backToTop.ts",
     ["src/scripts/backToTop.ts"]
   );
-  const originalWindow = globalThis.window;
-  const originalDocument = globalThis.document;
   const documentHandlers = new Map();
   const addDocumentHandler = (event, handler) => {
     const handlers = documentHandlers.get(event) ?? new Set();
@@ -934,68 +932,68 @@ test("back-to-top client script preserves scroll and cleanup behavior", async ()
   };
   const flushAnimationFrame = () => animationFrameCallbacks.shift()?.();
 
-  globalThis.window = windowMock;
-  globalThis.document = {
-    body,
-    documentElement: rootElement,
-    addEventListener: addDocumentHandler,
-    removeEventListener: removeDocumentHandler,
-    querySelector: selector =>
-      ({
-        "#btt-btn-container": btnContainer,
-        "[data-button='back-to-top']": backToTopBtn,
-      })[selector] ?? null,
-  };
+  await withGlobalMocks(
+    {
+      window: windowMock,
+      document: {
+        body,
+        documentElement: rootElement,
+        addEventListener: addDocumentHandler,
+        removeEventListener: removeDocumentHandler,
+        querySelector: selector =>
+          ({
+            "#btt-btn-container": btnContainer,
+            "[data-button='back-to-top']": backToTopBtn,
+          })[selector] ?? null,
+      },
+    },
+    async () => {
+      setupBackToTopButton();
 
-  try {
-    setupBackToTopButton();
+      assert.equal(backToTopBtn.dataset.backToTopBound, "true");
+      assert.equal(backToTopBtn.handlerCount("click"), 1);
+      assert.equal(documentHandlerCount("scroll"), 1);
+      assert.equal(documentHandlerCount("astro:before-swap"), 1);
 
-    assert.equal(backToTopBtn.dataset.backToTopBound, "true");
-    assert.equal(backToTopBtn.handlerCount("click"), 1);
-    assert.equal(documentHandlerCount("scroll"), 1);
-    assert.equal(documentHandlerCount("astro:before-swap"), 1);
+      rootElement.scrollTop = 200;
+      dispatchDocument("scroll");
+      flushAnimationFrame();
 
-    rootElement.scrollTop = 200;
-    dispatchDocument("scroll");
-    flushAnimationFrame();
+      assert.equal(btnContainer.classList.contains("opacity-100"), true);
+      assert.equal(btnContainer.classList.contains("translate-y-0"), true);
+      assert.equal(btnContainer.classList.contains("opacity-0"), false);
+      assert.equal(btnContainer.classList.contains("translate-y-14"), false);
 
-    assert.equal(btnContainer.classList.contains("opacity-100"), true);
-    assert.equal(btnContainer.classList.contains("translate-y-0"), true);
-    assert.equal(btnContainer.classList.contains("opacity-0"), false);
-    assert.equal(btnContainer.classList.contains("translate-y-14"), false);
+      rootElement.scrollTop = 100;
+      dispatchDocument("scroll");
+      flushAnimationFrame();
 
-    rootElement.scrollTop = 100;
-    dispatchDocument("scroll");
-    flushAnimationFrame();
+      assert.equal(btnContainer.classList.contains("opacity-100"), false);
+      assert.equal(btnContainer.classList.contains("translate-y-0"), false);
+      assert.equal(btnContainer.classList.contains("opacity-0"), true);
+      assert.equal(btnContainer.classList.contains("translate-y-14"), true);
 
-    assert.equal(btnContainer.classList.contains("opacity-100"), false);
-    assert.equal(btnContainer.classList.contains("translate-y-0"), false);
-    assert.equal(btnContainer.classList.contains("opacity-0"), true);
-    assert.equal(btnContainer.classList.contains("translate-y-14"), true);
+      rootElement.scrollTop = 320;
+      body.scrollTop = 240;
+      backToTopBtn.dispatch("click");
 
-    rootElement.scrollTop = 320;
-    body.scrollTop = 240;
-    backToTopBtn.dispatch("click");
+      assert.equal(rootElement.scrollTop, 0);
+      assert.equal(body.scrollTop, 0);
 
-    assert.equal(rootElement.scrollTop, 0);
-    assert.equal(body.scrollTop, 0);
+      setupBackToTopButton();
 
-    setupBackToTopButton();
+      assert.equal(backToTopBtn.handlerCount("click"), 1);
+      assert.equal(documentHandlerCount("scroll"), 1);
 
-    assert.equal(backToTopBtn.handlerCount("click"), 1);
-    assert.equal(documentHandlerCount("scroll"), 1);
+      windowMock.__backToTopCleanup();
 
-    windowMock.__backToTopCleanup();
-
-    assert.equal(backToTopBtn.handlerCount("click"), 0);
-    assert.equal(documentHandlerCount("scroll"), 0);
-    assert.equal(documentHandlerCount("astro:before-swap"), 0);
-    assert.equal(backToTopBtn.dataset.backToTopBound, undefined);
-    assert.equal(windowMock.__backToTopCleanup, undefined);
-  } finally {
-    globalThis.window = originalWindow;
-    globalThis.document = originalDocument;
-  }
+      assert.equal(backToTopBtn.handlerCount("click"), 0);
+      assert.equal(documentHandlerCount("scroll"), 0);
+      assert.equal(documentHandlerCount("astro:before-swap"), 0);
+      assert.equal(backToTopBtn.dataset.backToTopBound, undefined);
+      assert.equal(windowMock.__backToTopCleanup, undefined);
+    }
+  );
 });
 
 test("tags index client script preserves sort state behavior", async () => {
@@ -1003,8 +1001,6 @@ test("tags index client script preserves sort state behavior", async () => {
     "src/scripts/tagsIndex.ts",
     ["src/scripts/toggleControls.ts", "src/scripts/tagsIndex.ts"]
   );
-  const originalWindow = globalThis.window;
-  const originalDocument = globalThis.document;
   const appendedCards = [];
   const indicatorStyles = new Map();
   const popularButton = makeMetricButton(
@@ -1059,41 +1055,42 @@ test("tags index client script preserves sort state behavior", async () => {
     }),
   };
 
-  globalThis.window = {
-    matchMedia: () => ({ matches: true }),
-    requestAnimationFrame: callback => {
-      callback();
-      return 1;
+  await withGlobalMocks(
+    {
+      window: {
+        matchMedia: () => ({ matches: true }),
+        requestAnimationFrame: callback => {
+          callback();
+          return 1;
+        },
+        cancelAnimationFrame: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      },
+      document: {
+        querySelector: selector =>
+          selector === "[data-tags-index]" ? root : null,
+      },
     },
-    cancelAnimationFrame: () => {},
-    addEventListener: () => {},
-    removeEventListener: () => {},
-  };
-  globalThis.document = {
-    querySelector: selector => (selector === "[data-tags-index]" ? root : null),
-  };
+    async () => {
+      setupTagsIndexPage();
+      assert.equal(
+        status.textContent,
+        "Showing all 2 topics, sorted by popularity."
+      );
+      assert.equal(popularButton.getAttribute("aria-pressed"), "true");
+      assert.equal(azButton.getAttribute("aria-pressed"), "false");
+      assert.equal(sortToggle.dataset.inkReady, "true");
 
-  try {
-    setupTagsIndexPage();
-    assert.equal(
-      status.textContent,
-      "Showing all 2 topics, sorted by popularity."
-    );
-    assert.equal(popularButton.getAttribute("aria-pressed"), "true");
-    assert.equal(azButton.getAttribute("aria-pressed"), "false");
-    assert.equal(sortToggle.dataset.inkReady, "true");
+      azButton.click();
 
-    azButton.click();
-
-    assert.deepEqual(appendedCards, ["Alpha", "Beta"]);
-    assert.equal(status.textContent, "Showing all 2 topics, sorted A-Z.");
-    assert.equal(popularButton.getAttribute("aria-pressed"), "false");
-    assert.equal(azButton.getAttribute("aria-pressed"), "true");
-    assert.equal(indicatorStyles.get("--sort-indicator-x"), "56px");
-  } finally {
-    globalThis.window = originalWindow;
-    globalThis.document = originalDocument;
-  }
+      assert.deepEqual(appendedCards, ["Alpha", "Beta"]);
+      assert.equal(status.textContent, "Showing all 2 topics, sorted A-Z.");
+      assert.equal(popularButton.getAttribute("aria-pressed"), "false");
+      assert.equal(azButton.getAttribute("aria-pressed"), "true");
+      assert.equal(indicatorStyles.get("--sort-indicator-x"), "56px");
+    }
+  );
 });
 
 test("post filters client script preserves URL-backed filtering", async () => {
