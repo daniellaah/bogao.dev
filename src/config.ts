@@ -13,7 +13,7 @@ export const SITE = {
   author: "Bo",
   profile: "https://github.com/daniellaah",
   desc: "Bo's blog about machine learning notes, LLM workflows, and personal experiments.",
-  title: "BoGao.Dev",
+  title: "AdventurousX",
   ogImage: "og.png",
   postPerPage: 100,
   postPopularFilterTags: [
