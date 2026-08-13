@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
+import getBlogEntries from "@/utils/getBlogEntries";
 import { getProjectPath } from "@/utils/getProjectPath";
 import { getPostPath } from "@/utils/getPostPath";
 import getSortedPosts from "@/utils/getSortedPosts";
@@ -30,7 +31,7 @@ const stripMarkdown = (value: string) =>
     .trim();
 
 export const GET: APIRoute = async () => {
-  const blogEntries = await getCollection("blog");
+  const blogEntries = await getBlogEntries();
   const posts = getSortedPosts(blogEntries);
   const projects = await getCollection("projects", isPublishedProject);
   const tags = getUniqueTags(posts);

@@ -1,126 +1,153 @@
 ---
 import { getCollection } from "astro:content";
-import dayjs from "@/utils/dayjs";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import PostsList from "@/components/PostsList.astro";
-import getLatestProjects from "@/utils/getLatestProjects";
-import getSortedPosts from "@/utils/getSortedPosts";
+import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import IconFileText from "@/assets/icons/IconFileText.svg";
+import IconGitHub from "@/assets/icons/IconGitHub.svg";
+import IconLinkedIn from "@/assets/icons/IconLinkedIn.svg";
+import { SITE } from "@/config";
 import { getProjectPath } from "@/utils/getProjectPath";
+import "@/styles/home.css";
 
-const posts = await getCollection("blog");
-const projects = await getCollection("projects");
-const sortedPosts = getSortedPosts(posts);
-const latestPosts = sortedPosts.slice(0, 10);
-const latestProjects = getLatestProjects(projects, 4);
+const projects = await getCollection("projects", ({ data }) => !data.draft);
+
+const selectedWorkSpecs = [
+  {
+    id: "bogaodev",
+    tags: ["Vibe coding", "Personal site", "Writing"],
+    artifact: "Personal platform",
+  },
+] as const;
+
+const selectedWork = selectedWorkSpecs.flatMap(spec => {
+  const project = projects.find(
+    ({ id }) => getProjectPath(id) === `/projects/${spec.id}`
+  );
+  return project ? [{ project, ...spec }] : [];
+});
 ---
 
-<Layout>
+<Layout
+  title={`${SITE.author} Gao — AI Engineer | ${SITE.title}`}
+  description="Bo Gao builds reliable AI agent systems, evaluation workflows, retrieval experiments, and AI developer tools."
+>
   <Header />
-  <main id="main-content" data-layout="index" class="app-layout">
-    <section id="hero" class="pt-12 pb-10 sm:pt-16">
-      <div class="mx-auto max-w-4xl">
-        <div class="hero-avatar mx-auto h-36 w-36 sm:h-40 sm:w-40">
-          <img
-            src="/images/site/avatar.svg"
-            alt="Portrait of Bo"
-            width="1254"
-            height="1254"
-            decoding="async"
-            class="hero-avatar__image hero-avatar__image--light h-full w-full rounded-full object-cover"
-          />
-          <img
-            src="/images/site/avatar-dark.svg"
-            alt="Portrait of Bo"
-            width="1254"
-            height="1254"
-            decoding="async"
-            class="hero-avatar__image hero-avatar__image--dark h-full w-full rounded-full object-cover"
-          />
-        </div>
+  <main id="main-content" data-layout="index" class="career-home app-layout">
+    <section class="career-hero" aria-labelledby="career-hero-title">
+      <div class="hero-avatar career-hero__avatar">
+        <img
+          src="/images/site/avatar.svg"
+          alt="Portrait of Bo"
+          width="1254"
+          height="1254"
+          decoding="async"
+          class="hero-avatar__image hero-avatar__image--light h-full w-full rounded-full object-cover"
+        />
+        <img
+          src="/images/site/avatar-dark.svg"
+          alt="Portrait of Bo"
+          width="1254"
+          height="1254"
+          decoding="async"
+          class="hero-avatar__image hero-avatar__image--dark h-full w-full rounded-full object-cover"
+        />
+      </div>
 
-        <h1
-          class="hero-title mt-7 text-center text-3xl leading-tight font-bold sm:text-4xl"
-        >
-          Hi, I'm Bo
+      <div class="career-hero__content">
+        <h1 id="career-hero-title" class="career-hero__title">
+          Bo Gao <span aria-hidden="true">—</span> AI Engineer
         </h1>
+        <p class="career-hero__summary">
+          I build reliable agent systems, evaluation workflows, retrieval
+          experiments, and AI developer tools.
+        </p>
 
         <div
-          class="mx-auto mt-5 max-w-2xl space-y-3 text-center text-base leading-7 text-graphite sm:text-[1.15rem] sm:leading-7"
+          class="career-hero__profile-links"
+          aria-label="Professional profiles"
         >
-          <p>Let's build something.</p>
+          <a
+            class="career-hero__profile-link hand-underline-trigger"
+            href={SITE.profile}
+            rel="me noreferrer"
+            target="_blank"
+            aria-label="Explore my projects, code, and experiments on GitHub"
+          >
+            <IconGitHub aria-hidden="true" />
+            <span>
+              <small>Projects, code, and experiments</small>
+              <strong class="hand-underline">GitHub</strong>
+            </span>
+            <IconArrowRight aria-hidden="true" />
+          </a>
+          <a
+            class="career-hero__profile-link hand-underline-trigger"
+            href={SITE.linkedin}
+            rel="me noreferrer"
+            target="_blank"
+            aria-label="Connect on LinkedIn. Open to AI engineering roles in the United States."
+          >
+            <IconLinkedIn aria-hidden="true" />
+            <span>
+              <small>Open to AI engineering roles in the U.S.</small>
+              <strong class="hand-underline">LinkedIn</strong>
+            </span>
+            <IconArrowRight aria-hidden="true" />
+          </a>
         </div>
       </div>
     </section>
 
-    <section class="pb-8">
-      <div>
-        <div class="sketch-divider" aria-hidden="true"></div>
-        <div class="flex items-end justify-between gap-4">
-          <div>
-            <p class="notebook-kicker">01 / Build log</p>
-            <h2 class="mt-1 text-2xl font-semibold sm:text-3xl">
-              Latest Projects
-            </h2>
-          </div>
-          <a
-            href="/projects/"
-            class="ink-link font-code text-xs text-graphite hover:text-foreground"
-          >
-            View all
-          </a>
+    <section id="selected-work" class="career-section">
+      <div class="career-section__heading">
+        <div>
+          <p class="notebook-kicker">01 / Selected work</p>
         </div>
-
-        <ul class="ledger-list--subtle mt-5">
-          {
-            latestProjects.map(project => (
-              <li class="ledger-row last:border-b-0">
-                <a
-                  href={getProjectPath(project.id)}
-                  class="hand-underline-trigger grid gap-1 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
-                >
-                  <span class="min-w-0 text-base leading-none sm:text-[1.15rem] sm:leading-none">
-                    <span class="hand-underline content-title">
-                      {project.data.title}
-                    </span>
-                  </span>
-                  <time class="font-code text-xs leading-none tracking-[0.04em] text-graphite sm:text-right">
-                    {project.data.startDate
-                      ? dayjs.utc(project.data.startDate).format("D MMM YYYY")
-                      : String(project.data.year ?? "")}
-                  </time>
-                </a>
-              </li>
-            ))
-          }
-        </ul>
+        <a class="career-section__link ink-link" href="/projects/">
+          View all work <IconArrowRight aria-hidden="true" />
+        </a>
       </div>
-    </section>
 
-    <section class="pb-8">
-      <div>
-        <div class="sketch-divider" aria-hidden="true"></div>
-        <div class="flex items-end justify-between gap-4">
-          <div>
-            <p class="notebook-kicker">02 / Writing</p>
-            <h2 class="mt-1 text-2xl font-semibold sm:text-3xl">
-              Latest Posts
-            </h2>
-          </div>
-          <a
-            href="/posts/"
-            class="ink-link font-code text-xs text-graphite hover:text-foreground"
-          >
-            View all
-          </a>
-        </div>
-
-        <PostsList posts={latestPosts} />
-      </div>
+      <ol class="selected-work-list">
+        {
+          selectedWork.map(({ project, tags, artifact }, index) => (
+            <li class="selected-work-row">
+              <a
+                class="selected-work-row__link hand-underline-trigger"
+                href={getProjectPath(project.id)}
+              >
+                <span class="selected-work-row__number">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span class="selected-work-row__title hand-underline">
+                  {project.data.title}
+                </span>
+                <span class="selected-work-row__description">
+                  {project.data.description}
+                </span>
+                <span class="selected-work-row__tags" aria-label="Highlights">
+                  {tags.map(tag => (
+                    <span>{tag}</span>
+                  ))}
+                </span>
+                <span class="selected-work-row__artifact">
+                  <IconFileText aria-hidden="true" />
+                  {artifact}
+                </span>
+                <IconArrowRight
+                  class="selected-work-row__arrow"
+                  aria-hidden="true"
+                />
+              </a>
+            </li>
+          ))
+        }
+      </ol>
     </section>
   </main>
-  <Footer />
+  <Footer noMarginTop />
 </Layout>
 
 <script>

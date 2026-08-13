@@ -1,5 +1,5 @@
 {
-  "name": "daniellaah-tech-blog",
+  "name": "bogao-dev",
   "type": "module",
   "version": "0.1.0",
   "scripts": {
@@ -24,9 +24,7 @@
     "dayjs": "^1.11.19",
     "lodash.kebabcase": "^4.1.1",
     "rehype-katex": "^7.0.1",
-    "remark-collapse": "^0.1.2",
     "remark-math": "^6.0.0",
-    "remark-toc": "^9.0.0",
     "slugify": "^1.6.6",
     "tailwindcss": "^4.1.18"
   },

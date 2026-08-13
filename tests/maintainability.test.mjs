@@ -6,12 +6,11 @@ import path from "node:path";
 import { test } from "node:test";
 import { pathToFileURL } from "node:url";
 import ts from "typescript";
-import { stripMarkdownExt } from "../src/utils/slugifyCore.js";
 
 const ROOT = process.cwd();
 const MODULE_TEST_CACHE_DIR = path.join(
   os.tmpdir(),
-  "daniellaah-tech-blog",
+  "bogao-dev",
   "maintainability-tests"
 );
 const TRANSPILE_OPTIONS = {
@@ -51,23 +50,6 @@ const readJson = relativePath => JSON.parse(readText(relativePath));
 
 const getFrontmatterFromSource = source =>
   source.match(/^---\n([\s\S]*?)\n---/)?.[1] ?? "";
-
-const parseFrontmatter = relativePath =>
-  getFrontmatterFromSource(readText(relativePath));
-
-const getFrontmatterField = (frontmatter, field) =>
-  frontmatter
-    .match(new RegExp(`^${field}:\\s*["']?([^"'\n]+)["']?`, "m"))?.[1]
-    ?.trim();
-
-const listMarkdownFiles = dir =>
-  fs
-    .readdirSync(path.join(ROOT, dir), { withFileTypes: true })
-    .flatMap(entry => {
-      const relativePath = path.join(dir, entry.name);
-      if (entry.isDirectory()) return listMarkdownFiles(relativePath);
-      return /\.(md|mdx)$/i.test(entry.name) ? [relativePath] : [];
-    });
 
 const withNewContentFixture = callback => {
   const fixture = fs.mkdtempSync(path.join(os.tmpdir(), "new-content-script-"));
@@ -203,14 +185,13 @@ const loadRssRoute = async () => {
   const prelude = `
 const SITE = {
   title: "BoGao.Dev",
-  desc: "Bo's blog about machine learning notes, LLM workflows, and personal experiments.",
+  desc: "Bo's portfolio and writing on AI systems and engineering work.",
   website: "https://bogao.dev/",
 };
 const rss = options => new Response(JSON.stringify(options), {
   headers: { "Content-Type": "application/json" },
 });
-const getCollection = async collection =>
-  globalThis.__rssCollections?.[collection] ?? [];
+const getBlogEntries = async () => globalThis.__rssCollections?.blog ?? [];
 ${ROUTE_POST_HELPERS}
 `;
   return importTranspiledSource(`${prelude}\n${source}`);
@@ -1878,14 +1859,10 @@ test("project URLs are filename-driven, not frontmatter slug-driven", () => {
   }
 });
 
-test("project list and latest-project ordering contracts stay distinct", async () => {
+test("project list ordering keeps featured and manual priorities", async () => {
   const { default: getSortedProjects } = await loadProjectModule(
     "src/utils/getSortedProjects.ts",
     ["src/utils/getSortedProjects.ts", "src/utils/projectVisibility.ts"]
-  );
-  const { default: getLatestProjects } = await loadProjectModule(
-    "src/utils/getLatestProjects.ts",
-    ["src/utils/getLatestProjects.ts", "src/utils/projectVisibility.ts"]
   );
   const projects = [
     {
@@ -1938,10 +1915,6 @@ test("project list and latest-project ordering contracts stay distinct", async (
     getSortedProjects(projects).map(project => project.id),
     ["older-featured.md", "manual-first.md", "newer-auto.md"]
   );
-  assert.deepEqual(
-    getLatestProjects(projects, 2).map(project => project.id),
-    ["newer-auto.md", "manual-first.md"]
-  );
 });
 
 test("stale blog metadata fields stay removed", () => {
@@ -1954,36 +1927,9 @@ test("stale blog metadata fields stay removed", () => {
   assert.ok(!siteConfig.includes("timezone:"));
 });
 
-test("vercel redirects point at current generated content routes", () => {
+test("vercel config stays free of retired content redirects", () => {
   const vercelConfig = readJson("vercel.json");
-  const knownRoutes = new Set([
-    "/",
-    "/404",
-    "/about",
-    "/archives",
-    "/posts",
-    "/projects",
-    "/search",
-    "/tags",
-  ]);
 
-  for (const file of listMarkdownFiles("src/content/blog")) {
-    const frontmatter = parseFrontmatter(file);
-    knownRoutes.add(
-      `/posts/${getFrontmatterField(frontmatter, "slug") ?? stripMarkdownExt(path.basename(file))}`
-    );
-  }
-
-  for (const file of listMarkdownFiles("src/content/projects")) {
-    knownRoutes.add(
-      `/projects/${stripMarkdownExt(path.basename(file)).toLowerCase()}`
-    );
-  }
-
-  for (const redirect of vercelConfig.redirects) {
-    assert.ok(
-      knownRoutes.has(redirect.destination.replace(/\/+$/, "")),
-      `${redirect.source} points at missing destination ${redirect.destination}`
-    );
-  }
+  assert.equal(vercelConfig.framework, "astro");
+  assert.deepEqual(vercelConfig.redirects ?? [], []);
 });

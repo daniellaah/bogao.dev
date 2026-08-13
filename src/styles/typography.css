@@ -5,6 +5,7 @@
   .app-prose {
     @apply prose;
     max-width: var(--reading-measure);
+    font-family: var(--font-body);
     font-size: 1rem;
     line-height: 1.85;
 
@@ -14,7 +15,7 @@
     h4,
     th {
       @apply mb-3 text-foreground;
-      font-family: var(--font-display);
+      font-family: var(--font-ui);
     }
 
     h3 {
@@ -109,7 +110,7 @@
 
     blockquote {
       @apply border-s-foreground/70 wrap-break-word opacity-80;
-      font-family: var(--font-display);
+      font-family: var(--font-body);
     }
 
     details {

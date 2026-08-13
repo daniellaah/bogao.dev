@@ -1,6 +1,9 @@
 ---
 import type { HTMLAttributes } from "astro/types";
-import Socials from "./Socials.astro";
+import IconGitHub from "@/assets/icons/IconGitHub.svg";
+import IconLinkedIn from "@/assets/icons/IconLinkedIn.svg";
+import { SITE } from "@/config";
+import "@/styles/footer.css";
 
 const currentYear = new Date().getFullYear();
 
@@ -15,20 +18,30 @@ const { noMarginTop = false, class: className, ...attrs } = Astro.props;
   class:list={["app-layout", { "mt-auto": !noMarginTop }, className]}
   {...attrs}
 >
-  <div
-    class:list={[
-      "py-6 sm:py-5",
-      "sketch-edge-top",
-      "flex flex-col items-center justify-between sm:flex-row-reverse",
-    ]}
-  >
-    <Socials />
-    <div
-      class="my-2 flex flex-col items-center text-sm whitespace-nowrap text-graphite sm:flex-row"
-    >
-      <span>Copyright &#169; {currentYear}</span>
-      <span class="hidden sm:inline">&nbsp;|&nbsp;</span>
-      <span>All rights reserved.</span>
+  <div class="site-footer">
+    <p class="site-footer__lead">Let's build something useful.</p>
+
+    <div class="site-footer__links">
+      <a
+        class="ink-link"
+        href={SITE.profile}
+        rel="me noreferrer"
+        target="_blank"
+      >
+        <IconGitHub aria-hidden="true" />
+        GitHub
+      </a>
+      <a
+        class="ink-link"
+        href={SITE.linkedin}
+        rel="me noreferrer"
+        target="_blank"
+      >
+        <IconLinkedIn aria-hidden="true" />
+        LinkedIn
+      </a>
     </div>
+
+    <p>© {currentYear} {SITE.title}</p>
   </div>
 </footer>

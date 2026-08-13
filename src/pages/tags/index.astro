@@ -1,14 +1,14 @@
 ---
-import { getCollection } from "astro:content";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
+import getBlogEntries from "@/utils/getBlogEntries";
 import { collectTagStats, type TagStat } from "@/utils/tags";
 import { SITE } from "@/config";
 
-const posts = getSortedPosts(await getCollection("blog"));
+const posts = getSortedPosts(await getBlogEntries());
 
 const tagCollator = new Intl.Collator(undefined, {
   sensitivity: "base",

@@ -6,8 +6,8 @@ title: Replace with your title
 # slug: "custom-post-url"
 draft: true
 tags:
-  - frontend
-  - notes
+  - ai-agents
+  - engineering
 description: Replace with a short summary for readers and search engines.
 ---
 

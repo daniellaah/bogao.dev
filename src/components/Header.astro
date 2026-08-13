@@ -4,11 +4,6 @@ import IconMoon from "@/assets/icons/IconMoon.svg";
 import IconSearch from "@/assets/icons/IconSearch.svg";
 import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
 import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
-import IconArchive from "@/assets/icons/IconArchive.svg";
-import IconBox from "@/assets/icons/IconBox.svg";
-import IconFileText from "@/assets/icons/IconFileText.svg";
-import IconTag from "@/assets/icons/IconTag.svg";
-import IconUserCircle from "@/assets/icons/IconUserCircle.svg";
 import LinkButton from "./LinkButton.astro";
 import { SITE } from "@/config";
 
@@ -25,14 +20,10 @@ const isActive = (path: string) => {
   return currentPath === path || currentPathArray[0] === pathArray[0];
 };
 
-const navItems = [
-  { href: "/posts", label: "Posts", Icon: IconFileText },
-  { href: "/projects", label: "Projects", Icon: IconBox },
-  { href: "/tags", label: "Tags", Icon: IconTag },
-  { href: "/about", label: "About", Icon: IconUserCircle },
-  ...(SITE.showArchives
-    ? [{ href: "/archives", label: "Archives", Icon: IconArchive }]
-    : []),
+const navItems: { href: string; label: string; match?: string }[] = [
+  { href: "/projects", label: "Work", match: "/projects" },
+  { href: "/posts", label: "Writing", match: "/posts" },
+  { href: "/about", label: "About", match: "/about" },
 ];
 ---
 
@@ -102,23 +93,17 @@ const navItems = [
         ]}
       >
         {
-          navItems.map(({ href, label, Icon }) => {
-            const active = isActive(href);
+          navItems.map(({ href, label, match }) => {
+            const active = match ? isActive(match) : false;
 
             return (
               <li>
                 <a
                   href={href}
                   data-nav-item={label}
-                  class="hand-underline-trigger gap-1.5"
+                  class="hand-underline-trigger"
                   aria-current={active ? "page" : undefined}
                 >
-                  <Icon
-                    class:list={[
-                      "nav-link-icon",
-                      { "nav-link-icon--active": active },
-                    ]}
-                  />
                   <span
                     class:list={["hand-underline", { "active-nav": active }]}
                   >

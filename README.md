@@ -1,6 +1,6 @@
-# Bo's Blog
+# BoGao.Dev
 
-个人技术博客，基于 [Astro](https://astro.build/) 和 [Astro Paper](https://github.com/satnaing/astro-paper) 初始化。
+个人 AI 工程作品集与技术写作站点，基于 [Astro](https://astro.build/) 构建。
 
 ## 本地开发
 
@@ -41,46 +41,13 @@ templates/          内容创建模板
 
 ## 当前状态
 
-- 已接入 Astro Paper 模板
-- 已切换博客内容目录到 `src/content/blog`
-- `Posts` 页面当前每页最多显示 `100` 篇文章，并支持年份 / 标签轻量筛选
-- 已自托管 `LXGW WenKai` WOFF2 字体并应用到正文和标题
-- 文章页已切换到 KaTeX 编译期数学公式渲染
-- 站内搜索使用自定义 `/search-index.json`，覆盖 posts、projects 和 tags
-- 已写入基础站点信息与首页文案
-- 已导入一批旧博客文章
-- 旧文章已统一迁移到新的 `pubDatetime` / `modDatetime`
-- 旧文章已批量清洗旧站内链、空链接、正文 H1、description 和 tags
-- 文章详情页日期统一使用 `YYYY-MM-DD`
-- 已补齐 Open Graph / Twitter Card 基础元信息，默认分享图来自 `public/og.png`
-
-## 旧文章迁移说明
-
-当前仓库已经统一使用新 frontmatter：
-
-- `pubDatetime`
-- `modDatetime`
-
-旧文章已经完成一轮批量清洗：
-
-- 移除了 `category: Legacy` 和 `featured: false` 这类旧字段
-- 把旧博客绝对链接改成当前 `/posts/...` 路径
-- 修复了空链接
-- 把正文里的页面级 H1 降成了正文层级标题
-- 统一了部分 tags 命名
-- 重写了 description，避免直接使用旧正文截断
-- 已迁移到 `remark-math + rehype-katex`，并清理了一轮旧文章公式写法
-
-当前仍需要注意的内容资源项：
-
-- 历史正文目前没有使用 Markdown 图片语法的远程图片引用
-- 如后续补回旧文章配图，优先放到 `public/images/posts/`
-
-## 下一步建议
-
-- 按需补充旧文章图片资源
-- 按需替换默认 OG 图、favicon 和个人资料素材
-- 发布新的正式文章
+- 首页以 AI 工程定位、Selected Work 和职业资料为核心
+- Projects 和 Posts 使用独立内容集合
+- Posts 支持年份 / 标签筛选，每页最多显示 `100` 篇
+- 文章页支持 KaTeX 编译期数学公式渲染
+- 站内搜索使用 `/search-index.json`，覆盖 posts、projects 和 tags
+- 已配置 sitemap、RSS、Open Graph 和 light/dark theme
+- 默认分享图来自 `public/og.png`
 
 ## GitHub + Vercel 部署
 
@@ -147,7 +114,7 @@ PUBLIC_BAIDU_SITE_VERIFICATION=codeva-xxxx
 常用写作命令：
 
 ```bash
-npm run new:post -- "My new post" --tags machine-learning,notes
+npm run new:post -- "My new post" --tags ai-agents,evaluation
 npm run new:project -- "My project" --stack Python,Astro --repoUrl https://github.com/yourname/project
 ```
 

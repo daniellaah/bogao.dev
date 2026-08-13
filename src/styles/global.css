@@ -108,13 +108,16 @@ html[data-theme="dark"] {
   --font-body:
     "LXGW WenKai", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
     "Noto Sans CJK SC", "Segoe UI", sans-serif;
+  --font-ui:
+    "Avenir Next", Avenir, "PingFang SC", "Hiragino Sans GB", "Segoe UI",
+    "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
   --font-display:
     "Handlee", "LXGW WenKai", "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei", "Noto Sans CJK SC", "Segoe UI", sans-serif;
   --font-code:
     "SFMono-Regular", "JetBrains Mono", "Cascadia Code", "Fira Code",
     ui-monospace, monospace;
-  --font-app: var(--font-body);
+  --font-app: var(--font-ui);
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-strong: var(--surface-strong);
@@ -148,12 +151,12 @@ html[data-theme="dark"] {
   h4,
   h5,
   h6 {
-    font-family: var(--font-display);
+    font-family: var(--font-ui);
   }
   button,
   nav,
   .active-nav {
-    font-family: var(--font-body);
+    font-family: var(--font-ui);
   }
   code,
   pre,
@@ -392,7 +395,7 @@ html[data-theme="dark"] {
 
 .content-title,
 .ui-text {
-  font-family: var(--font-body);
+  font-family: var(--font-ui);
 }
 
 .reading-column {
@@ -471,18 +474,6 @@ html[data-theme="dark"] .site-avatar__image--light {
 
 html[data-theme="dark"] .site-avatar__image--dark {
   display: block;
-}
-
-.nav-link-icon {
-  width: 1.15rem;
-  height: 1.15rem;
-  flex: 0 0 auto;
-  color: currentColor;
-  opacity: 0.86;
-}
-
-.nav-link-icon--active {
-  opacity: 1;
 }
 
 .search-nav-link {
@@ -709,7 +700,7 @@ html[data-theme="dark"] .site-avatar__image--dark {
 }
 
 .search-input {
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   -webkit-appearance: none;
   appearance: none;
 }
@@ -987,7 +978,7 @@ html[data-theme="light"] .tags-tag-card:hover .tag-count-badge {
   background: transparent;
   padding: 0.9rem 5.4rem 0.9rem 3rem;
   color: var(--foreground);
-  font-family: var(--font-display);
+  font-family: var(--font-ui);
   font-size: 1.15rem;
   outline: 0;
   -webkit-appearance: none;

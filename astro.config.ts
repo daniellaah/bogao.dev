@@ -3,8 +3,6 @@ import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
-import remarkToc from "remark-toc";
-import remarkCollapse from "remark-collapse";
 import {
   transformerNotationDiff,
   transformerNotationHighlight,
@@ -22,11 +20,7 @@ export default defineConfig({
     }),
   ],
   markdown: {
-    remarkPlugins: [
-      remarkMath,
-      remarkToc,
-      [remarkCollapse, { test: "Table of contents" }],
-    ],
+    remarkPlugins: [remarkMath],
     rehypePlugins: [rehypeKatex],
     shikiConfig: {
       // For more themes, visit https://shiki.style/themes

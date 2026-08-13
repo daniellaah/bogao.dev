@@ -1,6 +1,6 @@
 ---
 title: "BoGao.Dev"
-description: "A personal publishing system for machine learning writing, LLM workflow write-ups, project pages, and lightweight research logs."
+description: "A personal website built through vibe coding to explore AI-assisted creation and create a home for my projects, writing, and ideas."
 status: "shipping"
 order: -1
 startDate: 2026-02-04
@@ -14,28 +14,25 @@ demoUrl: "https://bogao.dev"
 repoUrl: "https://github.com/daniellaah/daniellaah.github.io"
 ---
 
-## What it is
+## Why I built it
 
-This site started as an Astro Paper setup, then gradually turned into a personal system for publishing ML writing, LLM workflow experiments, and project pages.
+BoGao.Dev began as a practical vibe coding experiment. I wanted to experience what it is like to shape a real, evolving product with AI-assisted tools instead of using AI only for isolated code snippets.
 
-The goal is not to build a complicated CMS. The goal is to keep publishing simple while making room for long-form technical writing, experiments, and project documentation.
+It also gives me a place I own to introduce my work, publish useful writing, and document what I am learning.
 
-## What changed
+## What I focused on
 
-- Reworked the homepage and information architecture to remove most of the template feel.
-- Added a dedicated projects collection so project pages do not live in the same content bucket as long-form writing.
-- Migrated historical machine learning writing into a consistent frontmatter format.
-- Switched math rendering to compile-time KaTeX for archived ML notes and formulas.
-- Deployed the site through GitHub and Vercel with sitemap, Open Graph, and search indexing in place.
+- Turning a broad idea into small, testable iterations.
+- Learning how to direct, review, and refine AI-generated work.
+- Developing a visual style that feels personal rather than template-driven.
+- Creating a simple workflow for adding projects and articles over time.
 
-## Why it matters
+## What it represents
 
-I wanted a publishing workflow that stays close to code: Markdown files, git history, predictable builds, and no hidden admin panel.
+This project is not intended as a showcase of full-stack complexity. Its value is the process: learning how to collaborate effectively with AI, make clear product decisions, and turn an unfinished idea into a useful personal platform.
 
-This project is also where I test how a technical blog should feel when it is used as both a writing archive and a lightweight surface for experiments.
+## Next
 
-## Next steps
-
-- Add more real ML/AI project entries and improve the visual identity.
-- Design a custom Open Graph image instead of relying on the default one.
-- Keep refining the balance between writing, projects, and long-term maintainability.
+- Keep the site focused as new work is added.
+- Publish practical notes and project stories rather than filling it with placeholder content.
+- Continue using the site to test better human-AI creative workflows.

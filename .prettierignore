@@ -4,7 +4,6 @@
 # Except these files & folders
 !/src
 !/public
-!/docs
 !/scripts
 !/templates
 !/tests
@@ -17,6 +16,6 @@
 !vercel.json
 !.gitignore
 
-# Historical posts contain migrated Markdown and math formulas; content:check
-# validates frontmatter without rewriting article bodies.
+# Article Markdown is author-owned; content:check validates frontmatter without
+# allowing an automatic formatter to rewrite prose, code examples, or formulas.
 src/content/blog/**
