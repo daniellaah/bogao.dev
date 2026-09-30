@@ -197,32 +197,61 @@ describe("check-content", () => {
     expect(result.stderr).toContain('duplicate project slug "one"');
   });
 
-  it("parses the frontmatter shapes the templates use", () => {
-    const { data, raw } = parseFrontmatter(
+  it("parses frontmatter as YAML", () => {
+    const data = parseFrontmatter(
       "example.md",
       [
         "---",
         'title: "A title: with punctuation"',
         "draft: false",
         "order: -1",
-        "tags:",
-        "  - Machine Learning",
-        '  - "LLMs"',
+        "tags: [Machine Learning, LLMs]",
+        "description: >-",
+        "  Folded",
+        "  text",
+        "pubDatetime: 2026-06-22",
         "modDatetime:",
         "---",
         "Body",
-      ].join("\n")
+      ].join("\r\n")
     );
 
-    expect(data).toMatchObject({
+    expect(data).toEqual({
       title: "A title: with punctuation",
       draft: false,
       order: -1,
       tags: ["Machine Learning", "LLMs"],
-      modDatetime: "",
+      description: "Folded text",
+      pubDatetime: "2026-06-22",
+      modDatetime: null,
     });
-    expect((raw as Record<string, unknown>).title).toBe(
-      '"A title: with punctuation"'
-    );
+  });
+
+  it("accepts dates and zoned datetimes only", () => {
+    const dir = createFixture();
+    const postWithDate = (slug: string, pubDatetime: string) =>
+      write(
+        dir,
+        `src/content/blog/${slug}.md`,
+        [
+          "---",
+          `pubDatetime: ${pubDatetime}`,
+          `title: ${slug}`,
+          `slug: ${slug}`,
+          "description: About it",
+          "tags: []",
+          "---",
+        ].join("\n")
+      );
+    postWithDate("date", "2026-06-22");
+    postWithDate("utc", "2026-06-22T09:30:00Z");
+    postWithDate("offset", "2026-06-22T09:30+08:00");
+    postWithDate("floating", "2026-06-22T09:30");
+
+    const result = checkContent(dir);
+    expect(result.status).toBe(1);
+    expect(result.stderr.trim().split("\n")).toEqual([
+      expect.stringContaining("floating.md: pubDatetime must be YYYY-MM-DD"),
+    ]);
   });
 });

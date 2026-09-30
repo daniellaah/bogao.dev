@@ -39,7 +39,10 @@ export const escapeSearchHtml = (value: string) =>
 const normalizeSearchText = (value: string) =>
   value.toLowerCase().replace(/\s+/g, " ").trim();
 
-const isCjk = (value: string) => /[\u3400-\u9fff]/.test(value);
+// Scripts written without spaces between words: a query in them is one term.
+const CJK =
+  /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
+const isCjk = (value: string) => CJK.test(value);
 
 export const splitSearchTerms = (value: string) => {
   const normalized = normalizeSearchText(value);
@@ -75,14 +78,34 @@ export const formatSearchInputPlaceholder = (scope: string) =>
 export const formatNoSearchResults = (query: string) =>
   `No results for ${query}`;
 
+type NormalizedRecord = Record<
+  "title" | "description" | "meta" | "content",
+  string
+>;
+
+// Records come from one loaded index, so normalize each once rather than on
+// every keystroke.
+const normalizedRecords = new WeakMap<SearchRecord, NormalizedRecord>();
+
+const getNormalizedRecord = (record: SearchRecord) => {
+  let normalized = normalizedRecords.get(record);
+  if (!normalized) {
+    normalized = {
+      title: normalizeSearchText(record.title),
+      description: normalizeSearchText(record.description),
+      meta: normalizeSearchText(record.metaText),
+      content: normalizeSearchText(record.content),
+    };
+    normalizedRecords.set(record, normalized);
+  }
+  return normalized;
+};
+
 export const scoreSearchRecord = (
   record: SearchRecord,
   terms: string[]
 ): RankedSearchRecord | null => {
-  const title = normalizeSearchText(record.title);
-  const description = normalizeSearchText(record.description);
-  const meta = normalizeSearchText(record.metaText);
-  const content = normalizeSearchText(record.content);
+  const { title, description, meta, content } = getNormalizedRecord(record);
 
   let score = 0;
   for (const term of terms) {

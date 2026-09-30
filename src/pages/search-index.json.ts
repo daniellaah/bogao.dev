@@ -3,9 +3,9 @@ import { getCollection } from "astro:content";
 import { getProjectPath } from "@/utils/getProjectPath";
 import { getPostPath } from "@/utils/getPostPath";
 import getSortedPosts from "@/utils/getSortedPosts";
-import getUniqueTags from "@/utils/getUniqueTags";
 import { isPublishedProject } from "@/utils/projectVisibility";
 import { stripMarkdown } from "@/utils/stripMarkdown";
+import { collectTagStats, getTagPath } from "@/utils/tags";
 import searchKinds from "@/data/search-kinds.json";
 
 const SEARCH_RECORD_KINDS = Object.fromEntries(
@@ -22,7 +22,7 @@ export const GET: APIRoute = async () => {
   const blogEntries = await getCollection("blog");
   const posts = getSortedPosts(blogEntries);
   const projects = await getCollection("projects", isPublishedProject);
-  const tags = getUniqueTags(posts);
+  const tags = collectTagStats(posts);
 
   const records = [
     ...posts.map(post => ({
@@ -48,9 +48,9 @@ export const GET: APIRoute = async () => {
     ...tags.map(tag => ({
       title: `#${tag.tagName}`,
       description: `${tag.count} item${tag.count === 1 ? "" : "s"} tagged with #${tag.tagName}`,
-      url: `/tags/${tag.tag}/`,
+      url: getTagPath(tag.slug),
       kind: SEARCH_RECORD_KINDS.tags,
-      metaText: `${tag.tagName} ${tag.tag}`,
+      metaText: `${tag.tagName} ${tag.slug}`,
       content: tag.tagName,
     })),
   ];
@@ -58,7 +58,6 @@ export const GET: APIRoute = async () => {
   return new Response(JSON.stringify(records), {
     headers: {
       "Content-Type": "application/json; charset=utf-8",
-      "Cache-Control": "public, max-age=0, must-revalidate",
     },
   });
 };

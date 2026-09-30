@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
+      - run: npm run content:check
+      - run: npm test
+      - run: npm run build
+        env:
+          # Raises the GitHub API rate limit for the merged-PR previews.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

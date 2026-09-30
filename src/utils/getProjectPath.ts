@@ -1,5 +1,7 @@
-import { getResolvedSlug } from "./contentSlug";
+import { getResolvedSlug } from "./slugifyCore";
 
-export function getProjectPath(id: string) {
-  return `/projects/${getResolvedSlug(id)}`;
-}
+/** A project's URL segment, from its file name. */
+export const getProjectSlug = (id: string): string => getResolvedSlug(id);
+
+export const getProjectPath = (id: string) =>
+  `/projects/${getProjectSlug(id)}/`;

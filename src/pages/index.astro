@@ -15,16 +15,14 @@ import { HOMEPAGE_PROJECTS, OPEN_SOURCE, PROFILE } from "@/data/profile";
 import getSortedPosts from "@/utils/getSortedPosts";
 import getSortedProjects from "@/utils/getSortedProjects";
 import { getProjectAccent } from "@/utils/accent";
-import { getProjectPath } from "@/utils/getProjectPath";
+import { getProjectSlug } from "@/utils/getProjectPath";
 import "@/styles/home.css";
 
 const projects = await getCollection("projects", ({ data }) => !data.draft);
 const sortedProjectIds = getSortedProjects(projects).map(({ id }) => id);
 
 const homepageProjects = HOMEPAGE_PROJECTS.flatMap(slug => {
-  const project = projects.find(
-    ({ id }) => getProjectPath(id) === `/projects/${slug}`
-  );
+  const project = projects.find(({ id }) => getProjectSlug(id) === slug);
   return project ? [project] : [];
 });
 

@@ -121,13 +121,26 @@ npm run new:project -- "My project" --stack Python,Astro --repoUrl https://githu
 说明：
 
 - 新内容默认 `draft: true`
-- 日期默认使用当天，格式为 `YYYY-MM-DD`
+- 日期默认使用当天，格式为 `YYYY-MM-DD`；需要精确到时间时写成带时区的 `2026-10-01T09:00+08:00`（不带时区会被 `content:check` 拒绝，否则结果取决于构建机器的时区）
 - Post 会写入显式 `slug`，后续修改标题或文件名不会改变 URL
 - 如果标题生成的 slug 不理想，可以用 `--slug your-custom-slug` 指定
 - Project URL 固定由文件名生成；`new:project --slug` 只用于控制生成的文件名，不会写入 frontmatter `slug`
 - 文章语言默认按标题 / 描述自动判断（含汉字即 `zh-CN`，否则 `en`），用于 `<html lang>` 和 `og:locale`；需要时可在 frontmatter 里写 `lang: ja` 等显式指定
 
-发布或提交前建议运行：
+## 定时发布与自动重建
+
+站点是静态构建的：`pubDatetime` 在未来的文章，以及首页开源卡片里的最新 merged PR，都要等下一次构建才会更新。
+
+`.github/workflows/rebuild.yml` 每天 00:00 UTC 触发一次 Vercel 重建（也可以在 Actions 页面手动运行）。启用方式：
+
+1. 在 Vercel 项目 Settings → Git → Deploy Hooks 里创建一个 hook
+2. 把 hook URL 存成 GitHub 仓库 secret `VERCEL_DEPLOY_HOOK_URL`
+
+没有配置这个 secret 时，任务会直接跳过。需要更精确的发布时间，可以把 cron 改得更频繁。
+
+## 检查
+
+推送到 `master` 和每个 PR 都会由 `.github/workflows/ci.yml` 运行下面这些检查。本地提交前也可以手动运行：
 
 ```bash
 npm run content:check

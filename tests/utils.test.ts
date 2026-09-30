@@ -4,10 +4,9 @@ import { getProjectAccent } from "@/utils/accent";
 import { getBreadcrumbList } from "@/utils/breadcrumb";
 import dayjs from "@/utils/dayjs";
 import { getPostPath } from "@/utils/getPostPath";
-import { getProjectPath } from "@/utils/getProjectPath";
+import { getProjectPath, getProjectSlug } from "@/utils/getProjectPath";
 import getSortedPosts from "@/utils/getSortedPosts";
 import getSortedProjects from "@/utils/getSortedProjects";
-import getUniqueTags from "@/utils/getUniqueTags";
 import { getMergedPrsUrl, summarizeMergedPrs } from "@/utils/mergedPrs";
 import {
   getContentLang,
@@ -28,7 +27,7 @@ import {
 } from "@/utils/search";
 import { slugifyForContent, slugifyStr } from "@/utils/slugifyCore";
 import { stripMarkdown } from "@/utils/stripMarkdown";
-import { collectTagStats } from "@/utils/tags";
+import { collectTagStats, getTagPath } from "@/utils/tags";
 import { getTocHeadings } from "@/utils/toc";
 
 const post = (
@@ -67,7 +66,7 @@ describe("content URLs", () => {
       "src/content/blog/ML Notes/Example Post.md"
     );
 
-    expect(getPostPath(nested)).toBe("/posts/ml-notes/stable-custom-slug");
+    expect(getPostPath(nested)).toBe("/posts/ml-notes/stable-custom-slug/");
     expect(getPostPath(nested, false)).toBe("ml-notes/stable-custom-slug");
   });
 
@@ -76,12 +75,12 @@ describe("content URLs", () => {
       getPostPath(
         post("example-post", {}, "src/content/blog/_drafts/Example Post.md")
       )
-    ).toBe("/posts/example-post");
+    ).toBe("/posts/example-post/");
   });
 
   it("derives project paths from the file name", () => {
-    expect(getProjectPath("bogaodev")).toBe("/projects/bogaodev");
-    expect(getProjectPath("ARKB.md")).toBe("/projects/arkb");
+    expect(getProjectPath("bogaodev")).toBe("/projects/bogaodev/");
+    expect(getProjectSlug("ARKB.md")).toBe("arkb");
   });
 
   it("slugifies Latin and non-Latin text", () => {
@@ -149,28 +148,23 @@ describe("post and project ordering", () => {
 });
 
 describe("tags", () => {
-  it("counts each tag once per post and skips drafts", () => {
-    const stats = collectTagStats([
-      { tags: ["Machine Learning", "Machine Learning", "LLMs"] },
-      { tags: ["machine learning", "Running"] },
-      { tags: ["Draft"], draft: true },
-    ]);
+  const tagged = (...tags: string[]) => ({ data: { tags } });
 
+  it("counts each tag once per post, merging spellings, sorted by slug", () => {
     expect(
-      Object.fromEntries(stats.map(({ slug, postCount }) => [slug, postCount]))
-    ).toEqual({ llms: 1, "machine-learning": 2, running: 1 });
-  });
-
-  it("sorts unique tags by slug for the search index", () => {
-    expect(
-      getUniqueTags([
-        { data: { tags: ["Running"] } },
-        { data: { tags: ["Machine Learning"] } },
+      collectTagStats([
+        tagged("Machine Learning", "Machine Learning", "LLMs"),
+        tagged("machine learning", "Running"),
       ])
     ).toEqual([
-      { tag: "machine-learning", tagName: "Machine Learning", count: 1 },
-      { tag: "running", tagName: "Running", count: 1 },
+      { slug: "llms", tagName: "LLMs", count: 1 },
+      { slug: "machine-learning", tagName: "Machine Learning", count: 2 },
+      { slug: "running", tagName: "Running", count: 1 },
     ]);
+  });
+
+  it("links to the tag page", () => {
+    expect(getTagPath("machine-learning")).toBe("/tags/machine-learning/");
   });
 });
 
@@ -191,6 +185,7 @@ describe("search", () => {
       "learning",
     ]);
     expect(splitSearchTerms("机器学习")).toEqual(["机器学习"]);
+    expect(splitSearchTerms("けんさく")).toEqual(["けんさく"]);
     expect(splitSearchTerms("   ")).toEqual([]);
   });
 
@@ -263,6 +258,12 @@ describe("search", () => {
         ].join("\n")
       )
     ).toBe("Heading Visible link text and . and html text");
+  });
+
+  it("keeps hyphenated words and dollar amounts in the index", () => {
+    expect(
+      stripMarkdown("- LLM-as-judge costs $5 to $10 --- see $k$ and $$\\sum$$")
+    ).toBe("LLM-as-judge costs $5 to $10 see and");
   });
 });
 
@@ -366,8 +367,12 @@ describe("post details", () => {
   });
 
   it("labels paginated list routes in the breadcrumb", () => {
-    expect(getBreadcrumbList("/posts/")).toEqual(["Posts (page 1)"]);
+    expect(getBreadcrumbList("/posts/")).toEqual(["Posts"]);
     expect(getBreadcrumbList("/posts/2/")).toEqual(["Posts (page 2)"]);
+    expect(getBreadcrumbList("/tags/machine-learning/")).toEqual([
+      "tags",
+      "machine-learning",
+    ]);
     expect(getBreadcrumbList("/tags/machine-learning/2/")).toEqual([
       "tags",
       "machine-learning (page 2)",

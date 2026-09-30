@@ -89,9 +89,9 @@ describe("search-index.json", () => {
     expect(
       records.map(({ kind, url }: { kind: string; url: string }) => [kind, url])
     ).toEqual([
-      ["Post", "/posts/newer"],
-      ["Post", "/posts/older"],
-      ["Project", "/projects/arkb"],
+      ["Post", "/posts/newer/"],
+      ["Post", "/posts/older/"],
+      ["Project", "/projects/arkb/"],
       ["Tag", "/tags/retrieval/"],
     ]);
     expect(records[0].content).toBe("newer Body with a link and .");

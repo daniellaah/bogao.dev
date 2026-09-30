@@ -5,7 +5,7 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
-import { collectTagStats, type TagStat } from "@/utils/tags";
+import { collectTagStats, getTagPath, type TagStat } from "@/utils/tags";
 import { SITE } from "@/config";
 
 const posts = getSortedPosts(await getCollection("blog"));
@@ -17,11 +17,9 @@ const tagCollator = new Intl.Collator(undefined, {
 const compareTags = (tagA: TagStat, tagB: TagStat) =>
   tagCollator.compare(tagA.tagName, tagB.tagName);
 const compareTagsByPopularity = (tagA: TagStat, tagB: TagStat) =>
-  tagB.totalCount - tagA.totalCount || compareTags(tagA, tagB);
+  tagB.count - tagA.count || compareTags(tagA, tagB);
 
-const tags = collectTagStats([
-  ...posts.map(post => ({ tags: post.data.tags })),
-]).sort(compareTags);
+const tags = collectTagStats(posts).sort(compareTags);
 const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
 ---
 
@@ -77,22 +75,22 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
               <li
                 data-tag-card
                 data-tag-name={tag.tagName}
-                data-total-count={tag.totalCount}
+                data-count={tag.count}
                 style={`--tag-enter-delay: ${Math.min(index * 16, 220)}ms;`}
               >
                 <a
-                  href={`/tags/${tag.slug}/`}
+                  href={getTagPath(tag.slug)}
                   class="tags-tag-card card-border hover-underline-trigger"
                 >
-                  <span class="min-w-0">
-                    <span class="hover-underline content-title text-lg">
-                      #<span transition:name={tag.slug}>{tag.tagName}</span>
-                    </span>
-                    <span class="mt-1 block font-code text-xs text-graphite">
-                      {tag.postCount} posts
+                  <span class="hover-underline content-title min-w-0 text-lg">
+                    #<span transition:name={tag.slug}>{tag.tagName}</span>
+                  </span>
+                  <span class="tag-count-badge">
+                    {tag.count}
+                    <span class="sr-only">
+                      {tag.count === 1 ? "post" : "posts"}
                     </span>
                   </span>
-                  <span class="tag-count-badge">{tag.totalCount}</span>
                 </a>
               </li>
             ))

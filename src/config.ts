@@ -26,8 +26,10 @@ export const SITE = {
     "LLM Systems",
     "Developer Tools",
   ],
+  // Posts dated up to this far in the future still publish, so a build that
+  // runs a little early includes them. Future posts appear on the next build
+  // after their pubDatetime; see .github/workflows/rebuild.yml.
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
-  showArchives: true,
   showBackButton: true, // enable back links and stored return URLs
   lang: "en", // default <html lang>; posts can override it
   dir: "ltr", // "rtl" | "auto"

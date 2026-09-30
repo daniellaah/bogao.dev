@@ -1,0 +1,24 @@
+name: Scheduled rebuild
+
+# The site is static, so a post scheduled for a future pubDatetime, and the
+# merged-PR previews on the homepage, only update when Vercel rebuilds.
+# Create a Deploy Hook in the Vercel project settings and store its URL in
+# the VERCEL_DEPLOY_HOOK_URL repository secret; without it this job skips.
+on:
+  schedule:
+    - cron: "0 0 * * *" # daily, 00:00 UTC
+  workflow_dispatch:
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Vercel deploy hook
+        env:
+          DEPLOY_HOOK_URL: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK_URL" ]; then
+            echo "VERCEL_DEPLOY_HOOK_URL is not set; skipping."
+            exit 0
+          fi
+          curl --fail --silent --show-error -X POST "$DEPLOY_HOOK_URL"

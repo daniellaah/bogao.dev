@@ -19,11 +19,9 @@ export default defineConfig({
     // About content now lives on the homepage.
     "/about": "/",
   },
-  integrations: [
-    sitemap({
-      filter: page => SITE.showArchives || !page.endsWith("/archives"),
-    }),
-  ],
+  // Every internal link and canonical URL ends in "/"; see also vercel.json.
+  trailingSlash: "always",
+  integrations: [sitemap()],
   markdown: {
     remarkPlugins: [remarkMath],
     // rehypeHeadingText must run before KaTeX renders math in headings.

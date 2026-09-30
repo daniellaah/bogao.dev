@@ -14,6 +14,7 @@ import { getTocHeadings } from "@/utils/toc";
 import { resolveOgImage } from "@/utils/ogImage";
 import { getContentLang } from "@/utils/contentLang";
 import { slugifyStr } from "@/utils/slugifyCore";
+import { getTagPath } from "@/utils/tags";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { SITE } from "@/config";
@@ -61,23 +62,15 @@ const layoutProps = {
   modDatetime,
   canonicalURL,
   ogImage,
-  scrollSmooth: true,
   lang: getContentLang(post.data),
 };
 
-const allPosts = posts.map(postEntry => ({
-  id: postEntry.id,
-  title: postEntry.data.title,
-  href: getPostPath(postEntry),
-}));
-
-const currentPostIndex = allPosts.findIndex(entry => entry.id === post.id);
-
-const prevPost = currentPostIndex > 0 ? allPosts[currentPostIndex - 1] : null;
-const nextPost =
-  currentPostIndex >= 0 && currentPostIndex < allPosts.length - 1
-    ? allPosts[currentPostIndex + 1]
-    : null;
+// `posts` is newest first: the older post follows this one in the list.
+const postIndex = posts.findIndex(entry => entry.id === post.id);
+const toLink = (entry: SortedBlogPost | undefined) =>
+  entry && { title: entry.data.title, href: getPostPath(entry) };
+const olderPost = toLink(posts[postIndex + 1]);
+const newerPost = postIndex > 0 ? toLink(posts[postIndex - 1]) : undefined;
 ---
 
 <Layout {...layoutProps}>
@@ -96,18 +89,13 @@ const nextPost =
           <ul class="post-hero__tags" aria-label="Tags">
             {tags.map(tag => (
               <li>
-                <a href={`/tags/${slugifyStr(tag)}/`}>{tag}</a>
+                <a href={getTagPath(slugifyStr(tag))}>{tag}</a>
               </li>
             ))}
           </ul>
         )
       }
-      <h1
-        transition:name={slugifyStr(title.replaceAll(".", "-"))}
-        class="post-hero__title"
-      >
-        {title}
-      </h1>
+      <h1 class="post-hero__title">{title}</h1>
       <p class="post-hero__description">{description}</p>
       <p class="post-hero__meta">
         <time datetime={published.toISOString()}>
@@ -163,7 +151,7 @@ const nextPost =
                     {tags.map(tag => (
                       <a
                         class="doc-facts__chip"
-                        href={`/tags/${slugifyStr(tag)}/`}
+                        href={getTagPath(slugifyStr(tag))}
                       >
                         {tag}
                       </a>
@@ -242,31 +230,31 @@ const nextPost =
 
         <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
           {
-            prevPost && (
+            olderPost && (
               <a
-                href={prevPost.href}
+                href={olderPost.href}
                 class="flex w-full gap-1 hover:opacity-75"
               >
                 <IconChevronLeft class="inline-block flex-none rtl:rotate-180" />
                 <div>
-                  <span class="notebook-kicker">Previous Post</span>
+                  <span class="notebook-kicker">Older post</span>
                   <div class="ink-link content-title mt-1 text-sm">
-                    {prevPost.title}
+                    {olderPost.title}
                   </div>
                 </div>
               </a>
             )
           }
           {
-            nextPost && (
+            newerPost && (
               <a
-                href={nextPost.href}
+                href={newerPost.href}
                 class="flex w-full justify-end gap-1 text-end hover:opacity-75 sm:col-start-2"
               >
                 <div>
-                  <span class="notebook-kicker">Next Post</span>
+                  <span class="notebook-kicker">Newer post</span>
                   <div class="ink-link content-title mt-1 text-sm">
-                    {nextPost.title}
+                    {newerPost.title}
                   </div>
                 </div>
                 <IconChevronRight class="inline-block flex-none rtl:rotate-180" />

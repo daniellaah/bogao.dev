@@ -63,8 +63,7 @@ export function setupTagsIndexPage() {
     const sortedCards = [...cards].sort((cardA, cardB) => {
       if (currentSort === "popular") {
         const countDiff =
-          Number(cardB.dataset.totalCount ?? 0) -
-          Number(cardA.dataset.totalCount ?? 0);
+          Number(cardB.dataset.count ?? 0) - Number(cardA.dataset.count ?? 0);
         if (countDiff !== 0) return countDiff;
       }
 

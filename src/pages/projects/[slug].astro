@@ -11,7 +11,7 @@ import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import { getProjectAccent } from "@/utils/accent";
 import getSortedProjects from "@/utils/getSortedProjects";
-import { getProjectPath } from "@/utils/getProjectPath";
+import { getProjectSlug } from "@/utils/getProjectPath";
 import { resolveOgImage } from "@/utils/ogImage";
 import { getTocHeadings } from "@/utils/toc";
 import { SITE } from "@/config";
@@ -22,7 +22,7 @@ export const getStaticPaths = (async () => {
   const projects = getSortedProjects(await getCollection("projects"));
 
   return projects.map(project => ({
-    params: { slug: getProjectPath(project.id).split("/").at(-1) },
+    params: { slug: getProjectSlug(project.id) },
     props: { project, projects },
   }));
 }) satisfies GetStaticPaths;

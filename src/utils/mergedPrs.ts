@@ -28,7 +28,8 @@ export const getMergedPrsUrl = (repo: string, author: string) =>
     `is:pr is:merged author:${author}`
   )}`;
 
-// Search can't sort by merge date, so pick the latest merge client-side.
+// Search can't sort by merge date, so pick the latest merge client-side from
+// the most recently updated PRs (merging updates a PR, so it is among them).
 export const summarizeMergedPrs = (
   response: SearchResponse
 ): MergedPrSummary | undefined => {
@@ -57,7 +58,7 @@ const fetchMergedPrs = async (repo: string, author: string) => {
 
   try {
     const response = await fetch(
-      `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&per_page=50`,
+      `https://api.github.com/search/issues?q=${encodeURIComponent(query)}&sort=updated&order=desc&per_page=50`,
       {
         headers: {
           Accept: "application/vnd.github+json",

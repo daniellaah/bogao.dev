@@ -56,13 +56,6 @@ const searchInputPlaceholder = formatSearchInputPlaceholder(searchAllScope);
         }
       </div>
 
-      <script
-        id="search-kind-data"
-        is:inline
-        type="application/json"
-        set:html={JSON.stringify(searchKinds)}
-      />
-
       <p id="search-status" class="font-code text-xs text-graphite">
         {formatSearchEmptyPrompt(searchAllScope)}
       </p>

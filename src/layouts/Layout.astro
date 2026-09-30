@@ -18,7 +18,6 @@ type Props = {
   canonicalURL?: string;
   pubDatetime?: Date;
   modDatetime?: Date | null;
-  scrollSmooth?: boolean;
   lang?: string;
 };
 
@@ -31,7 +30,6 @@ const {
   canonicalURL = new URL(Astro.url.pathname, Astro.url),
   pubDatetime,
   modDatetime,
-  scrollSmooth = false,
   lang = SITE.lang,
 } = Astro.props;
 
@@ -59,14 +57,10 @@ const structuredData = {
 ---
 
 <!doctype html>
-<html
-  dir={SITE.dir}
-  lang={lang}
-  class:list={[{ "scroll-smooth": scrollSmooth }]}
->
+<html dir={SITE.dir} lang={lang}>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link
       rel="preload"
       href="/fonts/Handlee-Regular.woff2"
@@ -75,6 +69,7 @@ const structuredData = {
       crossorigin
     />
     <link rel="icon" href="/images/site/avatar.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/site.webmanifest" />
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
@@ -126,7 +121,7 @@ const structuredData = {
     <script
       type="application/ld+json"
       is:inline
-      set:html={JSON.stringify(structuredData)}
+      set:html={JSON.stringify(structuredData).replaceAll("<", "\\u003c")}
     />
 
     <!-- Enable RSS feed auto-discovery  -->

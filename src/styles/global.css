@@ -1195,22 +1195,12 @@ html[data-theme="dark"] .hero-action--github {
   @apply font-code text-xs font-semibold tracking-[0.16em] text-graphite uppercase;
 }
 
-.ledger-row {
-  @apply pt-3.5 pb-0;
-}
-
-.ledger-row,
 .list-row {
   border-bottom: 1px solid var(--rule-subtle);
 }
 
-.ledger-row:last-child,
 .list-row:last-child {
   border-bottom: 0;
-}
-
-.ledger-list--subtle > .ledger-row:last-child {
-  border-bottom: 1px solid var(--rule-subtle);
 }
 
 .rule-top {
@@ -1221,35 +1211,15 @@ html[data-theme="dark"] .hero-action--github {
   border-block: 1px solid var(--rule);
 }
 
-.rule-section:first-child {
-  border-top: 0;
-}
-
 .divider {
   height: 0;
   border: 0;
   border-top: 1px solid var(--rule-strong);
 }
 
-.timeline {
-  border-inline-start: 0;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--foreground) 27%, transparent) 0 5px,
-    transparent 5px 9px
-  );
-  background-position: left top;
-  background-repeat: repeat-y;
-  background-size: 1px 9px;
-}
-
 @media (min-width: 40rem) {
   .mobile-menu {
     border-block: 0;
-  }
-
-  .timeline {
-    background-image: none;
   }
 }
 

@@ -1,40 +1,35 @@
 import { slugifyStr } from "./slugifyCore";
 
-type TagSource = {
-  tags: string[];
-  draft?: boolean;
-};
-
 export type TagStat = {
   slug: string;
-  tag: string;
   tagName: string;
-  totalCount: number;
-  postCount: number;
+  count: number;
 };
 
-export const collectTagStats = (sources: TagSource[]) => {
-  const tagMap = new Map<string, TagStat>();
+export const getTagPath = (tagSlug: string) => `/tags/${tagSlug}/`;
 
-  for (const source of sources.filter(entry => !entry.draft)) {
-    const uniqueTags = new Map(
-      source.tags.map(tagName => [slugifyStr(tagName), tagName] as const)
-    );
+/**
+ * Tags across the given (published) posts, sorted by slug. Each post counts
+ * once per tag; spellings that slugify the same share one entry, named by the
+ * first spelling seen.
+ */
+export const collectTagStats = (posts: { data: { tags: string[] } }[]) => {
+  const stats = new Map<string, TagStat>();
 
-    for (const [slug, tagName] of uniqueTags) {
-      const current = tagMap.get(slug);
-      const postCount = (current?.postCount ?? 0) + 1;
-      const totalCount = (current?.totalCount ?? 0) + 1;
+  for (const { data } of posts) {
+    const slugs = new Set<string>();
+    for (const tagName of data.tags) {
+      const slug = slugifyStr(tagName);
+      if (slugs.has(slug)) continue;
+      slugs.add(slug);
 
-      tagMap.set(slug, {
-        slug,
-        tag: slug,
-        tagName: current?.tagName ?? tagName,
-        totalCount,
-        postCount,
-      });
+      const stat = stats.get(slug);
+      if (stat) stat.count += 1;
+      else stats.set(slug, { slug, tagName, count: 1 });
     }
   }
 
-  return Array.from(tagMap.values());
+  return Array.from(stats.values()).sort((a, b) =>
+    a.slug.localeCompare(b.slug)
+  );
 };

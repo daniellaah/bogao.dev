@@ -1,15 +1,14 @@
+// Path segments shown in the breadcrumb; paginated lists name their page.
 export function getBreadcrumbList(pathname: string) {
   const segments = pathname.replace(/\/+$/, "").split("/").slice(1);
+  const [section, first, second] = segments;
 
-  if (segments[0] === "posts") {
-    return [`Posts (page ${segments[1] || 1})`];
+  if (section === "posts") {
+    return [first ? `Posts (page ${first})` : "Posts"];
   }
 
-  if (segments[0] === "tags" && !Number.isNaN(Number(segments[2]))) {
-    return [
-      segments[0],
-      `${segments[1]} ${Number(segments[2]) === 1 ? "" : "(page " + segments[2] + ")"}`,
-    ];
+  if (section === "tags" && second) {
+    return [section, `${first} (page ${second})`];
   }
 
   return segments;

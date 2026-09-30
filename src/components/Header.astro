@@ -26,8 +26,8 @@ const isActive = (path: string) => {
 const hasPosts = getSortedPosts(await getCollection("blog")).length > 0;
 
 const navItems: { href: string; label: string; match?: string }[] = [
-  { href: "/projects", label: "Projects", match: "/projects" },
-  ...(hasPosts ? [{ href: "/posts", label: "Posts", match: "/posts" }] : []),
+  { href: "/projects/", label: "Projects", match: "/projects" },
+  ...(hasPosts ? [{ href: "/posts/", label: "Posts", match: "/posts" }] : []),
 ];
 ---
 
@@ -123,7 +123,7 @@ const navItems: { href: string; label: string; match?: string }[] = [
           class="col-span-2 mt-2 grid grid-cols-2 gap-2 border-t border-border pt-2 first:mt-0 first:border-t-0 first:pt-0 lg:mt-0 lg:flex lg:items-center lg:gap-1 lg:border-0 lg:pt-0"
         >
           <LinkButton
-            href="/search"
+            href="/search/"
             data-command-open
             class="search-nav-link hover-underline-trigger flex min-h-11 items-center justify-center px-2 py-2 lg:min-h-0 lg:p-1"
             title="Search (⌘K / Ctrl+K)"

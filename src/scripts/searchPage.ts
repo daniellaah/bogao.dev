@@ -13,6 +13,7 @@ import {
   type SearchRecord,
   type SearchRecordKind,
 } from "../utils/search";
+import searchKinds from "../data/search-kinds.json";
 import { loadSearchIndex } from "./searchIndex";
 import { getCurrentUrlSearchParams, replaceCurrentUrlSearch } from "./urlState";
 
@@ -25,14 +26,10 @@ export function setupSearchPage() {
   const kindButtons = Array.from(
     document.querySelectorAll<HTMLButtonElement>("[data-search-kind]")
   );
-  const kindData =
-    document.querySelector<HTMLScriptElement>("#search-kind-data");
 
-  if (!input || !clearButton || !status || !results || !kindData) return;
+  if (!input || !clearButton || !status || !results) return;
 
-  const searchKindEntries = JSON.parse(
-    kindData.textContent ?? "[]"
-  ) as SearchKindEntry[];
+  const searchKindEntries = searchKinds as SearchKindEntry[];
   const searchKindToRecordKind = Object.fromEntries(
     searchKindEntries.map(kind => [kind.filter, kind.recordKind])
   ) as Record<SearchKind, SearchRecordKind | null>;

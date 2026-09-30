@@ -90,7 +90,7 @@ describe("post filters", () => {
   it("applies year and tag filters from the URL", async () => {
     await renderPostsPage("https://bogao.dev/posts/?tag=retrieval&year=2026");
 
-    expect(visiblePosts()).toEqual(["/posts/rrf"]);
+    expect(visiblePosts()).toEqual(["/posts/rrf/"]);
     expect(document.querySelector("[data-filter-status]")?.textContent).toBe(
       "Showing 1 post."
     );
@@ -121,7 +121,7 @@ describe("post filters", () => {
       ?.click();
 
     expect(location.search).toBe("?tag=evaluation");
-    expect(visiblePosts()).toEqual(["/posts/agentic-eval"]);
+    expect(visiblePosts()).toEqual(["/posts/agentic-eval/"]);
     expect(sessionStorage.getItem("backUrl")).toBe("/posts/?tag=evaluation");
     expect(sessionStorage.getItem("backLabel")).toBe("Posts");
   });

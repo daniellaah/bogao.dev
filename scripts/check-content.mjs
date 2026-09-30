@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { parse } from "yaml";
 import {
   ALLOWED_FRONTMATTER_FIELDS,
   COLLECTIONS,
@@ -12,7 +13,10 @@ import {
   stripMarkdownExt,
 } from "./content-rules.mjs";
 
-const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+// A date, or a date and time with an explicit zone so scheduled posts go
+// live at the same moment whatever the build machine's time zone.
+const DATE_PATTERN =
+  /^\d{4}-\d{2}-\d{2}(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2}))?$/;
 
 const errors = [];
 const warnings = [];
@@ -30,54 +34,21 @@ const listMarkdownFiles = dir => {
   });
 };
 
-const parseScalar = value => {
-  const trimmed = value.trim();
-  if (trimmed === "") return "";
-  if (trimmed === "null") return null;
-  if (trimmed === "true") return true;
-  if (trimmed === "false") return false;
-  if (trimmed === "[]") return [];
-  if (/^-?\d+$/.test(trimmed)) return Number(trimmed);
-  if (
-    (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
-    (trimmed.startsWith("'") && trimmed.endsWith("'"))
-  ) {
-    return trimmed.slice(1, -1);
-  }
-  return trimmed;
-};
-
 export const parseFrontmatter = (file, source) => {
-  const match = source.match(/^---\n([\s\S]*?)\n---/);
+  const match = source.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) {
     errors.push(`${file}: missing YAML frontmatter`);
-    return { data: {}, raw: {} };
+    return {};
   }
 
-  const data = {};
-  const raw = {};
-  let currentKey = null;
-
-  for (const line of match[1].split("\n")) {
-    if (!line.trim() || line.trimStart().startsWith("#")) continue;
-
-    const arrayItem = line.match(/^\s+-\s*(.*)$/);
-    if (arrayItem && currentKey) {
-      if (!Array.isArray(data[currentKey])) data[currentKey] = [];
-      data[currentKey].push(parseScalar(arrayItem[1]));
-      continue;
-    }
-
-    const field = line.match(/^([A-Za-z][A-Za-z0-9_]*):\s*(.*)$/);
-    if (!field) continue;
-
-    const [, key, value] = field;
-    currentKey = key;
-    raw[key] = value.trim();
-    data[key] = parseScalar(value);
+  try {
+    const data = parse(match[1]);
+    if (data && typeof data === "object" && !Array.isArray(data)) return data;
+    errors.push(`${file}: frontmatter must be a YAML mapping`);
+  } catch (error) {
+    errors.push(`${file}: invalid YAML frontmatter (${error.message})`);
   }
-
-  return { data, raw };
+  return {};
 };
 
 const isPresent = value =>
@@ -99,16 +70,17 @@ const validateKnownFields = (file, collection, data) => {
   }
 };
 
-const validateDate = (file, raw, field, required = false) => {
-  const value = raw[field];
+const validateDate = (file, data, field, required = false) => {
+  const value = data[field];
   if (!isPresent(value)) {
     if (required) errors.push(`${file}: missing ${field}`);
     return;
   }
 
-  const unquoted = String(value).replace(/^['"]|['"]$/g, "");
-  if (!DATE_PATTERN.test(unquoted)) {
-    errors.push(`${file}: ${field} must use YYYY-MM-DD`);
+  if (!DATE_PATTERN.test(String(value))) {
+    errors.push(
+      `${file}: ${field} must be YYYY-MM-DD or YYYY-MM-DDTHH:mm with a zone (Z or +08:00)`
+    );
   }
 };
 
@@ -160,18 +132,18 @@ const validateUrl = (file, data, field) => {
   }
 };
 
-const validateBlog = (file, data, raw, seenSlugs) => {
+const validateBlog = (file, data, seenSlugs) => {
   requireFields(file, data, ["pubDatetime", "title", "description"]);
-  validateDate(file, raw, "pubDatetime", true);
-  validateDate(file, raw, "modDatetime");
+  validateDate(file, data, "pubDatetime", true);
+  validateDate(file, data, "modDatetime");
   validateStringArray(file, data, "tags", true);
   addSlug(seenSlugs, "blog", file, data.slug);
   warnImplicitSlug(file, data);
 };
 
-const validateProject = (file, data, raw, seenSlugs) => {
+const validateProject = (file, data, seenSlugs) => {
   requireFields(file, data, ["title", "description", "status", "order"]);
-  validateDate(file, raw, "startDate");
+  validateDate(file, data, "startDate");
   validateStringArray(file, data, "stack");
   validateUrl(file, data, "demoUrl");
   validateUrl(file, data, "repoUrl");
@@ -207,13 +179,13 @@ const main = () => {
 
     for (const file of files) {
       const source = fs.readFileSync(path.join(REPO_ROOT, file), "utf8");
-      const { data, raw } = parseFrontmatter(file, source);
+      const data = parseFrontmatter(file, source);
 
       validateKnownFields(file, collection.name, data);
 
-      if (collection.name === "blog") validateBlog(file, data, raw, seenSlugs);
+      if (collection.name === "blog") validateBlog(file, data, seenSlugs);
       if (collection.name === "projects") {
-        validateProject(file, data, raw, seenSlugs);
+        validateProject(file, data, seenSlugs);
       }
     }
   }
