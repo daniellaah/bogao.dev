@@ -46,7 +46,7 @@ const isArticle = Boolean(pubDatetime);
 const ogType = isArticle ? "article" : "website";
 const socialImageAlt = `${title} | ${SITE.title}`;
 
-// Escape "<" so no string in the data can close the <script> element.
+// Escape "<" so no string in the data can end the JSON-LD block early.
 const jsonLd = JSON.stringify({
   "@context": "https://schema.org",
   ...structuredData,

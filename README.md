@@ -4,7 +4,7 @@
 
 ## 本地开发
 
-建议使用 Node.js 22（见 `.nvmrc`）。
+需要 Node.js 22.12 或更高版本（见 `.nvmrc`）。
 
 ```bash
 npm install

@@ -1,6 +1,7 @@
 import { defineConfig, envField } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
+import { unified } from "@astrojs/markdown-remark";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 import {
@@ -22,10 +23,17 @@ export default defineConfig({
   // Every internal link and canonical URL ends in "/"; see also vercel.json.
   trailingSlash: "always",
   integrations: [sitemap()],
+  // Astro 7 strips whitespace between inline elements by default ("jsx");
+  // keep the markup's spaces, which the templates rely on.
+  compressHTML: true,
   markdown: {
-    remarkPlugins: [remarkMath],
-    // rehypeHeadingText must run before KaTeX renders math in headings.
-    rehypePlugins: [rehypeHeadingText, rehypeKatex],
+    // remark/rehype, which Astro 7 no longer uses by default, for the math
+    // and heading-text plugins.
+    processor: unified({
+      remarkPlugins: [remarkMath],
+      // rehypeHeadingText must run before KaTeX renders math in headings.
+      rehypePlugins: [rehypeHeadingText, rehypeKatex],
+    }),
     shikiConfig: {
       // For more themes, visit https://shiki.style/themes
       themes: { light: "min-light", dark: "night-owl" },
@@ -40,8 +48,6 @@ export default defineConfig({
     },
   },
   vite: {
-    // @ts-expect-error Tailwind's Vite plugin is typed for Vite 7 and Astro 5
-    // bundles Vite 6; drop this once Astro ships Vite 7 (withastro/astro#14030).
     plugins: [tailwindcss()],
   },
   image: {
@@ -61,8 +67,5 @@ export default defineConfig({
         optional: true,
       }),
     },
-  },
-  experimental: {
-    preserveScriptOrder: true,
   },
 });

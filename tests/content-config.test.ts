@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { z } from "astro:content";
+import { z } from "astro/zod";
 import { collections } from "@/content.config";
 import contentRules from "@/data/content-rules.json";
 
@@ -7,7 +7,7 @@ const schemaFields = (name: keyof typeof collections) => {
   const { schema } = collections[name];
   if (typeof schema !== "function") throw new Error(`${name}: no schema`);
   const object = schema({ image: () => z.string() } as never);
-  return Object.keys((object as z.AnyZodObject).shape);
+  return Object.keys((object as z.ZodObject).shape);
 };
 
 describe("content config", () => {
