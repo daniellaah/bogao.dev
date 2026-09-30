@@ -1,6 +1,9 @@
 ---
 title: "Project Name"
 description: "One clear sentence about what this project does and why it matters."
+kicker: "Project"
+tags:
+  - Highlight
 status: "active"
 draft: true
 order: 10

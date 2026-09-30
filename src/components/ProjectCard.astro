@@ -1,35 +1,17 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import ProjectStatusBadge from "./ProjectStatusBadge.astro";
+import WorkCard from "./WorkCard.astro";
 import { getProjectPath } from "@/utils/getProjectPath";
 
 type Props = CollectionEntry<"projects">;
 
 const { id, data } = Astro.props;
-const { title, description, status, stack, year } = data;
-const href = getProjectPath(id);
 ---
 
-<article>
-  <a href={href} class="project-list-card sketch-border hand-underline-trigger">
-    <h2 class="min-w-0">
-      <span class="hand-underline content-title text-2xl">{title}</span>
-    </h2>
-
-    <div class="project-card-meta mt-4 flex flex-wrap items-center gap-3">
-      <ProjectStatusBadge status={status} />
-      {year && <span class="font-code text-xs text-graphite">{year}</span>}
-      {
-        stack.length > 0 && (
-          <span class="min-w-0 text-sm text-graphite">{stack.join(" · ")}</span>
-        )
-      }
-    </div>
-
-    <div>
-      <p class="mt-3 max-w-3xl text-sm leading-7 text-graphite">
-        {description}
-      </p>
-    </div>
-  </a>
-</article>
+<WorkCard
+  href={getProjectPath(id)}
+  kicker={data.kicker}
+  title={data.title}
+  description={data.description}
+  tags={data.tags}
+/>

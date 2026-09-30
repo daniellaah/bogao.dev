@@ -1,0 +1,39 @@
+---
+import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import "@/styles/work-card.css";
+
+type Props = {
+  href: string;
+  kicker?: string;
+  title: string;
+  description: string;
+  tags: readonly string[];
+  external?: boolean;
+};
+
+const {
+  href,
+  kicker,
+  title,
+  description,
+  tags,
+  external = false,
+} = Astro.props;
+---
+
+<a
+  class="work-card sketch-border hand-underline-trigger"
+  href={href}
+  rel={external ? "noreferrer" : undefined}
+  target={external ? "_blank" : undefined}
+>
+  {kicker && <span class="work-card__kicker">{kicker}</span>}
+  <span class="work-card__title hand-underline">{title}</span>
+  <span class="work-card__description">{description}</span>
+  <span class="work-card__footer">
+    <span class="work-card__tags" aria-label="Highlights">
+      {tags.map(tag => <span>{tag}</span>)}
+    </span>
+    <IconArrowRight class="work-card__arrow" aria-hidden="true" />
+  </span>
+</a>

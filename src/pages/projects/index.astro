@@ -5,6 +5,8 @@ import Main from "@/layouts/Main.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
+import WorkCard from "@/components/WorkCard.astro";
+import { OPEN_SOURCE } from "@/data/profile";
 import getSortedProjects from "@/utils/getSortedProjects";
 import { SITE } from "@/config";
 
@@ -13,7 +15,7 @@ const projects = getSortedProjects(await getCollection("projects"));
 
 <Layout
   title={`Projects | ${SITE.title}`}
-  description="Selected ML, LLM, and knowledge-tool experiments built by Bo."
+  description="Projects and open-source contributions by Bo Gao: agentic RAG, production recommender retrieval, and LLM tooling."
 >
   <Header />
   <Main pageTitle="Projects">
@@ -26,7 +28,7 @@ const projects = getSortedProjects(await getCollection("projects"));
             </p>
           </div>
 
-          <div class="projects-card-list">
+          <div class="work-grid">
             {projects.map(project => (
               <ProjectCard {...project} />
             ))}
@@ -42,6 +44,29 @@ const projects = getSortedProjects(await getCollection("projects"));
         </section>
       )
     }
+
+    <section
+      class="sketch-edge-top mt-12 pt-8"
+      aria-labelledby="open-source-heading"
+    >
+      <h2 id="open-source-heading" class="text-2xl font-semibold">
+        Open Source Contributions
+      </h2>
+      <div class="work-grid mt-6">
+        {
+          OPEN_SOURCE.map(({ name, owner, description, tags, href }) => (
+            <WorkCard
+              href={href}
+              kicker={owner}
+              title={name}
+              description={description}
+              tags={tags}
+              external
+            />
+          ))
+        }
+      </div>
+    </section>
   </Main>
   <Footer />
 </Layout>

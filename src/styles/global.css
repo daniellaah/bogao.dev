@@ -802,11 +802,6 @@ html[data-theme="dark"] .site-avatar__image--dark {
   gap: 0.55rem 0.8rem;
 }
 
-.projects-card-list {
-  display: grid;
-  gap: 0.85rem;
-}
-
 [data-tags-index][data-tags-entering] [data-tag-card] {
   animation: tag-card-enter 260ms var(--motion-ease-smooth) both;
   animation-delay: var(--tag-enter-delay, 0ms);
@@ -814,8 +809,7 @@ html[data-theme="dark"] .site-avatar__image--dark {
   will-change: opacity, transform;
 }
 
-.tags-tag-card,
-.project-list-card {
+.tags-tag-card {
   border: 0;
   border-radius: 9px 13px 8px 12px / 12px 8px 13px 9px;
   background: color-mix(in srgb, var(--surface) 62%, transparent);
@@ -836,33 +830,21 @@ html[data-theme="dark"] .site-avatar__image--dark {
   padding: 0.62rem 0.8rem;
 }
 
-.project-list-card {
-  --sketch-border-size: 5px;
-
-  display: block;
-  width: 100%;
-  padding: 1rem 1.1rem;
-}
-
-.tags-tag-card .content-title,
-.project-list-card .content-title {
+.tags-tag-card .content-title {
   white-space: normal;
   overflow-wrap: anywhere;
 }
 
-html[data-theme="light"] .tags-tag-card,
-html[data-theme="light"] .project-list-card {
+html[data-theme="light"] .tags-tag-card {
   background: var(--background);
   color: var(--foreground);
 }
 
-html[data-theme="light"] .tags-tag-card .text-graphite,
-html[data-theme="light"] .project-list-card .text-graphite {
+html[data-theme="light"] .tags-tag-card .text-graphite {
   color: var(--foreground);
 }
 
-.tags-tag-card:hover,
-.project-list-card:hover {
+.tags-tag-card:hover {
   --sketch-border-image: var(--sketch-border-expressive-image);
 
   background: color-mix(in srgb, var(--muted) 54%, transparent);

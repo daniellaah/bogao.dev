@@ -30,6 +30,10 @@ const projects = defineCollection({
     z.object({
       title: z.string(),
       description: z.string(),
+      // Small label above the card title, e.g. "Featured project".
+      kicker: z.string().optional(),
+      // Highlights shown on project cards; `stack` lists the full tech stack.
+      tags: z.array(z.string()).default([]),
       status: z.enum(projectStatuses).default("active"),
       order: z.number().int().default(99),
       startDate: z.coerce.date().optional().nullable(),

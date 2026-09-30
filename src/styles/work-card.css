@@ -1,0 +1,101 @@
+/* Shared card for projects and open-source contributions. */
+
+.work-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.25rem 1.4rem;
+  transition:
+    background-color var(--motion-duration-base) var(--motion-ease-standard),
+    transform var(--motion-duration-press) var(--motion-ease-standard);
+}
+
+.work-card:hover {
+  background-color: color-mix(in srgb, var(--surface) 60%, transparent);
+  transform: translate(-1px, -1px);
+}
+
+.work-card__kicker {
+  font-family: var(--font-code);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--graphite);
+  text-transform: uppercase;
+}
+
+.work-card__title {
+  width: fit-content;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.work-card__description {
+  max-width: 52rem;
+  color: var(--graphite);
+  font-size: 0.93rem;
+  line-height: 1.6;
+}
+
+.work-card__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.2rem;
+}
+
+.work-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.work-card__tags > span {
+  border: var(--control-border-width) solid var(--control-border-color-subtle);
+  border-radius: 3px 6px 4px 5px / 6px 3px 5px 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.work-card__arrow {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+  transition: transform var(--motion-duration-base) var(--motion-ease-smooth);
+}
+
+.work-card:hover .work-card__arrow {
+  transform: translateX(0.18rem);
+}
+
+.work-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+@media (max-width: 52rem) {
+  .work-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 40rem) {
+  .work-card {
+    padding: 1rem 1.05rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-card,
+  .work-card__arrow {
+    transition: none;
+  }
+}

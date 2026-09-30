@@ -1,5 +1,5 @@
 ---
-author: Bo
+author: Bo Gao
 pubDatetime: 2026-03-06
 modDatetime: 2026-03-06
 title: Replace with your title

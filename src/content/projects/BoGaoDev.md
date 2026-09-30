@@ -1,38 +1,50 @@
 ---
 title: "BoGao.Dev"
-description: "A personal website built through vibe coding to explore AI-assisted creation and create a home for my projects, writing, and ideas."
+description: "This site: an Astro portfolio with content collections, site-wide search, RSS, and light/dark themes, deployed on Vercel."
+kicker: "Personal site"
+tags:
+  - Astro
+  - TypeScript
+  - Tailwind CSS
+  - Vercel
 status: "shipping"
-order: -1
+order: 10
 startDate: 2026-02-04
 featured: false
 year: 2026
 stack:
   - Astro
-  - GitHub
+  - TypeScript
+  - Tailwind CSS
   - Vercel
-demoUrl: "https://bogao.dev"
-repoUrl: "https://github.com/daniellaah/daniellaah.github.io"
+repoUrl: "https://github.com/daniellaah/bogao.dev"
 ---
 
-## Why I built it
+## What it is
 
-BoGao.Dev began as a practical vibe coding experiment. I wanted to experience what it is like to shape a real, evolving product with AI-assisted tools instead of using AI only for isolated code snippets.
+My personal site and portfolio: a home for my projects, open-source
+contributions, and writing. It is a static Astro site, deployed on Vercel from
+this repository.
 
-It also gives me a place I own to introduce my work, publish useful writing, and document what I am learning.
+## How it's built
 
-## What I focused on
+- **Typed content.** Projects and posts are Markdown files in Astro content
+  collections with a validated schema, plus a `content:check` script that
+  flags missing or unknown frontmatter before a build.
+- **Search without a backend.** A search index is generated at build time and
+  queried in the browser, both on `/search` and in a ⌘K / Ctrl+K command
+  palette.
+- **One card, everywhere.** Projects and open-source contributions share a
+  single card component, so the homepage and the projects page cannot drift
+  apart.
+- **Maintainability tests.** A Node test suite covers routing, search, content
+  rules, and the client-side scripts.
 
-- Turning a broad idea into small, testable iterations.
-- Learning how to direct, review, and refine AI-generated work.
-- Developing a visual style that feels personal rather than template-driven.
-- Creating a simple workflow for adding projects and articles over time.
+The rest is the usual plumbing, done properly: RSS, a sitemap, Open Graph
+tags, and light and dark themes.
 
-## What it represents
+## How I work on it
 
-This project is not intended as a showcase of full-stack complexity. Its value is the process: learning how to collaborate effectively with AI, make clear product decisions, and turn an unfinished idea into a useful personal platform.
-
-## Next
-
-- Keep the site focused as new work is added.
-- Publish practical notes and project stories rather than filling it with placeholder content.
-- Continue using the site to test better human-AI creative workflows.
+I build the site with AI coding tools such as Claude Code. I decide what the
+site should say and how it should look, review every change, and keep it
+covered by tests; the tools make each iteration faster.

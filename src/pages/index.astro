@@ -3,35 +3,36 @@ import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
+import ProjectCard from "@/components/ProjectCard.astro";
+import WorkCard from "@/components/WorkCard.astro";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import IconFileText from "@/assets/icons/IconFileText.svg";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import IconLinkedIn from "@/assets/icons/IconLinkedIn.svg";
 import { SITE } from "@/config";
+import { HOMEPAGE_PROJECTS, OPEN_SOURCE, PROFILE } from "@/data/profile";
+import dayjs from "@/utils/dayjs";
+import getBlogEntries from "@/utils/getBlogEntries";
+import getSortedPosts from "@/utils/getSortedPosts";
+import { getPostPath } from "@/utils/getPostPath";
 import { getProjectPath } from "@/utils/getProjectPath";
 import "@/styles/home.css";
 
 const projects = await getCollection("projects", ({ data }) => !data.draft);
 
-const selectedWorkSpecs = [
-  {
-    id: "bogaodev",
-    tags: ["Vibe coding", "Personal site", "Writing"],
-    artifact: "Personal platform",
-  },
-] as const;
-
-const selectedWork = selectedWorkSpecs.flatMap(spec => {
+const homepageProjects = HOMEPAGE_PROJECTS.flatMap(slug => {
   const project = projects.find(
-    ({ id }) => getProjectPath(id) === `/projects/${spec.id}`
+    ({ id }) => getProjectPath(id) === `/projects/${slug}`
   );
-  return project ? [{ project, ...spec }] : [];
+  return project ? [project] : [];
 });
+
+const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
 ---
 
 <Layout
-  title={`${SITE.author} Gao — AI Engineer | ${SITE.title}`}
-  description="Bo Gao builds reliable AI agent systems, evaluation workflows, retrieval experiments, and AI developer tools."
+  title={`${PROFILE.name} — ${PROFILE.role} | ${SITE.title}`}
+  description={`${PROFILE.summary} ${PROFILE.availability}`}
 >
   <Header />
   <main id="main-content" data-layout="index" class="career-home app-layout">
@@ -39,7 +40,7 @@ const selectedWork = selectedWorkSpecs.flatMap(spec => {
       <div class="hero-avatar career-hero__avatar">
         <img
           src="/images/site/avatar.svg"
-          alt="Portrait of Bo"
+          alt={`Illustrated portrait of ${PROFILE.name}`}
           width="1254"
           height="1254"
           decoding="async"
@@ -47,7 +48,7 @@ const selectedWork = selectedWorkSpecs.flatMap(spec => {
         />
         <img
           src="/images/site/avatar-dark.svg"
-          alt="Portrait of Bo"
+          alt={`Illustrated portrait of ${PROFILE.name}`}
           width="1254"
           height="1254"
           decoding="async"
@@ -57,95 +58,138 @@ const selectedWork = selectedWorkSpecs.flatMap(spec => {
 
       <div class="career-hero__content">
         <h1 id="career-hero-title" class="career-hero__title">
-          Bo Gao <span aria-hidden="true">—</span> AI Engineer
+          {PROFILE.name}
         </h1>
-        <p class="career-hero__summary">
-          I build reliable agent systems, evaluation workflows, retrieval
-          experiments, and AI developer tools.
-        </p>
+        <p class="career-hero__role">{PROFILE.role}</p>
+        <div class="career-hero__summary">
+          {PROFILE.intro.map(paragraph => <p>{paragraph}</p>)}
+        </div>
 
-        <div
-          class="career-hero__profile-links"
-          aria-label="Professional profiles"
-        >
+        <div class="career-hero__actions" aria-label="Contact and profiles">
           <a
-            class="career-hero__profile-link hand-underline-trigger"
+            class="hero-action hero-action--icon"
             href={SITE.profile}
             rel="me noreferrer"
             target="_blank"
-            aria-label="Explore my projects, code, and experiments on GitHub"
+            aria-label="GitHub"
+            title="GitHub"
           >
             <IconGitHub aria-hidden="true" />
-            <span>
-              <small>Projects, code, and experiments</small>
-              <strong class="hand-underline">GitHub</strong>
-            </span>
-            <IconArrowRight aria-hidden="true" />
           </a>
           <a
-            class="career-hero__profile-link hand-underline-trigger"
+            class="hero-action hero-action--icon"
             href={SITE.linkedin}
             rel="me noreferrer"
             target="_blank"
-            aria-label="Connect on LinkedIn. Open to AI engineering roles in the United States."
+            aria-label="LinkedIn"
+            title="LinkedIn"
           >
             <IconLinkedIn aria-hidden="true" />
-            <span>
-              <small>Open to AI engineering roles in the U.S.</small>
-              <strong class="hand-underline">LinkedIn</strong>
-            </span>
-            <IconArrowRight aria-hidden="true" />
           </a>
+          {
+            SITE.resumeUrl && (
+              <a
+                class="hero-action hero-action--icon"
+                href={SITE.resumeUrl}
+                aria-label="Résumé"
+                title="Résumé"
+              >
+                <IconFileText aria-hidden="true" />
+              </a>
+            )
+          }
         </div>
       </div>
     </section>
 
-    <section id="selected-work" class="career-section">
+    <section id="work" class="career-section" aria-labelledby="work-heading">
       <div class="career-section__heading">
-        <div>
-          <p class="notebook-kicker">01 / Selected work</p>
-        </div>
+        <h2 id="work-heading" class="notebook-kicker">Projects</h2>
         <a class="career-section__link ink-link" href="/projects/">
-          View all work <IconArrowRight aria-hidden="true" />
+          All projects <IconArrowRight aria-hidden="true" />
         </a>
       </div>
 
-      <ol class="selected-work-list">
+      <div class="work-grid">
+        {homepageProjects.map(project => <ProjectCard {...project} />)}
+      </div>
+    </section>
+
+    <section
+      id="open-source"
+      class="career-section"
+      aria-labelledby="open-source-heading"
+    >
+      <div class="career-section__heading">
+        <h2 id="open-source-heading" class="notebook-kicker">
+          Open Source Contributions
+        </h2>
+      </div>
+
+      <div class="work-grid">
         {
-          selectedWork.map(({ project, tags, artifact }, index) => (
-            <li class="selected-work-row">
-              <a
-                class="selected-work-row__link hand-underline-trigger"
-                href={getProjectPath(project.id)}
-              >
-                <span class="selected-work-row__number">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <span class="selected-work-row__title hand-underline">
-                  {project.data.title}
-                </span>
-                <span class="selected-work-row__description">
-                  {project.data.description}
-                </span>
-                <span class="selected-work-row__tags" aria-label="Highlights">
-                  {tags.map(tag => (
-                    <span>{tag}</span>
-                  ))}
-                </span>
-                <span class="selected-work-row__artifact">
-                  <IconFileText aria-hidden="true" />
-                  {artifact}
-                </span>
-                <IconArrowRight
-                  class="selected-work-row__arrow"
-                  aria-hidden="true"
-                />
-              </a>
-            </li>
+          OPEN_SOURCE.map(({ name, owner, description, tags, href }) => (
+            <WorkCard
+              href={href}
+              kicker={owner}
+              title={name}
+              description={description}
+              tags={tags}
+              external
+            />
           ))
         }
-      </ol>
+      </div>
     </section>
+
+    {
+      recentPosts.length > 0 && (
+        <section
+          id="writing"
+          class="career-section"
+          aria-labelledby="writing-heading"
+        >
+          <div class="career-section__heading">
+            <h2 id="writing-heading" class="notebook-kicker">
+              Recent Posts
+            </h2>
+            <a class="career-section__link ink-link" href="/posts/">
+              All posts <IconArrowRight aria-hidden="true" />
+            </a>
+          </div>
+
+          <ol class="writing-list">
+            {recentPosts.map(post => (
+              <li>
+                <a
+                  class="writing-row hand-underline-trigger"
+                  href={getPostPath(post)}
+                >
+                  <time
+                    class="writing-row__date"
+                    datetime={post.data.pubDatetime.toISOString()}
+                  >
+                    {dayjs.utc(post.data.pubDatetime).format("D MMM YYYY")}
+                  </time>
+                  <span class="writing-row__text">
+                    <span class="writing-row__title hand-underline">
+                      {post.data.title}
+                    </span>
+                    <span class="writing-row__description">
+                      {post.data.description}
+                    </span>
+                  </span>
+                  <IconArrowRight
+                    class="writing-row__arrow"
+                    aria-hidden="true"
+                  />
+                </a>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )
+    }
   </main>
   <Footer noMarginTop />
 </Layout>

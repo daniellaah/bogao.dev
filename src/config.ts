@@ -10,10 +10,12 @@ const resolvedWebsite =
 
 export const SITE = {
   website: resolvedWebsite,
-  author: "Bo",
+  author: "Bo Gao",
   profile: "https://github.com/daniellaah",
   linkedin: "https://www.linkedin.com/in/bogao223/",
-  desc: "Bo's portfolio and writing on AI agents, evaluation, retrieval, developer tools, and applied AI systems.",
+  // Set to a public path (e.g. "/resume.pdf") to show a Résumé icon in the hero.
+  resumeUrl: undefined as string | undefined,
+  desc: "Bo Gao, AI / ML engineer: production retrieval and recommendation systems at 100M+ DAU scale, now agentic retrieval and LLM post-training.",
   title: "BoGao.Dev",
   ogImage: "og.png",
   postPerPage: 100,

@@ -20,6 +20,8 @@
       "frontmatterFields": [
         "title",
         "description",
+        "kicker",
+        "tags",
         "status",
         "order",
         "startDate",

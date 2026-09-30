@@ -6,6 +6,8 @@ import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
 import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
 import LinkButton from "./LinkButton.astro";
 import { SITE } from "@/config";
+import getBlogEntries from "@/utils/getBlogEntries";
+import getSortedPosts from "@/utils/getSortedPosts";
 
 const { pathname } = Astro.url;
 
@@ -20,10 +22,12 @@ const isActive = (path: string) => {
   return currentPath === path || currentPathArray[0] === pathArray[0];
 };
 
+// Posts stays out of the nav until at least one post is published.
+const hasPosts = getSortedPosts(await getBlogEntries()).length > 0;
+
 const navItems: { href: string; label: string; match?: string }[] = [
-  { href: "/projects", label: "Work", match: "/projects" },
-  { href: "/posts", label: "Writing", match: "/posts" },
-  { href: "/about", label: "About", match: "/about" },
+  { href: "/projects", label: "Projects", match: "/projects" },
+  ...(hasPosts ? [{ href: "/posts", label: "Posts", match: "/posts" }] : []),
 ];
 ---
 
@@ -48,7 +52,7 @@ const navItems: { href: string; label: string; match?: string }[] = [
   >
     <a
       href="/"
-      class="site-brand site-wordmark absolute py-1 text-xl leading-none font-semibold whitespace-nowrap lg:static lg:my-auto lg:text-2xl"
+      class="site-brand site-wordmark absolute top-[1.125rem] py-1 text-xl leading-none font-semibold whitespace-nowrap sm:top-[1.625rem] lg:static lg:my-auto lg:text-2xl"
     >
       <span class="site-avatar" aria-hidden="true">
         <img
@@ -116,14 +120,14 @@ const navItems: { href: string; label: string; match?: string }[] = [
         }
 
         <li
-          class="col-span-2 mt-2 grid grid-cols-2 gap-2 border-t border-border pt-2 lg:mt-0 lg:flex lg:items-center lg:gap-1 lg:border-0 lg:pt-0"
+          class="col-span-2 mt-2 grid grid-cols-2 gap-2 border-t border-border pt-2 first:mt-0 first:border-t-0 first:pt-0 lg:mt-0 lg:flex lg:items-center lg:gap-1 lg:border-0 lg:pt-0"
         >
           <LinkButton
             href="/search"
             data-command-open
             class="search-nav-link hand-underline-trigger flex min-h-11 items-center justify-center px-2 py-2 lg:min-h-0 lg:p-1"
-            title="Search"
-            aria-label="Search. Press Command K to open quick search."
+            title="Search (⌘K / Ctrl+K)"
+            aria-label="Search. Press Command K or Control K to open quick search."
             aria-current={isActive("/search") ? "page" : undefined}
             disableHoverOpacity
           >
