@@ -79,13 +79,36 @@ body:has(.career-home) #top-nav-wrap {
   margin-top: 0.75rem;
 }
 
+/* Job-search status: the one line a recruiter should not miss. */
+.career-hero__status {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  max-width: 44rem;
+  margin-top: 1.1rem;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--control-border-radius);
+  background: var(--surface);
+  font-size: 0.95rem;
+  line-height: 1.45;
+  text-wrap: balance;
+}
+
+.career-hero__status-dot {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: 0.45em;
+  border-radius: 50%;
+  background: var(--ink-green);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ink-green) 22%, transparent);
+}
+
 .career-hero__actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
-}
-
-.career-hero__actions {
   margin-top: 1.5rem;
 }
 
@@ -111,20 +134,6 @@ body:has(.career-home) #top-nav-wrap {
   font-weight: 600;
   letter-spacing: -0.015em;
   line-height: 1.2;
-}
-
-.career-section__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: var(--graphite);
-  font-size: 0.85rem;
-  white-space: nowrap;
-}
-
-.career-section__link svg {
-  width: 1.1rem;
-  height: 1.1rem;
 }
 
 /* Responsive */

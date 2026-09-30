@@ -43,11 +43,11 @@ export const GET: APIRoute = async () => {
     })),
     ...tags.map(tag => ({
       title: `#${tag.tagName}`,
-      description: `${tag.count} item${tag.count === 1 ? "" : "s"} tagged with #${tag.tagName}`,
+      description: `${tag.count} post${tag.count === 1 ? "" : "s"} tagged #${tag.tagName}`,
       url: getTagPath(tag.slug),
       kind: SEARCH_RECORD_KINDS.tags,
       metaText: `${tag.tagName} ${tag.slug}`,
-      content: tag.tagName,
+      content: "",
     })),
   ];
 

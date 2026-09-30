@@ -11,6 +11,7 @@ export const PROFILE = {
     "I'm currently an MSCS student at USC. I'm interested in agentic AI, RAG, and LLMs.",
     "Previously I worked as a Machine Learning Engineer building large-scale recommender systems at Xiaohongshu (rednote) and JOYY, focused on retrieval models and strategies.",
   ],
+  // Shown under the intro on the homepage and in its meta description.
   availability:
     "MS Computer Science at USC, May 2027. Open to full-time AI / ML engineering roles in the U.S.",
 } as const;

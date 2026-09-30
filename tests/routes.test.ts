@@ -99,6 +99,9 @@ describe("search-index.json", () => {
       metaText: "active 2026 Python",
       content: "Project body",
     });
-    expect(records[3].description).toBe("2 items tagged with #Retrieval");
+    expect(records[3]).toMatchObject({
+      description: "2 posts tagged #Retrieval",
+      content: "",
+    });
   });
 });

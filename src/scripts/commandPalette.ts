@@ -3,6 +3,7 @@ import {
   escapeSearchHtml,
   formatNoSearchResults,
   formatSearchResultSummary,
+  highlightSearchTerms,
   rankSearchRecords,
   splitSearchTerms,
   type SearchRecord,
@@ -105,11 +106,11 @@ export function setupCommandPalettePage() {
               <a href="${escapeSearchHtml(record.url)}" class="hover-underline-trigger block">
                 <div class="flex items-baseline justify-between gap-4">
                   <span class="hover-underline min-w-0 truncate text-base font-medium">
-                    ${escapeSearchHtml(record.title)}
+                    ${highlightSearchTerms(record.title, terms)}
                   </span>
                   <span class="notebook-kicker shrink-0">${escapeSearchHtml(record.kind)}</span>
                 </div>
-                <p class="mt-1 truncate text-sm text-graphite">${escapeSearchHtml(record.description || record.metaText)}</p>
+                <p class="mt-1 truncate text-sm text-graphite">${highlightSearchTerms(record.description || record.metaText, terms)}</p>
               </a>
             </li>
           `

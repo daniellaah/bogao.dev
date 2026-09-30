@@ -46,18 +46,58 @@ export const splitSearchTerms = (value: string) => {
     : normalized.split(" ").filter(Boolean);
 };
 
+// Moves `index` to the nearest space within `reach` in `direction`, so an
+// excerpt starts and ends on whole words. Text without spaces (CJK) keeps it.
+const snapToSpace = (
+  text: string,
+  index: number,
+  direction: -1 | 1,
+  reach = 24
+) => {
+  for (let offset = 0; offset <= reach; offset++) {
+    const at = index + direction * offset;
+    if (at <= 0 || at >= text.length) return index;
+    if (text[at] === " ") return direction < 0 ? at + 1 : at;
+  }
+  return index;
+};
+
+/** About 160 characters of `content` around the first matching term. */
 export const buildSearchExcerpt = (content: string, terms: string[]) => {
-  const normalized = normalizeSearchText(content);
-  const firstTerm = terms.find((term: string) => normalized.includes(term));
-  if (!firstTerm) return content.slice(0, 160);
+  const lower = content.toLowerCase();
+  const matches = terms
+    .map(term => lower.indexOf(term))
+    .filter(index => index >= 0);
+  const first = matches.length ? Math.min(...matches) : 0;
 
-  const index = normalized.indexOf(firstTerm);
-  const start = Math.max(0, index - 48);
-  const end = Math.min(content.length, index + 112);
-  const prefix = start > 0 ? "..." : "";
-  const suffix = end < content.length ? "..." : "";
+  const start = first > 48 ? snapToSpace(content, first - 48, -1) : 0;
+  const end =
+    start + 160 < content.length
+      ? snapToSpace(content, start + 160, 1)
+      : content.length;
 
-  return `${prefix}${content.slice(start, end).trim()}${suffix}`;
+  return `${start > 0 ? "…" : ""}${content.slice(start, end).trim()}${
+    end < content.length ? "…" : ""
+  }`;
+};
+
+const escapeRegExp = (value: string) =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/** Escaped HTML for `text` with each search term wrapped in <mark>. */
+export const highlightSearchTerms = (text: string, terms: string[]) => {
+  if (!terms.length) return escapeSearchHtml(text);
+
+  const pattern = new RegExp(`(${terms.map(escapeRegExp).join("|")})`, "gi");
+  // With a capture group, split puts the matches at the odd indexes.
+  return text
+    .split(pattern)
+    .map((part, index) =>
+      index % 2
+        ? `<mark>${escapeSearchHtml(part)}</mark>`
+        : escapeSearchHtml(part)
+    )
+    .join("");
 };
 
 export const formatSearchResultSummary = (count: number, query: string) =>

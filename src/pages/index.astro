@@ -64,6 +64,10 @@ const recentPosts = (await getPosts()).slice(0, 3);
         <div class="career-hero__summary">
           {PROFILE.intro.map(paragraph => <p>{paragraph}</p>)}
         </div>
+        <p class="career-hero__status">
+          <span class="career-hero__status-dot" aria-hidden="true"></span>
+          {PROFILE.availability}
+        </p>
 
         <div class="career-hero__actions" aria-label="Contact and profiles">
           <a
@@ -107,7 +111,7 @@ const recentPosts = (await getPosts()).slice(0, 3);
         <h2 id="work-heading" class="career-section__title">
           <span class="marker-swipe marker-swipe--blue">Projects</span>
         </h2>
-        <a class="career-section__link ink-link" href="/projects/">
+        <a class="more-link ink-link" href="/projects/">
           All projects <IconArrowRight aria-hidden="true" />
         </a>
       </div>
@@ -146,7 +150,7 @@ const recentPosts = (await getPosts()).slice(0, 3);
             <h2 id="writing-heading" class="career-section__title">
               <span class="marker-swipe marker-swipe--pink">Recent Posts</span>
             </h2>
-            <a class="career-section__link ink-link" href="/posts/">
+            <a class="more-link ink-link" href="/posts/">
               All posts <IconArrowRight aria-hidden="true" />
             </a>
           </div>

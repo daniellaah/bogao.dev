@@ -5,6 +5,7 @@ import {
   formatSearchEmptyPrompt,
   formatNoSearchResults,
   formatSearchResultSummary,
+  highlightSearchTerms,
   rankSearchRecords,
   splitSearchTerms,
   type RankedSearchRecord,
@@ -92,21 +93,21 @@ export function setupSearchPage() {
 
     results.innerHTML = sorted
       .map((record: RankedSearchRecord) => {
-        const excerpt = buildSearchExcerpt(
-          record.content || record.description,
-          terms
-        );
+        // Body text only adds context when there is body text to show.
+        const excerpt = record.content
+          ? `<p class="mt-2 text-sm leading-6 text-graphite/80">${highlightSearchTerms(buildSearchExcerpt(record.content, terms), terms)}</p>`
+          : "";
         return `
             <li class="list-row py-5">
               <a href="${escapeSearchHtml(record.url)}" class="hover-underline-trigger block">
                 <div class="flex items-baseline justify-between gap-4">
                   <span class="hover-underline min-w-0 text-lg font-medium">
-                    ${escapeSearchHtml(record.title)}
+                    ${highlightSearchTerms(record.title, terms)}
                   </span>
                   <span class="notebook-kicker shrink-0">${escapeSearchHtml(record.kind)}</span>
                 </div>
-                <p class="mt-2 text-sm leading-6 text-graphite">${escapeSearchHtml(record.description)}</p>
-                <p class="mt-2 text-sm leading-6 text-graphite/80">${escapeSearchHtml(excerpt)}</p>
+                <p class="mt-2 text-sm leading-6 text-graphite">${highlightSearchTerms(record.description, terms)}</p>
+                ${excerpt}
               </a>
             </li>
           `;

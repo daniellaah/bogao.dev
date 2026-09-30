@@ -19,6 +19,7 @@ import {
   buildSearchExcerpt,
   createSearchIndexLoader,
   escapeSearchHtml,
+  highlightSearchTerms,
   rankSearchRecords,
   scoreSearchRecord,
   splitSearchTerms,
@@ -221,17 +222,31 @@ describe("search", () => {
     ]);
   });
 
-  it("excerpts around the first match", () => {
-    expect(
-      buildSearchExcerpt(
-        "Intro text before a longer setup paragraph with enough words before gradient descent notes and more context after.",
-        ["gradient"]
-      )
-    ).toBe(
-      "...longer setup paragraph with enough words before gradient descent notes and more context after."
-    );
+  it("excerpts around the first match on word boundaries", () => {
+    const text =
+      "Intro text before a longer setup paragraph with enough words before gradient descent notes and more context after the match, so much context that the excerpt has to stop somewhere reasonable before the text runs out.";
+
+    const excerpt = buildSearchExcerpt(text, ["gradient"]);
+    expect(excerpt).toMatch(/^…\S/);
+    expect(excerpt).toMatch(/\S…$/);
+    expect(excerpt).toContain("gradient descent");
+    // Starts and ends on whole words.
+    expect(text).toContain(excerpt.slice(1, -1));
+    expect(text[text.indexOf(excerpt.slice(1, -1)) - 1]).toBe(" ");
     expect(buildSearchExcerpt("Short content", ["missing"])).toBe(
       "Short content"
+    );
+  });
+
+  it("highlights terms in escaped HTML", () => {
+    expect(highlightSearchTerms("RAG <b> & rag", ["rag"])).toBe(
+      "<mark>RAG</mark> &lt;b&gt; &amp; <mark>rag</mark>"
+    );
+    expect(highlightSearchTerms("a.b (c)", ["a.b", "(c"])).toBe(
+      "<mark>a.b</mark> <mark>(c</mark>)"
+    );
+    expect(highlightSearchTerms("检索系统", ["检索"])).toBe(
+      "<mark>检索</mark>系统"
     );
   });
 

@@ -198,8 +198,13 @@ a.doc-facts__chip:hover {
   height: 0.38rem;
 }
 
+.toc-link:hover,
 .toc-link[aria-current="true"] {
   color: var(--foreground);
+}
+
+.toc-link:hover::before {
+  opacity: 0.8;
 }
 
 .toc-link[aria-current="true"]::before {

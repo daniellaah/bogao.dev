@@ -202,6 +202,36 @@ html[data-theme="dark"] {
   text-decoration: none;
 }
 
+/* Search terms in results. */
+mark {
+  border-radius: 2px;
+  background: color-mix(
+    in srgb,
+    var(--marker-yellow) calc(var(--marker-strength) * 0.7),
+    transparent
+  );
+  color: inherit;
+}
+
+/* "All posts ->": a quiet link to the full list behind a preview. */
+.more-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--graphite);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.more-link:is(:hover, :focus-visible) {
+  color: var(--foreground);
+}
+
+.more-link svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
 .chip {
   position: relative;
   min-height: var(--control-height);

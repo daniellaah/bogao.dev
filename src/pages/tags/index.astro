@@ -30,7 +30,8 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
     <section class="space-y-8" data-tags-index data-tags-entering>
       <section>
         <div class="content-controls toggle-panel-rule tags-sort-panel mb-6">
-          <div class="content-status">
+          {/* The sort buttons already show the order; announce it only. */}
+          <div class="content-status sr-only">
             <p
               class="content-status__message"
               data-tags-status
@@ -40,9 +41,7 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
             </p>
           </div>
 
-          <div
-            class="grid gap-2 sm:grid-cols-[4.5rem_minmax(0,1fr)] sm:items-center"
-          >
+          <div class="toggle-control-row">
             <span class="notebook-kicker">Sort By</span>
             <div
               class="ink-toggle tags-sort-toggle flex flex-wrap gap-2"
@@ -56,7 +55,7 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
                 data-active
                 aria-pressed="true"
               >
-                Pop
+                Popular
               </button>
               <button
                 type="button"
