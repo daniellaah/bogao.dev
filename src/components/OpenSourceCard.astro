@@ -1,0 +1,26 @@
+---
+import WorkCard from "./WorkCard.astro";
+import { GITHUB_USERNAME, type OpenSourceEntry } from "@/data/profile";
+import dayjs from "@/utils/dayjs";
+import { getLatestMergedPr, getMergedPrsUrl } from "@/utils/mergedPrs";
+
+type Props = OpenSourceEntry;
+
+const { name, owner, repo, description, tags } = Astro.props;
+const latest = await getLatestMergedPr(repo, GITHUB_USERNAME);
+---
+
+<WorkCard
+  href={getMergedPrsUrl(repo, GITHUB_USERNAME)}
+  kicker={owner}
+  title={name}
+  description={description}
+  tags={tags}
+  external
+  preview={latest && {
+    label:
+      latest.total > 1 ? `Latest of ${latest.total} merged PRs` : "Merged PR",
+    meta: `#${latest.number} · ${dayjs.utc(latest.mergedAt).format("D MMM YYYY")}`,
+    title: latest.title,
+  }}
+/>

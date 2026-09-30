@@ -19,25 +19,27 @@ export const PROFILE = {
 // each project's frontmatter.
 export const HOMEPAGE_PROJECTS = ["arkb", "bogaodev"] as const;
 
-const mergedPrs = (repo: string) =>
-  `https://github.com/${repo}/pulls?q=is%3Apr+is%3Amerged+author%3Adaniellaah`;
+export const GITHUB_USERNAME = "daniellaah";
 
-// Cards describe the project, not individual PRs; the link lists every merged PR.
+// Cards describe the project; the link lists every merged PR and the card
+// previews the latest one, fetched from GitHub at build time.
 export const OPEN_SOURCE = [
   {
     name: "inspect_ai",
     owner: "UK AI Security Institute",
+    repo: "UKGovernmentBEIS/inspect_ai",
     description:
       "A framework for large language model evaluations, created by the UK AI Security Institute.",
     tags: ["LLM evaluation", "Computer use", "Python"],
-    href: mergedPrs("UKGovernmentBEIS/inspect_ai"),
   },
   {
     name: "mlx-lm",
     owner: "Apple · ml-explore",
+    repo: "ml-explore/mlx-lm",
     description:
       "A Python package for generating text and fine-tuning large language models on Apple silicon with MLX.",
     tags: ["LLM inference", "Fine-tuning", "MLX"],
-    href: mergedPrs("ml-explore/mlx-lm"),
   },
 ] as const;
+
+export type OpenSourceEntry = (typeof OPEN_SOURCE)[number];

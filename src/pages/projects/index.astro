@@ -5,7 +5,7 @@ import Main from "@/layouts/Main.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
-import WorkCard from "@/components/WorkCard.astro";
+import OpenSourceCard from "@/components/OpenSourceCard.astro";
 import { OPEN_SOURCE } from "@/data/profile";
 import getSortedProjects from "@/utils/getSortedProjects";
 import { SITE } from "@/config";
@@ -21,19 +21,11 @@ const projects = getSortedProjects(await getCollection("projects"));
   <Main pageTitle="Projects">
     {
       projects.length > 0 ? (
-        <section class="content-controls">
-          <div class="content-status">
-            <p class="content-status__message">
-              Showing all {projects.length} projects.
-            </p>
-          </div>
-
-          <div class="work-grid">
-            {projects.map(project => (
-              <ProjectCard {...project} />
-            ))}
-          </div>
-        </section>
+        <div class="work-grid">
+          {projects.map(project => (
+            <ProjectCard {...project} />
+          ))}
+        </div>
       ) : (
         <section class="sketch-box sketch-border p-8">
           <h2 class="text-2xl font-semibold">No projects published yet.</h2>
@@ -53,18 +45,7 @@ const projects = getSortedProjects(await getCollection("projects"));
         Open Source Contributions
       </h2>
       <div class="work-grid work-grid--alt mt-6">
-        {
-          OPEN_SOURCE.map(({ name, owner, description, tags, href }) => (
-            <WorkCard
-              href={href}
-              kicker={owner}
-              title={name}
-              description={description}
-              tags={tags}
-              external
-            />
-          ))
-        }
+        {OPEN_SOURCE.map(entry => <OpenSourceCard {...entry} />)}
       </div>
     </section>
   </Main>

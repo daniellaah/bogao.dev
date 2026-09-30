@@ -1933,3 +1933,34 @@ test("vercel config stays free of retired content redirects", () => {
   assert.equal(vercelConfig.framework, "astro");
   assert.deepEqual(vercelConfig.redirects ?? [], []);
 });
+
+test("open-source cards preview the most recently merged PR", async () => {
+  const { summarizeMergedPrs, getMergedPrsUrl } = await loadTypeScriptModule(
+    "src/utils/mergedPrs.ts"
+  );
+  const item = (number, mergedAt) => ({
+    number,
+    title: `PR ${number}`,
+    html_url: `https://github.com/o/r/pull/${number}`,
+    pull_request: { merged_at: mergedAt },
+  });
+
+  const summary = summarizeMergedPrs({
+    total_count: 3,
+    items: [
+      item(10, "2026-03-01T00:00:00Z"),
+      item(12, "2026-09-01T00:00:00Z"),
+      item(11, "2026-06-01T00:00:00Z"),
+      item(13, null),
+    ],
+  });
+  assert.equal(summary.number, 12);
+  assert.equal(summary.total, 3);
+  assert.equal(summary.mergedAt.toISOString(), "2026-09-01T00:00:00.000Z");
+
+  assert.equal(summarizeMergedPrs({ total_count: 0, items: [] }), undefined);
+  assert.equal(
+    getMergedPrsUrl("o/r", "me"),
+    "https://github.com/o/r/pulls?q=is%3Apr%20is%3Amerged%20author%3Ame"
+  );
+});

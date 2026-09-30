@@ -175,14 +175,18 @@ html[data-theme="dark"] .hero-action--github {
 
 .career-section__heading {
   display: flex;
-  align-items: flex-start;
+  align-items: baseline;
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.1rem;
 }
 
-.career-section .notebook-kicker {
-  color: var(--foreground);
+.career-section__title {
+  font-family: var(--font-ui);
+  font-size: clamp(1.3rem, 2.2vw, 1.6rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.2;
 }
 
 .career-section__link {

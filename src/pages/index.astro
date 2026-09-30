@@ -4,7 +4,7 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
-import WorkCard from "@/components/WorkCard.astro";
+import OpenSourceCard from "@/components/OpenSourceCard.astro";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import IconFileText from "@/assets/icons/IconFileText.svg";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
@@ -104,7 +104,7 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
 
     <section id="work" class="career-section" aria-labelledby="work-heading">
       <div class="career-section__heading">
-        <h2 id="work-heading" class="notebook-kicker">
+        <h2 id="work-heading" class="career-section__title">
           <span class="marker-swipe marker-swipe--blue">Projects</span>
         </h2>
         <a class="career-section__link ink-link" href="/projects/">
@@ -123,7 +123,7 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
       aria-labelledby="open-source-heading"
     >
       <div class="career-section__heading">
-        <h2 id="open-source-heading" class="notebook-kicker">
+        <h2 id="open-source-heading" class="career-section__title">
           <span class="marker-swipe marker-swipe--green">
             Open Source Contributions
           </span>
@@ -131,18 +131,7 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
       </div>
 
       <div class="work-grid work-grid--alt">
-        {
-          OPEN_SOURCE.map(({ name, owner, description, tags, href }) => (
-            <WorkCard
-              href={href}
-              kicker={owner}
-              title={name}
-              description={description}
-              tags={tags}
-              external
-            />
-          ))
-        }
+        {OPEN_SOURCE.map(entry => <OpenSourceCard {...entry} />)}
       </div>
     </section>
 
@@ -154,7 +143,7 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
           aria-labelledby="writing-heading"
         >
           <div class="career-section__heading">
-            <h2 id="writing-heading" class="notebook-kicker">
+            <h2 id="writing-heading" class="career-section__title">
               <span class="marker-swipe marker-swipe--pink">Recent Posts</span>
             </h2>
             <a class="career-section__link ink-link" href="/posts/">

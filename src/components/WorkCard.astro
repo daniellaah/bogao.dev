@@ -9,6 +9,7 @@ type Props = {
   description: string;
   tags: readonly string[];
   external?: boolean;
+  preview?: { label: string; meta: string; title: string };
 };
 
 const {
@@ -18,6 +19,7 @@ const {
   description,
   tags,
   external = false,
+  preview,
 } = Astro.props;
 ---
 
@@ -30,6 +32,17 @@ const {
   {kicker && <span class="work-card__kicker">{kicker}</span>}
   <span class="work-card__title hand-underline">{title}</span>
   <span class="work-card__description">{description}</span>
+  {
+    preview && (
+      <span class="work-card__preview">
+        <span class="work-card__preview-head">
+          <span>{preview.label}</span>
+          <span>{preview.meta}</span>
+        </span>
+        <span class="work-card__preview-title">{preview.title}</span>
+      </span>
+    )
+  }
   <span class="work-card__footer">
     <span class="work-card__tags" aria-label="Highlights">
       {tags.map(tag => <span>{tag}</span>)}
