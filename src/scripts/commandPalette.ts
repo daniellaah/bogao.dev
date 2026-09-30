@@ -87,10 +87,7 @@ export function setupCommandPalettePage() {
 
     setResultsPanelVisible(true);
 
-    const sorted = rankSearchRecords(records, terms, {
-      limit: 8,
-      dedupe: false,
-    });
+    const sorted = rankSearchRecords(records, terms, 8);
 
     setThinking(false);
 
@@ -107,7 +104,7 @@ export function setupCommandPalettePage() {
             <li class="command-palette__result">
               <a href="${escapeSearchHtml(record.url)}" class="hover-underline-trigger block">
                 <div class="flex items-baseline justify-between gap-4">
-                  <span class="hover-underline content-title min-w-0 truncate text-base font-medium">
+                  <span class="hover-underline min-w-0 truncate text-base font-medium">
                     ${escapeSearchHtml(record.title)}
                   </span>
                   <span class="notebook-kicker shrink-0">${escapeSearchHtml(record.kind)}</span>

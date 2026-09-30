@@ -32,7 +32,7 @@ export default defineConfig({
       defaultColor: false,
       wrap: false,
       transformers: [
-        transformerFileName({ style: "v2", hideDot: false }),
+        transformerFileName(),
         transformerNotationHighlight(),
         transformerNotationWordHighlight(),
         transformerNotationDiff({ matchAlgorithm: "v3" }),
@@ -40,10 +40,8 @@ export default defineConfig({
     },
   },
   vite: {
-    // eslint-disable-next-line
-    // @ts-ignore
-    // This will be fixed in Astro 6 with Vite 7 support
-    // See: https://github.com/withastro/astro/issues/14030
+    // @ts-expect-error Tailwind's Vite plugin is typed for Vite 7 and Astro 5
+    // bundles Vite 6; drop this once Astro ships Vite 7 (withastro/astro#14030).
     plugins: [tailwindcss()],
   },
   image: {

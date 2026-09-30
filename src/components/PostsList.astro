@@ -1,9 +1,9 @@
 ---
 import PostRow from "@/components/PostRow.astro";
-import type { SortedBlogPost } from "@/utils/getSortedPosts";
+import type { Post } from "@/utils/posts";
 
 type Props = {
-  posts: SortedBlogPost[];
+  posts: Post[];
   filterable?: boolean;
 };
 

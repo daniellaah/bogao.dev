@@ -100,7 +100,7 @@ export function setupSearchPage() {
             <li class="list-row py-5">
               <a href="${escapeSearchHtml(record.url)}" class="hover-underline-trigger block">
                 <div class="flex items-baseline justify-between gap-4">
-                  <span class="hover-underline content-title min-w-0 text-lg font-medium">
+                  <span class="hover-underline min-w-0 text-lg font-medium">
                     ${escapeSearchHtml(record.title)}
                   </span>
                   <span class="notebook-kicker shrink-0">${escapeSearchHtml(record.kind)}</span>

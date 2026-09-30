@@ -147,3 +147,12 @@ body:has(.career-home) #top-nav-wrap {
     width: 7.5rem;
   }
 }
+
+.hero-avatar {
+  position: relative;
+  isolation: isolate;
+  padding: 4px;
+  border: 1.5px solid var(--foreground);
+  border-radius: 50%;
+  background: #ffffff;
+}

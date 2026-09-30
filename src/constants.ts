@@ -1,4 +1,3 @@
-import type { Props } from "astro";
 import IconMail from "@/assets/icons/IconMail.svg";
 import IconBrandX from "@/assets/icons/IconBrandX.svg";
 import IconLinkedIn from "@/assets/icons/IconLinkedIn.svg";
@@ -6,7 +5,7 @@ import IconLinkedIn from "@/assets/icons/IconLinkedIn.svg";
 interface Social {
   label: string;
   linkTitle: string;
-  icon: (_props: Props) => Element;
+  icon: typeof IconMail;
   href: (url: string, title: string) => string;
 }
 

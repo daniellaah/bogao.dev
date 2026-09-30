@@ -1,17 +1,18 @@
 ---
-import dayjs from "@/utils/dayjs";
+import { getYear } from "@/utils/date";
 import { SITE } from "@/config";
-import type { SortedBlogPost } from "@/utils/getSortedPosts";
+import type { Post } from "@/utils/posts";
 import { slugifyStr } from "@/utils/slugifyCore";
+import "@/styles/controls.css";
 
 type Props = {
-  posts: SortedBlogPost[];
+  posts: Post[];
 };
 
 const { posts } = Astro.props;
 
 const years = Array.from(
-  new Set(posts.map(post => dayjs.utc(post.data.pubDatetime).format("YYYY")))
+  new Set(posts.map(post => getYear(post.data.pubDatetime)))
 ).sort((a, b) => Number(b) - Number(a));
 
 const availableTags = new Map(
@@ -27,7 +28,7 @@ const tags = SITE.postPopularFilterTags.flatMap(configuredTag => {
 });
 
 const filterButtonClass =
-  "ink-toggle-button chip ui-text inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium text-graphite";
+  "ink-toggle-button chip inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium text-graphite";
 ---
 
 {
@@ -108,7 +109,7 @@ const filterButtonClass =
               </div>
               <a
                 href="/tags/"
-                class="chip ui-text inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium text-graphite"
+                class="chip inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium text-graphite"
               >
                 All Tags
               </a>

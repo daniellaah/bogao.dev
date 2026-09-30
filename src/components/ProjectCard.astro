@@ -1,10 +1,8 @@
 ---
-import type { CollectionEntry } from "astro:content";
 import WorkCard from "./WorkCard.astro";
-import type { Accent } from "@/utils/accent";
-import { getProjectPath } from "@/utils/getProjectPath";
+import { getProjectPath, type Project } from "@/utils/projects";
 
-type Props = CollectionEntry<"projects"> & { accent: Accent };
+type Props = Project;
 
 const { id, data, accent } = Astro.props;
 ---

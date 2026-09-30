@@ -1,0 +1,104 @@
+/* Tags index: topic cards and their count badges. */
+
+@keyframes tag-card-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.35rem, 0) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes tag-count-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+.tags-card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.8rem;
+}
+
+[data-tags-index][data-tags-entering] [data-tag-card] {
+  animation: tag-card-enter 260ms var(--motion-ease-smooth) both;
+  animation-delay: var(--tag-enter-delay, 0ms);
+  backface-visibility: hidden;
+  will-change: opacity, transform;
+}
+
+.tags-tag-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: max-content;
+  min-height: 3.85rem;
+  max-width: min(100%, 28rem);
+  gap: 0.75rem;
+  padding: 0.92rem 1.1rem;
+  background: color-mix(in srgb, var(--surface) 62%, transparent);
+  color: var(--foreground);
+  transition:
+    transform var(--motion-duration-press) var(--motion-ease-standard),
+    background-color var(--motion-duration-base) var(--motion-ease-standard);
+}
+
+.tags-tag-card__name {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+html[data-theme="light"] .tags-tag-card {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.tags-tag-card:hover {
+  background: color-mix(in srgb, var(--muted) 54%, transparent);
+  transform: translate(-1px, -1px);
+}
+
+.tags-tag-card:hover .tag-count-badge {
+  border-color: var(--control-border-color-strong);
+  transform: scale(1.06);
+}
+
+html[data-theme="light"] .tags-tag-card .tag-count-badge,
+html[data-theme="light"] .tags-tag-card:hover .tag-count-badge {
+  border-color: var(--foreground);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.tag-count-badge {
+  display: inline-flex;
+  min-width: 2.1rem;
+  height: 1.55rem;
+  align-items: center;
+  justify-content: center;
+  border: var(--control-border-width) solid var(--control-border-color-subtle);
+  border-radius: var(--control-border-radius);
+  color: var(--graphite);
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+  line-height: 1;
+  transform-origin: center;
+  transition:
+    border-color var(--motion-duration-base) var(--motion-ease-standard),
+    background-color var(--motion-duration-base) var(--motion-ease-standard),
+    color var(--motion-duration-base) var(--motion-ease-standard),
+    transform var(--motion-duration-press) var(--motion-ease-standard);
+}
+
+[data-tags-index][data-sort-pulse] .tag-count-badge {
+  animation: tag-count-pulse 220ms var(--motion-ease-smooth);
+}

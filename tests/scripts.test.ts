@@ -391,9 +391,9 @@ describe("post details", () => {
 
     expect(document.querySelectorAll(".heading-link")).toHaveLength(2);
     expect(document.querySelectorAll(".progress-container")).toHaveLength(1);
-    expect(
-      document.querySelector('[data-toc-link][href="#first"]')?.className
-    ).toContain("is-active");
+    expect(document.querySelector('[data-toc-link][aria-current="true"]')).toBe(
+      document.querySelector('[data-toc-link][href="#first"]')
+    );
 
     const copyButton = document.querySelector<HTMLButtonElement>(".copy-code")!;
     copyButton.click();

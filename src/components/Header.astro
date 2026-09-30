@@ -1,5 +1,4 @@
 ---
-import { getCollection } from "astro:content";
 import IconX from "@/assets/icons/IconX.svg";
 import IconMoon from "@/assets/icons/IconMoon.svg";
 import IconSearch from "@/assets/icons/IconSearch.svg";
@@ -7,27 +6,19 @@ import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
 import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
 import LinkButton from "./LinkButton.astro";
 import { SITE } from "@/config";
-import getSortedPosts from "@/utils/getSortedPosts";
+import "@/styles/header.css";
+import { getPosts } from "@/utils/posts";
 
-const { pathname } = Astro.url;
-
-// Remove trailing slash from current pathname if exists
-const currentPath =
-  pathname.endsWith("/") && pathname !== "/" ? pathname.slice(0, -1) : pathname;
-
-const isActive = (path: string) => {
-  const currentPathArray = currentPath.split("/").filter(p => p.trim());
-  const pathArray = path.split("/").filter(p => p.trim());
-
-  return currentPath === path || currentPathArray[0] === pathArray[0];
-};
+// A nav link is current anywhere in its section: "/posts/" on /posts/x/.
+const section = Astro.url.pathname.split("/")[1];
+const isActive = (href: string) => href.split("/")[1] === section;
 
 // Posts stays out of the nav until at least one post is published.
-const hasPosts = getSortedPosts(await getCollection("blog")).length > 0;
+const hasPosts = (await getPosts()).length > 0;
 
-const navItems: { href: string; label: string; match?: string }[] = [
-  { href: "/projects/", label: "Projects", match: "/projects" },
-  ...(hasPosts ? [{ href: "/posts/", label: "Posts", match: "/posts" }] : []),
+const navItems = [
+  { href: "/projects/", label: "Projects" },
+  ...(hasPosts ? [{ href: "/posts/", label: "Posts" }] : []),
 ];
 ---
 
@@ -40,7 +31,7 @@ const navItems: { href: string; label: string; match?: string }[] = [
 </a>
 
 <header
-  class="site-header-layout flex flex-col items-center justify-between lg:flex-row"
+  class="app-layout flex flex-col items-center justify-between lg:flex-row"
 >
   <div
     id="top-nav-wrap"
@@ -58,14 +49,14 @@ const navItems: { href: string; label: string; match?: string }[] = [
         <img
           src="/images/site/avatar.svg"
           alt=""
-          class="site-avatar__image site-avatar__image--light"
+          class="site-avatar__image dark:hidden"
           width="32"
           height="32"
         />
         <img
           src="/images/site/avatar-dark.svg"
           alt=""
-          class="site-avatar__image site-avatar__image--dark"
+          class="site-avatar__image hidden dark:block"
           width="32"
           height="32"
         />
@@ -97,8 +88,8 @@ const navItems: { href: string; label: string; match?: string }[] = [
         ]}
       >
         {
-          navItems.map(({ href, label, match }) => {
-            const active = match ? isActive(match) : false;
+          navItems.map(({ href, label }) => {
+            const active = isActive(href);
 
             return (
               <li>
@@ -128,7 +119,7 @@ const navItems: { href: string; label: string; match?: string }[] = [
             class="search-nav-link hover-underline-trigger flex min-h-11 items-center justify-center px-2 py-2 lg:min-h-0 lg:p-1"
             title="Search (⌘K / Ctrl+K)"
             aria-label="Search. Press Command K or Control K to open quick search."
-            aria-current={isActive("/search") ? "page" : undefined}
+            aria-current={isActive("/search/") ? "page" : undefined}
             disableHoverOpacity
           >
             <span class="search-nav-mark" aria-hidden="true">
@@ -137,7 +128,7 @@ const navItems: { href: string; label: string; match?: string }[] = [
             <span
               class:list={[
                 "hover-underline ms-1 lg:sr-only",
-                { "active-nav": isActive("/search") },
+                { "active-nav": isActive("/search/") },
               ]}>Search</span
             >
           </LinkButton>

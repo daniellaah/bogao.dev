@@ -1,17 +1,16 @@
 ---
 import type { GetStaticPaths } from "astro";
-import { getCollection, render } from "astro:content";
+import { render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import BackButton from "@/components/BackButton.astro";
+import TocList from "@/components/TocList.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
 import ProjectStatusBadge from "@/components/ProjectStatusBadge.astro";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
-import { getProjectAccent } from "@/utils/accent";
-import getSortedProjects from "@/utils/getSortedProjects";
-import { getProjectSlug } from "@/utils/getProjectPath";
+import { getProjects, getProjectSlug } from "@/utils/projects";
 import { resolveOgImage } from "@/utils/ogImage";
 import { getTocHeadings } from "@/utils/toc";
 import { SITE } from "@/config";
@@ -19,7 +18,7 @@ import "@/styles/doc-layout.css";
 import "@/styles/project.css";
 
 export const getStaticPaths = (async () => {
-  const projects = getSortedProjects(await getCollection("projects"));
+  const projects = await getProjects();
 
   return projects.map(project => ({
     params: { slug: getProjectSlug(project.id) },
@@ -43,8 +42,7 @@ const {
 } = project.data;
 const ogImage = resolveOgImage(project.data.ogImage, Astro.url.origin);
 
-const projectIds = projects.map(({ id }) => id);
-const accent = getProjectAccent(project.id, projectIds);
+const { accent } = project;
 
 const tocHeadings = getTocHeadings(
   headings,
@@ -147,22 +145,7 @@ const relatedProjects = projects
             showToc && (
               <nav class="doc-toc" aria-label="On this page">
                 <p class="doc-panel__label">On this page</p>
-                <ol>
-                  {tocHeadings.map(heading => (
-                    <li>
-                      <a
-                        href={`#${heading.slug}`}
-                        class:list={[
-                          "toc-link ink-link",
-                          heading.depth === 3 && "level-3",
-                        ]}
-                        data-toc-link
-                      >
-                        {heading.text}
-                      </a>
-                    </li>
-                  ))}
-                </ol>
+                <TocList headings={tocHeadings} />
               </nav>
             )
           }
@@ -180,10 +163,7 @@ const relatedProjects = projects
           <h2 class="project-related__title">More projects</h2>
           <div class="work-grid">
             {relatedProjects.map(item => (
-              <ProjectCard
-                {...item}
-                accent={getProjectAccent(item.id, projectIds)}
-              />
+              <ProjectCard {...item} />
             ))}
           </div>
         </section>

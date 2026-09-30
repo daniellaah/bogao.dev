@@ -1,5 +1,4 @@
 ---
-import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
@@ -12,21 +11,18 @@ import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import IconLinkedInMark from "@/assets/icons/IconLinkedInMark.svg";
 import { SITE } from "@/config";
 import { HOMEPAGE_PROJECTS, OPEN_SOURCE, PROFILE } from "@/data/profile";
-import getSortedPosts from "@/utils/getSortedPosts";
-import getSortedProjects from "@/utils/getSortedProjects";
-import { getProjectAccent } from "@/utils/accent";
-import { getProjectSlug } from "@/utils/getProjectPath";
+import { getPosts } from "@/utils/posts";
+import { getProjects, getProjectSlug } from "@/utils/projects";
 import "@/styles/home.css";
 
-const projects = await getCollection("projects", ({ data }) => !data.draft);
-const sortedProjectIds = getSortedProjects(projects).map(({ id }) => id);
+const projects = await getProjects();
 
 const homepageProjects = HOMEPAGE_PROJECTS.flatMap(slug => {
   const project = projects.find(({ id }) => getProjectSlug(id) === slug);
   return project ? [project] : [];
 });
 
-const recentPosts = getSortedPosts(await getCollection("blog")).slice(0, 3);
+const recentPosts = (await getPosts()).slice(0, 3);
 ---
 
 <Layout
@@ -48,7 +44,7 @@ const recentPosts = getSortedPosts(await getCollection("blog")).slice(0, 3);
           width="1254"
           height="1254"
           decoding="async"
-          class="hero-avatar__image hero-avatar__image--light h-full w-full rounded-full object-cover"
+          class="hero-avatar__image h-full w-full rounded-full object-cover dark:hidden"
         />
         <img
           src="/images/site/avatar-dark.svg"
@@ -56,7 +52,7 @@ const recentPosts = getSortedPosts(await getCollection("blog")).slice(0, 3);
           width="1254"
           height="1254"
           decoding="async"
-          class="hero-avatar__image hero-avatar__image--dark h-full w-full rounded-full object-cover"
+          class="hero-avatar__image hidden h-full w-full rounded-full object-cover dark:block"
         />
       </div>
 
@@ -117,14 +113,7 @@ const recentPosts = getSortedPosts(await getCollection("blog")).slice(0, 3);
       </div>
 
       <div class="work-grid">
-        {
-          homepageProjects.map(project => (
-            <ProjectCard
-              {...project}
-              accent={getProjectAccent(project.id, sortedProjectIds)}
-            />
-          ))
-        }
+        {homepageProjects.map(project => <ProjectCard {...project} />)}
       </div>
     </section>
 

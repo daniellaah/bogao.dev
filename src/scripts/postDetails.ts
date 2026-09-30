@@ -132,7 +132,6 @@ function setupActiveToc(article: HTMLElement): Cleanup | undefined {
     for (const link of links) {
       const href = link.getAttribute("href");
       const isActive = href?.startsWith("#") && getIdFromHash(href) === id;
-      link.classList.toggle("is-active", Boolean(isActive));
       if (isActive) link.setAttribute("aria-current", "true");
       else link.removeAttribute("aria-current");
     }

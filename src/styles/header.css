@@ -1,0 +1,118 @@
+/* Site header: wordmark, nav links, search and theme buttons. */
+
+.site-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.site-wordmark {
+  font-family: var(--font-display);
+}
+
+.active-nav {
+  color: var(--foreground);
+}
+
+.theme-icon {
+  transform-origin: center;
+  transition:
+    opacity var(--motion-duration-slow) var(--motion-ease-standard),
+    transform var(--motion-duration-morph) var(--motion-ease-smooth);
+  will-change: opacity, transform;
+}
+
+.theme-icon--moon {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.theme-icon--sun {
+  opacity: 0;
+  transform: rotate(-80deg) scale(0.72);
+}
+
+#top-nav-wrap::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: var(--rule);
+  pointer-events: none;
+  content: "";
+}
+
+html[data-theme="dark"] .theme-icon--moon {
+  opacity: 0;
+  transform: rotate(80deg) scale(0.72);
+}
+
+html[data-theme="dark"] .theme-icon--sun {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.site-avatar {
+  position: relative;
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--foreground) 52%, transparent);
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.site-avatar__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.search-nav-link {
+  position: relative;
+  outline: 0;
+}
+
+.search-nav-mark {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  transition: transform var(--motion-duration-press) var(--motion-ease-standard);
+}
+
+.search-nav-mark::before {
+  position: absolute;
+  right: 8%;
+  bottom: -0.2rem;
+  left: 8%;
+  height: 1.5px;
+  border-radius: 1px;
+  background: currentColor;
+  opacity: 0;
+  content: "";
+}
+
+.search-nav-icon {
+  transform-origin: 68% 68%;
+  transition: transform var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.search-nav-link:is(:focus-visible, [aria-current="page"])
+  .search-nav-mark::before {
+  opacity: 1;
+}
+
+.search-nav-link:active .search-nav-mark {
+  transform: translate(1px, 1px) scale(0.9);
+}
+
+@media (min-width: 40rem) {
+  .mobile-menu {
+    border-block: 0;
+  }
+}

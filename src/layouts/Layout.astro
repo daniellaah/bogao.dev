@@ -1,4 +1,6 @@
 ---
+// First, so component stylesheets imported below override its primitives.
+import "@/styles/global.css";
 import { ClientRouter } from "astro:transitions";
 import {
   PUBLIC_BAIDU_SITE_VERIFICATION,
@@ -7,7 +9,6 @@ import {
 import CommandPalette from "@/components/CommandPalette.astro";
 import { SITE } from "@/config";
 import { getOgLocale } from "@/utils/contentLang";
-import "@/styles/global.css";
 
 type Props = {
   title?: string;
@@ -151,7 +152,6 @@ const structuredData = {
               : "light";
 
         document.documentElement.dataset.theme = theme;
-        document.documentElement.style.colorScheme = theme;
         document
           .querySelector("meta[name='theme-color']")
           ?.setAttribute("content", theme === "dark" ? "#12151d" : "#f6f1e7");

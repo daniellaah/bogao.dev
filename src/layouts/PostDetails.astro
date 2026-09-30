@@ -5,10 +5,10 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import ShareLinks from "@/components/ShareLinks.astro";
 import BackButton from "@/components/BackButton.astro";
+import TocList from "@/components/TocList.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
-import type { SortedBlogPost } from "@/utils/getSortedPosts";
-import dayjs from "@/utils/dayjs";
-import { getPostPath } from "@/utils/getPostPath";
+import { formatDate, isSameDay } from "@/utils/date";
+import { getPostPath, type Post } from "@/utils/posts";
 import { getReadingMinutes } from "@/utils/readingTime";
 import { getTocHeadings } from "@/utils/toc";
 import { resolveOgImage } from "@/utils/ogImage";
@@ -23,8 +23,8 @@ import "@/styles/doc-layout.css";
 import "@/styles/post.css";
 
 type Props = {
-  post: SortedBlogPost;
-  posts: SortedBlogPost[];
+  post: Post;
+  posts: Post[];
 };
 
 const { post, posts } = Astro.props;
@@ -47,9 +47,9 @@ const tocHeadings = getTocHeadings(
 );
 const showToc = tocHeadings.length >= 3;
 
-const published = dayjs.utc(pubDatetime);
-const modified = modDatetime ? dayjs.utc(modDatetime) : null;
-const showModified = modified !== null && !modified.isSame(published, "day");
+const published = pubDatetime;
+const modified =
+  modDatetime && !isSameDay(modDatetime, published) ? modDatetime : null;
 const readingMinutes = getReadingMinutes(post.body ?? "");
 
 const ogImage = resolveOgImage(initOgImage, Astro.url.origin);
@@ -67,7 +67,7 @@ const layoutProps = {
 
 // `posts` is newest first: the older post follows this one in the list.
 const postIndex = posts.findIndex(entry => entry.id === post.id);
-const toLink = (entry: SortedBlogPost | undefined) =>
+const toLink = (entry: Post | undefined) =>
   entry && { title: entry.data.title, href: getPostPath(entry) };
 const olderPost = toLink(posts[postIndex + 1]);
 const newerPost = postIndex > 0 ? toLink(posts[postIndex - 1]) : undefined;
@@ -99,14 +99,14 @@ const newerPost = postIndex > 0 ? toLink(posts[postIndex - 1]) : undefined;
       <p class="post-hero__description">{description}</p>
       <p class="post-hero__meta">
         <time datetime={published.toISOString()}>
-          {published.format("D MMM YYYY")}
+          {formatDate(published)}
         </time>
         {
-          showModified && (
+          modified && (
             <span>
               Updated{" "}
               <time datetime={modified.toISOString()}>
-                {modified.format("D MMM YYYY")}
+                {formatDate(modified)}
               </time>
             </span>
           )
@@ -123,17 +123,17 @@ const newerPost = postIndex > 0 ? toLink(posts[postIndex - 1]) : undefined;
               <dt class="doc-panel__label">Published</dt>
               <dd class="doc-facts__value font-code">
                 <time datetime={published.toISOString()}>
-                  {published.format("D MMM YYYY")}
+                  {formatDate(published)}
                 </time>
               </dd>
             </div>
             {
-              showModified && (
+              modified && (
                 <div>
                   <dt class="doc-panel__label">Updated</dt>
                   <dd class="doc-facts__value font-code">
                     <time datetime={modified.toISOString()}>
-                      {modified.format("D MMM YYYY")}
+                      {formatDate(modified)}
                     </time>
                   </dd>
                 </div>
@@ -166,23 +166,7 @@ const newerPost = postIndex > 0 ? toLink(posts[postIndex - 1]) : undefined;
             showToc && (
               <nav class="doc-toc" aria-label="On this page">
                 <p class="doc-panel__label">On this page</p>
-                <ol>
-                  {tocHeadings.map(heading => (
-                    <li>
-                      <a
-                        href={`#${heading.slug}`}
-                        class:list={[
-                          "toc-link ink-link",
-                          heading.depth === 3 && "level-3",
-                          heading.depth === 4 && "level-4",
-                        ]}
-                        data-toc-link
-                      >
-                        {heading.text}
-                      </a>
-                    </li>
-                  ))}
-                </ol>
+                <TocList headings={tocHeadings} />
               </nav>
             )
           }
@@ -195,23 +179,7 @@ const newerPost = postIndex > 0 ? toLink(posts[postIndex - 1]) : undefined;
             <details class="post-toc-inline">
               <summary>On this page</summary>
               <nav aria-label="On this page">
-                <ol>
-                  {tocHeadings.map(heading => (
-                    <li>
-                      <a
-                        href={`#${heading.slug}`}
-                        class:list={[
-                          "toc-link ink-link",
-                          heading.depth === 3 && "level-3",
-                          heading.depth === 4 && "level-4",
-                        ]}
-                        data-toc-link
-                      >
-                        {heading.text}
-                      </a>
-                    </li>
-                  ))}
-                </ol>
+                <TocList headings={tocHeadings} />
               </nav>
             </details>
           )
@@ -238,9 +206,7 @@ const newerPost = postIndex > 0 ? toLink(posts[postIndex - 1]) : undefined;
                 <IconChevronLeft class="inline-block flex-none rtl:rotate-180" />
                 <div>
                   <span class="notebook-kicker">Older post</span>
-                  <div class="ink-link content-title mt-1 text-sm">
-                    {olderPost.title}
-                  </div>
+                  <div class="ink-link mt-1 text-sm">{olderPost.title}</div>
                 </div>
               </a>
             )
@@ -253,9 +219,7 @@ const newerPost = postIndex > 0 ? toLink(posts[postIndex - 1]) : undefined;
               >
                 <div>
                   <span class="notebook-kicker">Newer post</span>
-                  <div class="ink-link content-title mt-1 text-sm">
-                    {newerPost.title}
-                  </div>
+                  <div class="ink-link mt-1 text-sm">{newerPost.title}</div>
                 </div>
                 <IconChevronRight class="inline-block flex-none rtl:rotate-180" />
               </a>

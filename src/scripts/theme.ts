@@ -1,91 +1,75 @@
 import { onEveryPage } from "./lifecycle";
 
-const THEME_KEY = "theme";
-const LIGHT_THEME = "light";
-const DARK_THEME = "dark";
+// The inline script in Layout.astro applies the same theme before first paint.
+type Theme = "light" | "dark";
 
-type Theme = typeof LIGHT_THEME | typeof DARK_THEME;
+const THEME_KEY = "theme";
+// Matches --background for each theme in global.css.
+const THEME_COLORS: Record<Theme, string> = {
+  light: "#f6f1e7",
+  dark: "#12151d",
+};
 
 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+
+const isTheme = (value: unknown): value is Theme =>
+  value === "light" || value === "dark";
 
 function getStoredTheme(): Theme | null {
   try {
     const theme = localStorage.getItem(THEME_KEY);
-    return theme === LIGHT_THEME || theme === DARK_THEME ? theme : null;
+    return isTheme(theme) ? theme : null;
   } catch {
     return null;
   }
 }
 
-function getSystemTheme(): Theme {
-  return prefersDark.matches ? DARK_THEME : LIGHT_THEME;
-}
+const getSystemTheme = (): Theme => (prefersDark.matches ? "dark" : "light");
 
 function getCurrentTheme(): Theme {
   const theme = document.documentElement.dataset.theme;
-  return theme === LIGHT_THEME || theme === DARK_THEME
-    ? theme
-    : (getStoredTheme() ?? getSystemTheme());
+  return isTheme(theme) ? theme : (getStoredTheme() ?? getSystemTheme());
 }
 
-function updateThemeControls(theme: Theme) {
-  const button = document.querySelector<HTMLButtonElement>("#theme-btn");
-  const label = document.querySelector<HTMLElement>("[data-theme-label]");
-  const nextTheme = theme === LIGHT_THEME ? DARK_THEME : LIGHT_THEME;
-
-  button?.setAttribute("aria-label", `Switch to ${nextTheme} mode`);
-  button?.setAttribute("title", `Switch to ${nextTheme} mode`);
-
-  if (label) {
-    label.textContent = nextTheme === DARK_THEME ? "Dark" : "Light";
-  }
+// `color-scheme` follows data-theme in global.css.
+function setDocumentTheme(doc: Document, theme: Theme) {
+  doc.documentElement.dataset.theme = theme;
+  doc
+    .querySelector("meta[name='theme-color']")
+    ?.setAttribute("content", THEME_COLORS[theme]);
 }
 
 function applyTheme(theme: Theme) {
-  document.documentElement.dataset.theme = theme;
-  document.documentElement.style.colorScheme = theme;
-  document
-    .querySelector<HTMLMetaElement>("meta[name='theme-color']")
-    ?.setAttribute("content", theme === DARK_THEME ? "#12151d" : "#f6f1e7");
-  updateThemeControls(theme);
-}
+  setDocumentTheme(document, theme);
 
-function storeTheme(theme: Theme) {
-  try {
-    localStorage.setItem(THEME_KEY, theme);
-  } catch {
-    // The selected theme still applies for the current page if storage is blocked.
-  }
-}
-
-function bindThemeToggle() {
-  const button = document.querySelector<HTMLButtonElement>("#theme-btn");
-  button?.addEventListener("click", () => {
-    const nextTheme =
-      getCurrentTheme() === LIGHT_THEME ? DARK_THEME : LIGHT_THEME;
-
-    storeTheme(nextTheme);
-    applyTheme(nextTheme);
-  });
+  const nextTheme = theme === "light" ? "dark" : "light";
+  const button = document.querySelector("#theme-btn");
+  button?.setAttribute("aria-label", `Switch to ${nextTheme} mode`);
+  button?.setAttribute("title", `Switch to ${nextTheme} mode`);
+  const label = document.querySelector("[data-theme-label]");
+  if (label) label.textContent = nextTheme === "dark" ? "Dark" : "Light";
 }
 
 function setupTheme() {
   applyTheme(getCurrentTheme());
-  bindThemeToggle();
+
+  document.querySelector("#theme-btn")?.addEventListener("click", () => {
+    const nextTheme = getCurrentTheme() === "light" ? "dark" : "light";
+    try {
+      localStorage.setItem(THEME_KEY, nextTheme);
+    } catch {
+      // The theme still applies to this page if storage is blocked.
+    }
+    applyTheme(nextTheme);
+  });
 }
 
 onEveryPage(setupTheme);
 
-document.addEventListener("astro:before-swap", event => {
-  const theme = getCurrentTheme();
-  const { newDocument } = event;
-
-  newDocument.documentElement.dataset.theme = theme;
-  newDocument.documentElement.style.colorScheme = theme;
-  newDocument
-    .querySelector<HTMLMetaElement>("meta[name='theme-color']")
-    ?.setAttribute("content", theme === DARK_THEME ? "#12151d" : "#f6f1e7");
-});
+// Carry the theme into the incoming page before it is swapped in.
+document.addEventListener("astro:before-swap", ({ newDocument }) =>
+  setDocumentTheme(newDocument, getCurrentTheme())
+);
 
 prefersDark.addEventListener("change", () => {
   if (!getStoredTheme()) applyTheme(getSystemTheme());

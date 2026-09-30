@@ -1,0 +1,26 @@
+/* Search page. */
+
+.search-box {
+  background: var(--background);
+  transition:
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+/* Focus thickens the outline with a ring so the layout does not shift. */
+.search-box:focus-within {
+  border-color: var(--foreground);
+  box-shadow: 0 0 0 1px var(--foreground);
+}
+
+.search-clear {
+  line-height: 1;
+}
+
+.list-row {
+  border-bottom: 1px solid var(--rule-subtle);
+}
+
+.list-row:last-child {
+  border-bottom: 0;
+}

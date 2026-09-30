@@ -1,9 +1,6 @@
 import type { APIRoute } from "astro";
-import { getCollection } from "astro:content";
-import { getProjectPath } from "@/utils/getProjectPath";
-import { getPostPath } from "@/utils/getPostPath";
-import getSortedPosts from "@/utils/getSortedPosts";
-import { isPublishedProject } from "@/utils/projectVisibility";
+import { getPostPath, getPosts } from "@/utils/posts";
+import { getProjectPath, getProjects } from "@/utils/projects";
 import { stripMarkdown } from "@/utils/stripMarkdown";
 import { collectTagStats, getTagPath } from "@/utils/tags";
 import searchKinds from "@/data/search-kinds.json";
@@ -19,9 +16,8 @@ const SEARCH_RECORD_KINDS = Object.fromEntries(
 };
 
 export const GET: APIRoute = async () => {
-  const blogEntries = await getCollection("blog");
-  const posts = getSortedPosts(blogEntries);
-  const projects = await getCollection("projects", isPublishedProject);
+  const posts = await getPosts();
+  const projects = await getProjects();
   const tags = collectTagStats(posts);
 
   const records = [

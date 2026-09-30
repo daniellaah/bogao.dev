@@ -1,0 +1,97 @@
+/* Filter and sort controls on /posts and /tags. The active button's fill is
+   one ::before indicator that slides between buttons (toggleControls.ts). */
+
+.filter-panel {
+  padding-bottom: 0.75rem;
+  border-block: 0;
+  border-bottom: 1px solid var(--rule-subtle);
+}
+
+.content-status {
+  color: var(--graphite);
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.content-status__message {
+  margin: 0;
+}
+
+.content-status:has(> .content-status__message:empty) {
+  display: none;
+}
+
+.content-controls {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.toggle-panel-rule {
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--rule-subtle);
+}
+
+.toggle-control-row {
+  display: grid;
+  gap: var(--toggle-gap);
+}
+
+@media (min-width: 40rem) {
+  .toggle-control-row {
+    grid-template-columns: var(--toggle-label-width) minmax(0, 1fr);
+    align-items: center;
+  }
+}
+
+.ink-toggle {
+  position: relative;
+  isolation: isolate;
+}
+
+.ink-toggle::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: var(--sort-indicator-width, 0);
+  height: var(--sort-indicator-height, 0);
+  border-radius: var(--control-border-radius);
+  background: var(--foreground);
+  transform: translate(var(--sort-indicator-x, 0), var(--sort-indicator-y, 0));
+  content: "";
+}
+
+.ink-toggle[data-ink-ready="true"]::before {
+  transition:
+    transform var(--motion-duration-medium) var(--motion-ease-smooth),
+    width var(--motion-duration-medium) var(--motion-ease-smooth),
+    height var(--motion-duration-medium) var(--motion-ease-smooth);
+}
+
+.ink-toggle-button.chip {
+  position: relative;
+  z-index: 1;
+  border-color: var(--control-border-color);
+  background: transparent;
+  color: var(--graphite);
+  transition:
+    transform var(--motion-duration-press) var(--motion-ease-standard),
+    border-color var(--motion-duration-base) var(--motion-ease-standard),
+    color var(--motion-duration-base) var(--motion-ease-standard);
+}
+
+.ink-toggle-button.chip[data-active] {
+  border-color: var(--control-border-color-strong);
+  background: transparent;
+  color: var(--background);
+}
+
+.ink-toggle:not([data-ink-ready="true"]) .ink-toggle-button.chip[data-active] {
+  background: var(--foreground);
+  color: var(--background);
+}
+
+.ink-toggle-button.chip:active {
+  transform: scale(0.96);
+}

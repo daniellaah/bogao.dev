@@ -1,5 +1,4 @@
 ---
-import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Main from "@/layouts/Main.astro";
 import Header from "@/components/Header.astro";
@@ -7,12 +6,10 @@ import Footer from "@/components/Footer.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
 import OpenSourceCard from "@/components/OpenSourceCard.astro";
 import { OPEN_SOURCE } from "@/data/profile";
-import getSortedProjects from "@/utils/getSortedProjects";
-import { getProjectAccent } from "@/utils/accent";
+import { getProjects } from "@/utils/projects";
 import { SITE } from "@/config";
 
-const projects = getSortedProjects(await getCollection("projects"));
-const sortedProjectIds = projects.map(({ id }) => id);
+const projects = await getProjects();
 ---
 
 <Layout
@@ -25,10 +22,7 @@ const sortedProjectIds = projects.map(({ id }) => id);
       projects.length > 0 ? (
         <div class="work-grid">
           {projects.map(project => (
-            <ProjectCard
-              {...project}
-              accent={getProjectAccent(project.id, sortedProjectIds)}
-            />
+            <ProjectCard {...project} />
           ))}
         </div>
       ) : (

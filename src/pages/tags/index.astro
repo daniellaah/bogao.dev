@@ -1,14 +1,15 @@
 ---
-import { getCollection } from "astro:content";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import getSortedPosts from "@/utils/getSortedPosts";
+import { getPosts } from "@/utils/posts";
 import { collectTagStats, getTagPath, type TagStat } from "@/utils/tags";
 import { SITE } from "@/config";
+import "@/styles/controls.css";
+import "@/styles/tags.css";
 
-const posts = getSortedPosts(await getCollection("blog"));
+const posts = await getPosts();
 
 const tagCollator = new Intl.Collator(undefined, {
   sensitivity: "base",
@@ -50,7 +51,7 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
             >
               <button
                 type="button"
-                class="ink-toggle-button tags-sort-button chip ui-text inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium"
+                class="ink-toggle-button tags-sort-button chip inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium"
                 data-tag-sort="popular"
                 data-active
                 aria-pressed="true"
@@ -59,7 +60,7 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
               </button>
               <button
                 type="button"
-                class="ink-toggle-button tags-sort-button chip ui-text inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium"
+                class="ink-toggle-button tags-sort-button chip inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium"
                 data-tag-sort="az"
                 aria-pressed="false"
               >
@@ -82,7 +83,7 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
                   href={getTagPath(tag.slug)}
                   class="tags-tag-card card-border hover-underline-trigger"
                 >
-                  <span class="hover-underline content-title min-w-0 text-lg">
+                  <span class="tags-tag-card__name hover-underline min-w-0 text-lg">
                     #<span transition:name={tag.slug}>{tag.tagName}</span>
                   </span>
                   <span class="tag-count-badge">

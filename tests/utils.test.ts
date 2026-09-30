@@ -1,13 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import type { CollectionEntry } from "astro:content";
-import { getProjectAccent } from "@/utils/accent";
 import { getBreadcrumbList } from "@/utils/breadcrumb";
-import dayjs from "@/utils/dayjs";
-import { getPostPath } from "@/utils/getPostPath";
-import { getProjectPath, getProjectSlug } from "@/utils/getProjectPath";
-import getSortedPosts from "@/utils/getSortedPosts";
-import getSortedProjects from "@/utils/getSortedProjects";
+import { formatDate, getYear, isSameDay } from "@/utils/date";
+import { getPostPath, sortPosts } from "@/utils/posts";
+import { getProjectPath, getProjectSlug, sortProjects } from "@/utils/projects";
 import { getMergedPrsUrl, summarizeMergedPrs } from "@/utils/mergedPrs";
+import { transformerFileName } from "@/utils/transformers/fileName";
+import { codeToHtml } from "shiki";
 import {
   getContentLang,
   getInlineLang,
@@ -104,17 +103,14 @@ describe("post and project ordering", () => {
       post("newer", { pubDatetime: new Date("2024-02-01") }),
     ];
 
-    expect(getSortedPosts(posts).map(({ id }) => id)).toEqual([
-      "newer",
-      "older",
-    ]);
+    expect(sortPosts(posts).map(({ id }) => id)).toEqual(["newer", "older"]);
   });
 
   it("shows scheduled posts in development", () => {
     vi.stubEnv("DEV", true);
     const posts = [post("future", { pubDatetime: new Date("2999-01-01") })];
 
-    expect(getSortedPosts(posts).map(({ id }) => id)).toEqual(["future"]);
+    expect(sortPosts(posts).map(({ id }) => id)).toEqual(["future"]);
   });
 
   it("orders projects by featured, manual order, then start date", () => {
@@ -128,16 +124,27 @@ describe("post and project ordering", () => {
       project("draft", { draft: true, featured: true, order: 0 }),
     ];
 
-    expect(getSortedProjects(projects).map(({ id }) => id)).toEqual([
+    expect(sortProjects(projects).map(({ id }) => id)).toEqual([
       "older-featured",
       "manual-first",
       "newer-auto",
     ]);
   });
 
+  it("sorts start-dated projects newest first", () => {
+    const projects = [
+      project("old", { order: -1, startDate: new Date("2025-01-01") }),
+      project("new", { order: -1, startDate: new Date("2026-01-01") }),
+    ];
+
+    expect(sortProjects(projects).map(({ id }) => id)).toEqual(["new", "old"]);
+  });
+
   it("gives each project a stable accent by position", () => {
-    const ids = ["a", "b", "c", "d", "e"];
-    expect(ids.map(id => getProjectAccent(id, ids))).toEqual([
+    const projects = ["a", "b", "c", "d", "e"].map((id, index) =>
+      project(id, { order: index })
+    );
+    expect(sortProjects(projects).map(({ accent }) => accent)).toEqual([
       "yellow",
       "blue",
       "pink",
@@ -197,20 +204,21 @@ describe("search", () => {
     expect(scoreSearchRecord(record({}), ["gradient", "missing"])).toBeNull();
   });
 
-  it("dedupes by kind and URL, keeping the best match", () => {
+  it("ranks by score, then title, up to the limit", () => {
     const ranked = rankSearchRecords(
       [
+        record({ title: "B body match", metaText: "", content: "gradient" }),
+        record({ title: "A body match", metaText: "", content: "gradient" }),
         record({}),
-        record({
-          title: "Duplicate",
-          metaText: "",
-          content: "machine learning",
-        }),
       ],
-      ["machine", "learning"]
+      ["gradient"],
+      2
     );
 
-    expect(ranked.map(({ title }) => title)).toEqual(["Gradient descent"]);
+    expect(ranked.map(({ title }) => title)).toEqual([
+      "Gradient descent",
+      "A body match",
+    ]);
   });
 
   it("excerpts around the first match", () => {
@@ -269,9 +277,16 @@ describe("search", () => {
 
 describe("post details", () => {
   it("formats content dates in UTC", () => {
-    expect(dayjs.utc("2026-03-07T00:30:00-08:00").format("D MMM YYYY")).toBe(
-      "7 Mar 2026"
-    );
+    const date = new Date("2026-03-07T00:30:00-08:00");
+    expect(formatDate(date)).toBe("7 Mar 2026");
+    expect(formatDate(new Date("2026-09-30"))).toBe("30 Sep 2026");
+    expect(getYear(new Date("2026-01-01T00:00:00Z"))).toBe("2026");
+    expect(
+      isSameDay(
+        new Date("2026-03-07T01:00:00Z"),
+        new Date("2026-03-07T23:00:00Z")
+      )
+    ).toBe(true);
   });
 
   it("counts English words and CJK characters for reading time", () => {
@@ -377,6 +392,26 @@ describe("post details", () => {
       "tags",
       "machine-learning (page 2)",
     ]);
+  });
+});
+
+describe("code block file names", () => {
+  const render = (meta: string) =>
+    codeToHtml("const x = 1;", {
+      lang: "ts",
+      theme: "min-light",
+      meta: { __raw: meta },
+      transformers: [transformerFileName()],
+    });
+
+  it("labels a block from its file meta", async () => {
+    const html = await render('file="src/config.ts" {1}');
+    expect(html).toContain(">src/config.ts</span>");
+    expect(html).toContain("--file-name-offset: -0.75rem;");
+  });
+
+  it("leaves blocks without a file name unlabeled", async () => {
+    expect(await render("{1}")).not.toContain("left-2");
   });
 });
 

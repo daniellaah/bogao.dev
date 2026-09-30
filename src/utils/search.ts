@@ -20,12 +20,6 @@ export type SearchKindEntry = {
   scope: string;
 };
 
-type SearchRankOptions = {
-  limit?: number;
-  dedupe?: boolean;
-  getDedupeKey?: (record: RankedSearchRecord) => string;
-};
-
 export const SEARCH_LOAD_ERROR_MESSAGE = "Search failed to load.";
 
 export const escapeSearchHtml = (value: string) =>
@@ -122,38 +116,13 @@ export const scoreSearchRecord = (
 export const rankSearchRecords = (
   records: SearchRecord[],
   terms: string[],
-  {
-    limit = 20,
-    dedupe = true,
-    getDedupeKey = record => `${record.kind}:${record.url}`,
-  }: SearchRankOptions = {}
-) => {
-  const ranked = records
+  limit = 20
+) =>
+  records
     .map(record => scoreSearchRecord(record, terms))
-    .filter((record): record is RankedSearchRecord => Boolean(record));
-
-  const candidates = dedupe
-    ? Array.from(
-        ranked
-          .reduce((deduped, record) => {
-            const key = getDedupeKey(record);
-            const current = deduped.get(key);
-            if (!current || record.score > current.score) {
-              deduped.set(key, record);
-            }
-            return deduped;
-          }, new Map<string, RankedSearchRecord>())
-          .values()
-      )
-    : ranked;
-
-  return candidates
-    .sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      return a.title.localeCompare(b.title);
-    })
+    .filter((record): record is RankedSearchRecord => record !== null)
+    .sort((a, b) => b.score - a.score || a.title.localeCompare(b.title))
     .slice(0, limit);
-};
 
 export const createSearchIndexLoader = (
   fetcher: typeof fetch = fetch,

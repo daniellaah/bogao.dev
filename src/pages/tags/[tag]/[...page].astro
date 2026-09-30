@@ -1,5 +1,4 @@
 ---
-import { getCollection } from "astro:content";
 import type { GetStaticPathsOptions } from "astro";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
@@ -8,16 +7,16 @@ import Footer from "@/components/Footer.astro";
 import Pagination from "@/components/Pagination.astro";
 import PostRow from "@/components/PostRow.astro";
 import { slugifyStr } from "@/utils/slugifyCore";
-import getSortedPosts from "@/utils/getSortedPosts";
+import { getPosts } from "@/utils/posts";
 import { collectTagStats } from "@/utils/tags";
 import { SITE } from "@/config";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
-  const posts = getSortedPosts(await getCollection("blog"));
+  const posts = await getPosts();
   const tags = collectTagStats(posts);
 
   return tags.flatMap(({ slug, tagName }) => {
-    // getSortedPosts already orders newest first.
+    // getPosts already orders newest first.
     const taggedPosts = posts.filter(post =>
       post.data.tags.some(postTag => slugifyStr(postTag) === slug)
     );
