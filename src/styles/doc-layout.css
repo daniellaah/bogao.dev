@@ -55,6 +55,50 @@
   text-transform: uppercase;
 }
 
+/* Facts: two columns of label/value pairs; chips span the full width. */
+.doc-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.5rem;
+}
+
+.doc-facts__value {
+  margin-top: 0.4rem;
+  font-size: 0.92rem;
+}
+
+.doc-facts__wide {
+  grid-column: 1 / -1;
+}
+
+.doc-facts__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.doc-facts__chips > * {
+  border: var(--control-border-width) solid var(--control-border-color-subtle);
+  border-radius: 3px 6px 4px 5px / 6px 3px 5px 4px;
+  padding: 0.25rem 0.5rem;
+  background: color-mix(
+    in srgb,
+    var(--doc-marker, var(--marker-yellow)) calc(var(--marker-strength) * 0.22),
+    transparent
+  );
+  font-size: 0.75rem;
+  line-height: 1.1;
+}
+
+a.doc-facts__chip {
+  transition: border-color var(--motion-duration-fast)
+    var(--motion-ease-standard);
+}
+
+a.doc-facts__chip:hover {
+  border-color: var(--control-border-color-strong);
+}
+
 /* The table of contents only earns its space next to the article. */
 .doc-toc {
   display: none;
@@ -65,8 +109,9 @@
   font-size: 0.85rem;
 }
 
-/* An aside holding only the TOC has nothing to show on narrow screens. */
-.doc-aside--toc-only {
+/* For an aside that repeats what the page header already shows on narrow
+   screens. */
+.doc-aside--wide-only {
   display: none;
 }
 

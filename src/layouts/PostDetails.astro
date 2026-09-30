@@ -126,10 +126,54 @@ const nextPost =
     </header>
 
     <div class="doc-body">
-      {
-        showToc && (
-          <aside class="doc-aside doc-aside--toc-only">
-            <div class="doc-panel sketch-border sketch-border-thin">
+      <aside class="doc-aside doc-aside--wide-only" aria-label="Post details">
+        <div class="doc-panel sketch-border sketch-border-thin">
+          <dl class="doc-facts">
+            <div>
+              <dt class="doc-panel__label">Published</dt>
+              <dd class="doc-facts__value font-code">
+                <time datetime={published.toISOString()}>
+                  {published.format("D MMM YYYY")}
+                </time>
+              </dd>
+            </div>
+            {
+              showModified && (
+                <div>
+                  <dt class="doc-panel__label">Updated</dt>
+                  <dd class="doc-facts__value font-code">
+                    <time datetime={modified.toISOString()}>
+                      {modified.format("D MMM YYYY")}
+                    </time>
+                  </dd>
+                </div>
+              )
+            }
+            <div>
+              <dt class="doc-panel__label">Read time</dt>
+              <dd class="doc-facts__value font-code">{readingMinutes} min</dd>
+            </div>
+            {
+              tags.length > 0 && (
+                <div class="doc-facts__wide">
+                  <dt class="doc-panel__label">Tags</dt>
+                  <dd class="doc-facts__value doc-facts__chips">
+                    {tags.map(tag => (
+                      <a
+                        class="doc-facts__chip"
+                        href={`/tags/${slugifyStr(tag)}/`}
+                      >
+                        {tag}
+                      </a>
+                    ))}
+                  </dd>
+                </div>
+              )
+            }
+          </dl>
+
+          {
+            showToc && (
               <nav class="doc-toc" aria-label="On this page">
                 <p class="doc-panel__label">On this page</p>
                 <ol>
@@ -150,10 +194,10 @@ const nextPost =
                   ))}
                 </ol>
               </nav>
-            </div>
-          </aside>
-        )
-      }
+            )
+          }
+        </div>
+      </aside>
 
       <div class="doc-main">
         {

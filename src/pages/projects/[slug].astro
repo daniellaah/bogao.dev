@@ -114,10 +114,10 @@ const relatedProjects = projects
     <div class="doc-body">
       <aside class="doc-aside" aria-label="Project details">
         <div class="doc-panel sketch-border sketch-border-thin">
-          <dl class="project-facts__list">
+          <dl class="doc-facts">
             <div>
               <dt class="doc-panel__label">Status</dt>
-              <dd class="project-facts__value">
+              <dd class="doc-facts__value">
                 <ProjectStatusBadge status={status} />
               </dd>
             </div>
@@ -125,15 +125,15 @@ const relatedProjects = projects
               year && (
                 <div>
                   <dt class="doc-panel__label">Year</dt>
-                  <dd class="project-facts__value font-code">{year}</dd>
+                  <dd class="doc-facts__value font-code">{year}</dd>
                 </div>
               )
             }
             {
               stack.length > 0 && (
-                <div class="project-facts__stack">
+                <div class="doc-facts__wide">
                   <dt class="doc-panel__label">Stack</dt>
-                  <dd class="project-facts__value">
+                  <dd class="doc-facts__value doc-facts__chips">
                     {stack.map(item => (
                       <span>{item}</span>
                     ))}

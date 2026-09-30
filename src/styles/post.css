@@ -118,10 +118,17 @@
   font-size: 0.9rem;
 }
 
-/* Matches the breakpoint where the sticky aside TOC takes over. */
+/* From 64rem the side panel shows the tags, dates, and TOC, so the header
+   and inline TOC stop repeating them. */
 @media (min-width: 64rem) {
-  .post-toc-inline {
+  .post-toc-inline,
+  .post-hero__tags,
+  .post-hero__meta {
     display: none;
+  }
+
+  .post-hero__title {
+    margin-top: 0;
   }
 }
 
