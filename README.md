@@ -125,6 +125,7 @@ npm run new:project -- "My project" --stack Python,Astro --repoUrl https://githu
 - Post 会写入显式 `slug`，后续修改标题或文件名不会改变 URL
 - 如果标题生成的 slug 不理想，可以用 `--slug your-custom-slug` 指定
 - Project URL 固定由文件名生成；`new:project --slug` 只用于控制生成的文件名，不会写入 frontmatter `slug`
+- 文章语言默认按标题 / 描述自动判断（含汉字即 `zh-CN`，否则 `en`），用于 `<html lang>` 和 `og:locale`；需要时可在 frontmatter 里写 `lang: ja` 等显式指定
 
 发布或提交前建议运行：
 

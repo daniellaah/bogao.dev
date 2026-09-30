@@ -119,7 +119,6 @@ const makePost = options => {
   return {
     file: `${getContentDir("post")}/${filename}`,
     content: `---
-author: Bo
 pubDatetime: ${date}
 modDatetime: ${date}
 title: ${quoteYaml(options.title)}

@@ -1,11 +1,11 @@
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
-import getBlogEntries from "@/utils/getBlogEntries";
 import { getProjectPath } from "@/utils/getProjectPath";
 import { getPostPath } from "@/utils/getPostPath";
 import getSortedPosts from "@/utils/getSortedPosts";
 import getUniqueTags from "@/utils/getUniqueTags";
 import { isPublishedProject } from "@/utils/projectVisibility";
+import { stripMarkdown } from "@/utils/stripMarkdown";
 import searchKinds from "@/data/search-kinds.json";
 
 const SEARCH_RECORD_KINDS = Object.fromEntries(
@@ -18,20 +18,8 @@ const SEARCH_RECORD_KINDS = Object.fromEntries(
   tags: "Tag";
 };
 
-const stripMarkdown = (value: string) =>
-  value
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`[^`]*`/g, " ")
-    .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
-    .replace(/\$+[\s\S]*?\$+/g, " ")
-    .replace(/<\/?[^>]+>/g, " ")
-    .replace(/[#>*_~|-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
 export const GET: APIRoute = async () => {
-  const blogEntries = await getBlogEntries();
+  const blogEntries = await getCollection("blog");
   const posts = getSortedPosts(blogEntries);
   const projects = await getCollection("projects", isPublishedProject);
   const tags = getUniqueTags(posts);
@@ -43,7 +31,7 @@ export const GET: APIRoute = async () => {
       url: getPostPath(post),
       kind: SEARCH_RECORD_KINDS.posts,
       metaText: post.data.tags.join(" "),
-      content: stripMarkdown(post.body),
+      content: stripMarkdown(post.body ?? ""),
     })),
     ...projects.map(project => ({
       title: project.data.title,
@@ -55,7 +43,7 @@ export const GET: APIRoute = async () => {
         String(project.data.year ?? ""),
         ...project.data.stack,
       ].join(" "),
-      content: stripMarkdown(project.body),
+      content: stripMarkdown(project.body ?? ""),
     })),
     ...tags.map(tag => ({
       title: `#${tag.tagName}`,

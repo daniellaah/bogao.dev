@@ -5,9 +5,6 @@ export function setupHeaderNav() {
   const closeIcon = document.querySelector<HTMLElement>("#close-icon");
 
   if (!menuBtn || !menuItems || !menuIcon || !closeIcon) return;
-  if (menuBtn.dataset.navBound === "true") return;
-
-  menuBtn.dataset.navBound = "true";
 
   menuBtn.addEventListener("click", () => {
     const openMenu = menuBtn.getAttribute("aria-expanded") === "true";

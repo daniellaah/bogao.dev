@@ -12,7 +12,6 @@ import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import IconLinkedInMark from "@/assets/icons/IconLinkedInMark.svg";
 import { SITE } from "@/config";
 import { HOMEPAGE_PROJECTS, OPEN_SOURCE, PROFILE } from "@/data/profile";
-import getBlogEntries from "@/utils/getBlogEntries";
 import getSortedPosts from "@/utils/getSortedPosts";
 import getSortedProjects from "@/utils/getSortedProjects";
 import { getProjectAccent } from "@/utils/accent";
@@ -29,7 +28,7 @@ const homepageProjects = HOMEPAGE_PROJECTS.flatMap(slug => {
   return project ? [project] : [];
 });
 
-const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
+const recentPosts = getSortedPosts(await getCollection("blog")).slice(0, 3);
 ---
 
 <Layout
@@ -37,7 +36,12 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
   description={`${PROFILE.summary} ${PROFILE.availability}`}
 >
   <Header />
-  <main id="main-content" data-layout="index" class="career-home app-layout">
+  <main
+    id="main-content"
+    data-layout="index"
+    data-back-label={SITE.showBackButton ? "Home" : undefined}
+    class="career-home app-layout"
+  >
     <section class="career-hero" aria-labelledby="career-hero-title">
       <div class="hero-avatar career-hero__avatar">
         <img
@@ -173,19 +177,8 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
 </Layout>
 
 <script>
-  type HomeWindow = Window & {
-    __homeBackUrlCleanup?: () => void;
-    __homeAvatarHoverCleanup?: () => void;
-  };
-
+  import { onEveryPage } from "@/scripts/lifecycle";
   import { setupHomePage } from "@/scripts/homePage";
 
-  (window as HomeWindow).__homeBackUrlCleanup?.();
-  document.addEventListener("astro:page-load", setupHomePage);
-  (window as HomeWindow).__homeBackUrlCleanup = () => {
-    document.removeEventListener("astro:page-load", setupHomePage);
-    (window as HomeWindow).__homeAvatarHoverCleanup?.();
-    (window as HomeWindow).__homeAvatarHoverCleanup = undefined;
-  };
-  setupHomePage();
+  onEveryPage(setupHomePage);
 </script>

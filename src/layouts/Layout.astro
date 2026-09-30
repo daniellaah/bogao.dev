@@ -6,6 +6,7 @@ import {
 } from "astro:env/client";
 import CommandPalette from "@/components/CommandPalette.astro";
 import { SITE } from "@/config";
+import { getOgLocale } from "@/utils/contentLang";
 import "@/styles/global.css";
 
 type Props = {
@@ -18,6 +19,7 @@ type Props = {
   pubDatetime?: Date;
   modDatetime?: Date | null;
   scrollSmooth?: boolean;
+  lang?: string;
 };
 
 const {
@@ -30,6 +32,7 @@ const {
   pubDatetime,
   modDatetime,
   scrollSmooth = false,
+  lang = SITE.lang,
 } = Astro.props;
 
 const socialImageURL = new URL(ogImage, Astro.url);
@@ -41,6 +44,7 @@ const structuredData = {
   "@context": "https://schema.org",
   "@type": isArticle ? "BlogPosting" : "WebSite",
   headline: `${title}`,
+  inLanguage: lang,
   image: `${socialImageURL}`,
   ...(pubDatetime && { datePublished: pubDatetime.toISOString() }),
   ...(modDatetime && { dateModified: modDatetime.toISOString() }),
@@ -55,7 +59,11 @@ const structuredData = {
 ---
 
 <!doctype html>
-<html dir={SITE.dir} lang="en" class:list={[{ "scroll-smooth": scrollSmooth }]}>
+<html
+  dir={SITE.dir}
+  lang={lang}
+  class:list={[{ "scroll-smooth": scrollSmooth }]}
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -80,7 +88,7 @@ const structuredData = {
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={SITE.title} />
-    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale" content={getOgLocale(lang)} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonicalURL} />
@@ -127,7 +135,7 @@ const structuredData = {
       rel="alternate"
       type="application/rss+xml"
       title={SITE.title}
-      href={new URL("rss.xml", Astro.site)}
+      href={new URL("/rss.xml", Astro.url)}
     />
 
     <meta name="theme-color" content="#f6f1e7" />
@@ -181,6 +189,12 @@ const structuredData = {
   <body>
     <slot />
     <CommandPalette />
-    <script src="../scripts/theme.ts"></script>
+    <script>
+      import "@/scripts/theme";
+      import { onEveryPage } from "@/scripts/lifecycle";
+      import { setupBackNavigation } from "@/scripts/backNavigation";
+
+      onEveryPage(setupBackNavigation);
+    </script>
   </body>
 </html>

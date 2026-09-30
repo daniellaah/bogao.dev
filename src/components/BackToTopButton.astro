@@ -18,20 +18,8 @@ import IconArrowNarrowUp from "@/assets/icons/IconArrowNarrowUp.svg";
 </div>
 
 <script>
+  import { onEveryPage } from "@/scripts/lifecycle";
   import { setupBackToTopButton } from "@/scripts/backToTop";
 
-  type BackToTopWindow = Window & {
-    __backToTopCleanup?: () => void;
-    __backToTopLifecycleCleanup?: () => void;
-  };
-
-  (window as BackToTopWindow).__backToTopLifecycleCleanup?.();
-  document.addEventListener("astro:page-load", setupBackToTopButton);
-  document.addEventListener("astro:after-swap", setupBackToTopButton);
-  (window as BackToTopWindow).__backToTopLifecycleCleanup = () => {
-    document.removeEventListener("astro:page-load", setupBackToTopButton);
-    document.removeEventListener("astro:after-swap", setupBackToTopButton);
-    (window as BackToTopWindow).__backToTopCleanup?.();
-  };
-  setupBackToTopButton();
+  onEveryPage(setupBackToTopButton);
 </script>

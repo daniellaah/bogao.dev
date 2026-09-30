@@ -1,14 +1,14 @@
 ---
+import { getCollection } from "astro:content";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
-import getBlogEntries from "@/utils/getBlogEntries";
 import { collectTagStats, type TagStat } from "@/utils/tags";
 import { SITE } from "@/config";
 
-const posts = getSortedPosts(await getBlogEntries());
+const posts = getSortedPosts(await getCollection("blog"));
 
 const tagCollator = new Intl.Collator(undefined, {
   sensitivity: "base",
@@ -113,19 +113,8 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
 </Layout>
 
 <script>
-  import {
-    cleanupTagsIndexPage,
-    setupTagsIndexPage,
-  } from "@/scripts/tagsIndex";
+  import { onEveryPage } from "@/scripts/lifecycle";
+  import { setupTagsIndexPage } from "@/scripts/tagsIndex";
 
-  (
-    window as Window & { __tagsIndexCleanup?: () => void }
-  ).__tagsIndexCleanup?.();
-  document.addEventListener("astro:page-load", setupTagsIndexPage);
-  (window as Window & { __tagsIndexCleanup?: () => void }).__tagsIndexCleanup =
-    () => {
-      document.removeEventListener("astro:page-load", setupTagsIndexPage);
-      cleanupTagsIndexPage();
-    };
-  setupTagsIndexPage();
+  onEveryPage(setupTagsIndexPage);
 </script>

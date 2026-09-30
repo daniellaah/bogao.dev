@@ -121,21 +121,8 @@ const filterButtonClass =
 }
 
 <script>
-  import {
-    cleanupPostFiltersPage,
-    setupPostFiltersPage,
-  } from "@/scripts/postFilters";
+  import { onEveryPage } from "@/scripts/lifecycle";
+  import { setupPostFiltersPage } from "@/scripts/postFilters";
 
-  (
-    window as Window & { __postFiltersCleanup?: () => void }
-  ).__postFiltersCleanup?.();
-  document.addEventListener("astro:page-load", setupPostFiltersPage);
-  document.addEventListener("astro:after-swap", setupPostFiltersPage);
-  (
-    window as Window & { __postFiltersCleanup?: () => void }
-  ).__postFiltersCleanup = () => {
-    document.removeEventListener("astro:page-load", setupPostFiltersPage);
-    document.removeEventListener("astro:after-swap", setupPostFiltersPage);
-    cleanupPostFiltersPage();
-  };
+  onEveryPage(setupPostFiltersPage);
 </script>

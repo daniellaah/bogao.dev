@@ -1,7 +1,6 @@
 import {
   SEARCH_LOAD_ERROR_MESSAGE,
   buildSearchExcerpt,
-  createSearchIndexLoader,
   escapeSearchHtml,
   formatSearchEmptyPrompt,
   formatNoSearchResults,
@@ -14,6 +13,7 @@ import {
   type SearchRecord,
   type SearchRecordKind,
 } from "../utils/search";
+import { loadSearchIndex } from "./searchIndex";
 import { getCurrentUrlSearchParams, replaceCurrentUrlSearch } from "./urlState";
 
 export function setupSearchPage() {
@@ -29,9 +29,7 @@ export function setupSearchPage() {
     document.querySelector<HTMLScriptElement>("#search-kind-data");
 
   if (!input || !clearButton || !status || !results || !kindData) return;
-  if (input.dataset.initialized === "true") return;
 
-  input.dataset.initialized = "true";
   const searchKindEntries = JSON.parse(
     kindData.textContent ?? "[]"
   ) as SearchKindEntry[];
@@ -129,11 +127,9 @@ export function setupSearchPage() {
     replaceCurrentUrlSearch(params);
   };
 
-  const loadSearchRecords = createSearchIndexLoader();
-
   const loadRecords = async (showLoading = false) => {
     if (showLoading) status.textContent = "Loading search index...";
-    return loadSearchRecords();
+    return loadSearchIndex();
   };
 
   const runSearch = async (query: string, kind: SearchKind) => {

@@ -4,6 +4,7 @@ import dayjs from "@/utils/dayjs";
 import type { SortedBlogPost } from "@/utils/getSortedPosts";
 import { getPostPath } from "@/utils/getPostPath";
 import { slugifyStr } from "@/utils/slugifyCore";
+import { getInlineLang } from "@/utils/contentLang";
 import "@/styles/post-row.css";
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
 const { post, filterable = false } = Astro.props;
 const { title, description, tags, pubDatetime } = post.data;
 const published = dayjs.utc(pubDatetime);
+const lang = getInlineLang(post.data);
 ---
 
 <li
@@ -27,7 +29,7 @@ const published = dayjs.utc(pubDatetime);
     <time class="post-row__date" datetime={pubDatetime.toISOString()}>
       {published.format("D MMM YYYY")}
     </time>
-    <span class="post-row__text">
+    <span class="post-row__text" lang={lang}>
       <span class="post-row__title hover-underline content-title">{title}</span>
       <span class="post-row__description">{description}</span>
       {

@@ -74,17 +74,8 @@ const searchInputPlaceholder = formatSearchInputPlaceholder(searchAllScope);
 </Layout>
 
 <script>
+  import { onEveryPage } from "@/scripts/lifecycle";
   import { setupSearchPage } from "@/scripts/searchPage";
 
-  (
-    window as Window & { __searchPageCleanup?: () => void }
-  ).__searchPageCleanup?.();
-  document.addEventListener("astro:page-load", setupSearchPage);
-  document.addEventListener("astro:after-swap", setupSearchPage);
-  (
-    window as Window & { __searchPageCleanup?: () => void }
-  ).__searchPageCleanup = () => {
-    document.removeEventListener("astro:page-load", setupSearchPage);
-    document.removeEventListener("astro:after-swap", setupSearchPage);
-  };
+  onEveryPage(setupSearchPage);
 </script>

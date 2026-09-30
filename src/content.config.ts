@@ -1,4 +1,5 @@
 import { defineCollection, z } from "astro:content";
+import { glob } from "astro/loaders";
 import { SITE } from "@/config";
 import contentRules from "@/data/content-rules.json";
 
@@ -10,6 +11,10 @@ const projectStatuses = contentRules.projectStatuses as [
 ];
 
 const blog = defineCollection({
+  loader: glob({
+    pattern: "**/[^_]*.{md,mdx}",
+    base: `./${contentRules.collections.blog.dir}`,
+  }),
   schema: ({ image }) =>
     z.object({
       author: z.string().default(SITE.author),
@@ -22,10 +27,16 @@ const blog = defineCollection({
       ogImage: image().or(z.string()).optional(),
       description: z.string(),
       canonicalURL: z.string().optional(),
+      // BCP 47 tag, e.g. "zh-CN". Detected from the title when omitted.
+      lang: z.string().optional(),
     }),
 });
 
 const projects = defineCollection({
+  loader: glob({
+    pattern: "**/[^_]*.{md,mdx}",
+    base: `./${contentRules.collections.projects.dir}`,
+  }),
   schema: ({ image }) =>
     z.object({
       title: z.string(),

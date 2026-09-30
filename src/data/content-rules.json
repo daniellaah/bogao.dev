@@ -12,7 +12,8 @@
         "tags",
         "ogImage",
         "description",
-        "canonicalURL"
+        "canonicalURL",
+        "lang"
       ]
     },
     "projects": {

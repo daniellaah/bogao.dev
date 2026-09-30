@@ -29,5 +29,6 @@ export const SITE = {
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
   showArchives: true,
   showBackButton: true, // enable back links and stored return URLs
+  lang: "en", // default <html lang>; posts can override it
   dir: "ltr", // "rtl" | "auto"
 } as const;

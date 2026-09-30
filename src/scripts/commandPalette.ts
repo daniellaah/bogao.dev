@@ -1,6 +1,5 @@
 import {
   SEARCH_LOAD_ERROR_MESSAGE,
-  createSearchIndexLoader,
   escapeSearchHtml,
   formatNoSearchResults,
   formatSearchResultSummary,
@@ -8,21 +7,11 @@ import {
   splitSearchTerms,
   type SearchRecord,
 } from "../utils/search";
-
-type CommandWindow = Window & {
-  __commandPaletteBindingCleanup?: () => void;
-};
+import { loadSearchIndex as loadRecords } from "./searchIndex";
 
 const COMMAND_PALETTE_CLOSE_MS = 220;
 
-export function cleanupCommandPaletteBindings() {
-  (window as CommandWindow).__commandPaletteBindingCleanup?.();
-  (window as CommandWindow).__commandPaletteBindingCleanup = undefined;
-}
-
 export function setupCommandPalettePage() {
-  cleanupCommandPaletteBindings();
-
   const root = document.querySelector<HTMLElement>("#command-palette");
   const panel = document.querySelector<HTMLElement>(".command-palette__panel");
   const input = document.querySelector<HTMLInputElement>(
@@ -56,7 +45,6 @@ export function setupCommandPalettePage() {
   )
     return;
 
-  const loadRecords = createSearchIndexLoader();
   let previousActiveElement: Element | null = null;
   let closeTimer: number | undefined;
   let searchRunId = 0;
@@ -329,17 +317,11 @@ export function setupCommandPalettePage() {
     button.addEventListener("click", handleOpenClick)
   );
 
-  (window as CommandWindow).__commandPaletteBindingCleanup = () => {
+  // The palette and nav buttons are replaced on every swap; only the
+  // document and window listeners outlive the page.
+  return () => {
     document.removeEventListener("keydown", handleKeydown);
     window.removeEventListener("resize", handleResize);
-    input.removeEventListener("input", handleInput);
-    closeButtons.forEach(button =>
-      button.removeEventListener("click", closePalette)
-    );
-    openButtons.forEach(button =>
-      button.removeEventListener("click", handleOpenClick)
-    );
     clearCloseTimer();
-    setNavSearchActive(false);
   };
 }

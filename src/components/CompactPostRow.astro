@@ -3,6 +3,7 @@ import dayjs from "@/utils/dayjs";
 import type { SortedBlogPost } from "@/utils/getSortedPosts";
 import { getPostPath } from "@/utils/getPostPath";
 import { slugifyStr } from "@/utils/slugifyCore";
+import { getInlineLang } from "@/utils/contentLang";
 
 type Props = {
   post: SortedBlogPost;
@@ -26,7 +27,10 @@ const pubDatetime = dayjs.utc(post.data.pubDatetime);
     href={getPostPath(post)}
     class="hover-underline-trigger grid gap-1.5 pb-3 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
   >
-    <span class="block min-w-0 text-base leading-snug sm:text-[1.15rem]">
+    <span
+      class="block min-w-0 text-base leading-snug sm:text-[1.15rem]"
+      lang={getInlineLang(post.data)}
+    >
       <span class="hover-underline content-title">{post.data.title}</span>
     </span>
     <time

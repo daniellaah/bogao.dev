@@ -12,6 +12,7 @@ import { getPostPath } from "@/utils/getPostPath";
 import { getReadingMinutes } from "@/utils/readingTime";
 import { getTocHeadings } from "@/utils/toc";
 import { resolveOgImage } from "@/utils/ogImage";
+import { getContentLang } from "@/utils/contentLang";
 import { slugifyStr } from "@/utils/slugifyCore";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
@@ -61,6 +62,7 @@ const layoutProps = {
   canonicalURL,
   ogImage,
   scrollSmooth: true,
+  lang: getContentLang(post.data),
 };
 
 const allPosts = posts.map(postEntry => ({
@@ -80,7 +82,7 @@ const nextPost =
 
 <Layout {...layoutProps}>
   <Header />
-  <BackButton label="All Posts" />
+  <BackButton href="/posts/" label="Posts" />
   <main
     id="main-content"
     class:list={[
@@ -279,18 +281,8 @@ const nextPost =
 </Layout>
 
 <script>
-  import { setupPostDetailsPage } from "@/scripts/postDetails.js";
+  import { onEveryPage } from "@/scripts/lifecycle";
+  import { setupPostDetailsPage } from "@/scripts/postDetails";
 
-  type PostDetailsWindow = Window & {
-    __postDetailsLifecycleCleanup?: () => void;
-  };
-
-  (window as PostDetailsWindow).__postDetailsLifecycleCleanup?.();
-  document.addEventListener("astro:page-load", setupPostDetailsPage);
-  document.addEventListener("astro:after-swap", setupPostDetailsPage);
-  (window as PostDetailsWindow).__postDetailsLifecycleCleanup = () => {
-    document.removeEventListener("astro:page-load", setupPostDetailsPage);
-    document.removeEventListener("astro:after-swap", setupPostDetailsPage);
-  };
-  setupPostDetailsPage();
+  onEveryPage(setupPostDetailsPage);
 </script>

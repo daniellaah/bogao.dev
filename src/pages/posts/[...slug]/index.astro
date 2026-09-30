@@ -1,30 +1,24 @@
 ---
+import { getCollection } from "astro:content";
 import PostDetails from "@/layouts/PostDetails.astro";
-import getBlogEntries from "@/utils/getBlogEntries";
 import getSortedPosts from "@/utils/getSortedPosts";
 import type { SortedBlogPost } from "@/utils/getSortedPosts";
 import { getPostPath } from "@/utils/getPostPath";
 
 type Props = {
   post: SortedBlogPost;
+  posts: SortedBlogPost[];
 };
 
 export async function getStaticPaths() {
-  const posts = getSortedPosts(await getBlogEntries());
-  const postResult = posts.map(post => ({
-    params: {
-      slug: getPostPath(post, false),
-    },
-    props: { post },
+  const posts = getSortedPosts(await getCollection("blog"));
+  return posts.map(post => ({
+    params: { slug: getPostPath(post, false) },
+    props: { post, posts },
   }));
-
-  return postResult;
 }
 
-const { post } = Astro.props;
-
-const posts = await getBlogEntries();
-const sortedPosts = getSortedPosts(posts);
+const { post, posts } = Astro.props;
 ---
 
-<PostDetails {post} posts={sortedPosts} />
+<PostDetails {post} {posts} />

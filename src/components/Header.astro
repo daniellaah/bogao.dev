@@ -1,4 +1,5 @@
 ---
+import { getCollection } from "astro:content";
 import IconX from "@/assets/icons/IconX.svg";
 import IconMoon from "@/assets/icons/IconMoon.svg";
 import IconSearch from "@/assets/icons/IconSearch.svg";
@@ -6,7 +7,6 @@ import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
 import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
 import LinkButton from "./LinkButton.astro";
 import { SITE } from "@/config";
-import getBlogEntries from "@/utils/getBlogEntries";
 import getSortedPosts from "@/utils/getSortedPosts";
 
 const { pathname } = Astro.url;
@@ -23,7 +23,7 @@ const isActive = (path: string) => {
 };
 
 // Posts stays out of the nav until at least one post is published.
-const hasPosts = getSortedPosts(await getBlogEntries()).length > 0;
+const hasPosts = getSortedPosts(await getCollection("blog")).length > 0;
 
 const navItems: { href: string; label: string; match?: string }[] = [
   { href: "/projects", label: "Projects", match: "/projects" },
@@ -166,15 +166,8 @@ const navItems: { href: string; label: string; match?: string }[] = [
 </header>
 
 <script>
+  import { onEveryPage } from "@/scripts/lifecycle";
   import { setupHeaderNav } from "@/scripts/headerNav";
 
-  (
-    window as Window & { __headerNavCleanup?: () => void }
-  ).__headerNavCleanup?.();
-  document.addEventListener("astro:after-swap", setupHeaderNav);
-  (window as Window & { __headerNavCleanup?: () => void }).__headerNavCleanup =
-    () => {
-      document.removeEventListener("astro:after-swap", setupHeaderNav);
-    };
-  setupHeaderNav();
+  onEveryPage(setupHeaderNav);
 </script>

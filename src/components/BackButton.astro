@@ -5,10 +5,13 @@ import { SITE } from "@/config";
 
 type Props = {
   layoutClass?: string;
-  label?: string;
+  // Where the link goes when the reader did not arrive from a list page.
+  // backNavigation.ts replaces both with the last list page visited.
+  href: string;
+  label: string;
 };
 
-const { layoutClass = "app-layout", label = "Go back" } = Astro.props;
+const { layoutClass = "app-layout", href, label } = Astro.props;
 ---
 
 {
@@ -16,27 +19,12 @@ const { layoutClass = "app-layout", label = "Go back" } = Astro.props;
     <div class:list={[layoutClass, "flex items-center justify-start"]}>
       <LinkButton
         id="back-button"
-        href="/"
+        href={href}
         class="focus-outline -ms-2 mt-8 mb-2 hover:text-foreground/75"
       >
         <IconChevronLeft class="inline-block size-6 rtl:rotate-180" />
-        <span>{label}</span>
+        <span data-back-button-label>{label}</span>
       </LinkButton>
     </div>
   )
 }
-
-<script>
-  import { updateBackButtonUrl } from "@/scripts/backNavigation";
-
-  (
-    window as Window & { __backButtonCleanup?: () => void }
-  ).__backButtonCleanup?.();
-  document.addEventListener("astro:page-load", updateBackButtonUrl);
-  (
-    window as Window & { __backButtonCleanup?: () => void }
-  ).__backButtonCleanup = () => {
-    document.removeEventListener("astro:page-load", updateBackButtonUrl);
-  };
-  updateBackButtonUrl();
-</script>

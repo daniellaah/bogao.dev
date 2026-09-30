@@ -1,3 +1,5 @@
+import { onEveryPage } from "./lifecycle";
+
 const THEME_KEY = "theme";
 const LIGHT_THEME = "light";
 const DARK_THEME = "dark";
@@ -58,10 +60,7 @@ function storeTheme(theme: Theme) {
 
 function bindThemeToggle() {
   const button = document.querySelector<HTMLButtonElement>("#theme-btn");
-  if (!button || button.dataset.themeBound === "true") return;
-
-  button.dataset.themeBound = "true";
-  button.addEventListener("click", () => {
+  button?.addEventListener("click", () => {
     const nextTheme =
       getCurrentTheme() === LIGHT_THEME ? DARK_THEME : LIGHT_THEME;
 
@@ -75,9 +74,7 @@ function setupTheme() {
   bindThemeToggle();
 }
 
-setupTheme();
-
-document.addEventListener("astro:after-swap", setupTheme);
+onEveryPage(setupTheme);
 
 document.addEventListener("astro:before-swap", event => {
   const theme = getCurrentTheme();

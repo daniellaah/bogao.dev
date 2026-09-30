@@ -40,26 +40,12 @@ const url = Astro.url.href;
 </div>
 
 <script>
-  // Clipboard API first; fall back to a hidden textarea for contexts that
-  // block it (embedded browsers, some permission settings).
-  const copyText = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      return true;
-    } catch {
-      const field = document.createElement("textarea");
-      field.value = text;
-      field.setAttribute("readonly", "");
-      field.style.position = "fixed";
-      field.style.opacity = "0";
-      document.body.appendChild(field);
-      field.select();
-      const copied = document.execCommand("copy");
-      field.remove();
-      return copied;
-    }
-  };
+  import { copyText } from "@/scripts/clipboard";
 
+  const COPY_LABEL = "Copy link";
+  let resetTimer: number | undefined;
+
+  // Delegated, so it keeps working for buttons swapped in by navigation.
   document.addEventListener("click", async event => {
     const button = (event.target as Element | null)?.closest<HTMLElement>(
       "[data-copy-link]"
@@ -68,9 +54,12 @@ const url = Astro.url.href;
 
     const label = button.querySelector("[data-copy-link-label]");
     const copied = await copyText(button.dataset.copyLink ?? "");
-    if (label) label.textContent = copied ? "Copied" : "Copy failed";
-    window.setTimeout(() => {
-      if (label) label.textContent = "Copy link";
+    if (!label) return;
+
+    label.textContent = copied ? "Copied" : "Copy failed";
+    window.clearTimeout(resetTimer);
+    resetTimer = window.setTimeout(() => {
+      label.textContent = COPY_LABEL;
     }, 1800);
   });
 </script>

@@ -4,18 +4,9 @@ import {
 } from "./toggleControls";
 import { getCurrentUrlSearchParams, replaceCurrentUrlSearch } from "./urlState";
 
-let cleanupPostFiltersInstance = () => {};
-
-export function cleanupPostFiltersPage() {
-  cleanupPostFiltersInstance();
-  cleanupPostFiltersInstance = () => {};
-}
-
 export function setupPostFiltersPage() {
   const root = document.querySelector<HTMLElement>("[data-post-filters]");
-  if (!root || root.dataset.initialized === "true") return;
-
-  cleanupPostFiltersPage();
+  if (!root) return;
 
   const posts = Array.from(
     document.querySelectorAll<HTMLElement>("[data-post-list-item]")
@@ -33,20 +24,26 @@ export function setupPostFiltersPage() {
   const tagToggle = root.querySelector<HTMLElement>(
     '[data-filter-toggle="tag"]'
   );
+  const validYears = new Set([
+    "all",
+    ...yearButtons.map(button => button.dataset.filterYear ?? "all"),
+  ]);
   const validTags = new Set([
     "all",
     ...tagButtons.map(button => button.dataset.filterTag ?? "all"),
   ]);
 
-  root.dataset.initialized = "true";
-
+  // Unknown values in a shared or stale URL fall back to "all".
   const getFilter = () => {
     const params = getCurrentUrlSearchParams();
+    const requestedYear = params.get("year") || "all";
     const requestedTag = params.get("tag") || "all";
+    const year = validYears.has(requestedYear) ? requestedYear : "all";
+    const tag = validTags.has(requestedTag) ? requestedTag : "all";
     return {
-      year: params.get("year") || "all",
-      tag: validTags.has(requestedTag) ? requestedTag : "all",
-      invalidTag: !validTags.has(requestedTag),
+      year,
+      tag,
+      isNormalized: year === requestedYear && tag === requestedTag,
     };
   };
 
@@ -60,11 +57,16 @@ export function setupPostFiltersPage() {
     replaceCurrentUrlSearch(params);
   };
 
+  const syncToggles = (year: string, tag: string) => {
+    setActiveToggleButton(yearButtons, "filterYear", year, yearToggle);
+    setActiveToggleButton(tagButtons, "filterTag", tag, tagToggle);
+  };
+
   const applyFilter = () => {
-    const { year, tag, invalidTag } = getFilter();
+    const { year, tag, isNormalized } = getFilter();
     let visibleCount = 0;
 
-    if (invalidTag) updateUrl(year, tag);
+    if (!isNormalized) updateUrl(year, tag);
 
     for (const post of posts) {
       const yearMatches = year === "all" || post.dataset.postYear === year;
@@ -76,8 +78,7 @@ export function setupPostFiltersPage() {
       if (visible) visibleCount += 1;
     }
 
-    setActiveToggleButton(yearButtons, "filterYear", year, yearToggle);
-    setActiveToggleButton(tagButtons, "filterTag", tag, tagToggle);
+    syncToggles(year, tag);
 
     if (status) {
       status.textContent =
@@ -89,16 +90,14 @@ export function setupPostFiltersPage() {
 
   for (const button of yearButtons) {
     button.addEventListener("click", () => {
-      const { tag } = getFilter();
-      updateUrl(button.dataset.filterYear ?? "all", tag);
+      updateUrl(button.dataset.filterYear ?? "all", getFilter().tag);
       applyFilter();
     });
   }
 
   for (const button of tagButtons) {
     button.addEventListener("click", () => {
-      const { year } = getFilter();
-      updateUrl(year, button.dataset.filterTag ?? "all");
+      updateUrl(getFilter().year, button.dataset.filterTag ?? "all");
       applyFilter();
     });
   }
@@ -110,9 +109,8 @@ export function setupPostFiltersPage() {
     tagToggle?.setAttribute("data-ink-ready", "true");
   });
 
-  cleanupPostFiltersInstance = addToggleIndicatorResizeSync(() => {
+  return addToggleIndicatorResizeSync(() => {
     const { year, tag } = getFilter();
-    setActiveToggleButton(yearButtons, "filterYear", year, yearToggle);
-    setActiveToggleButton(tagButtons, "filterTag", tag, tagToggle);
+    syncToggles(year, tag);
   });
 }

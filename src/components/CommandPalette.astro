@@ -103,20 +103,8 @@ const searchInputPlaceholder = formatSearchInputPlaceholder(
 </div>
 
 <script>
-  import {
-    cleanupCommandPaletteBindings,
-    setupCommandPalettePage,
-  } from "@/scripts/commandPalette";
+  import { onEveryPage } from "@/scripts/lifecycle";
+  import { setupCommandPalettePage } from "@/scripts/commandPalette";
 
-  type CommandWindow = Window & {
-    __commandPaletteLifecycleCleanup?: () => void;
-  };
-
-  (window as CommandWindow).__commandPaletteLifecycleCleanup?.();
-  document.addEventListener("astro:page-load", setupCommandPalettePage);
-  (window as CommandWindow).__commandPaletteLifecycleCleanup = () => {
-    document.removeEventListener("astro:page-load", setupCommandPalettePage);
-    cleanupCommandPaletteBindings();
-  };
-  setupCommandPalettePage();
+  onEveryPage(setupCommandPalettePage);
 </script>

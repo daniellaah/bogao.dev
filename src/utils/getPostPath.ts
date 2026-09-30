@@ -5,12 +5,7 @@ export const getPostPath = (
   post: CollectionEntry<"blog">,
   includeBase = true
 ) => {
-  const path = getPath(
-    post.id,
-    post.filePath,
-    includeBase,
-    post.data.slug ?? post.slug
-  );
+  const path = getPath(post.id, post.filePath, includeBase, post.data.slug);
 
   return includeBase ? path : path.replace(/^\/+/, "");
 };

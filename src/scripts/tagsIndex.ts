@@ -5,18 +5,9 @@ import {
 
 type TagSort = "az" | "popular";
 
-let cleanupTagsIndexInstance = () => {};
-
-export function cleanupTagsIndexPage() {
-  cleanupTagsIndexInstance();
-  cleanupTagsIndexInstance = () => {};
-}
-
 export function setupTagsIndexPage() {
   const root = document.querySelector<HTMLElement>("[data-tags-index]");
-  if (!root || root.dataset.initialized === "true") return;
-
-  cleanupTagsIndexPage();
+  if (!root) return;
 
   const status = root.querySelector<HTMLElement>("[data-tags-status]");
   const sortToggle = root.querySelector<HTMLElement>("[data-tags-sort-toggle]");
@@ -31,7 +22,6 @@ export function setupTagsIndexPage() {
 
   if (!status || !sortToggle || !cardGrid) return;
 
-  root.dataset.initialized = "true";
   let currentSort: TagSort = "popular";
 
   if (reduceMotion.matches) {
@@ -158,7 +148,7 @@ export function setupTagsIndexPage() {
     sortToggle.dataset.inkReady = "true";
   });
 
-  cleanupTagsIndexInstance = addToggleIndicatorResizeSync(() => {
+  return addToggleIndicatorResizeSync(() => {
     setActiveToggleButton(sortButtons, "tagSort", currentSort, sortToggle);
   });
 }

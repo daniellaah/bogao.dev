@@ -1,16 +1,3 @@
-type HomeWindow = Window & {
-  __homeAvatarHoverCleanup?: () => void;
-  __homeAvatarLastReplayAt?: number;
-};
-
-function storeHomeBackUrl() {
-  const indexLayout = (document.querySelector("#main-content") as HTMLElement)
-    ?.dataset?.layout;
-  if (indexLayout) {
-    sessionStorage.setItem("backUrl", "/");
-  }
-}
-
 // Avatar SVG markup, fetched once per URL. A replay restarts the SVG's SMIL
 // animation by pointing the <img> at a fresh blob URL of the same markup, so
 // replays never re-download the file.
@@ -49,46 +36,25 @@ async function replayAvatarImage(image: HTMLImageElement) {
   }
 }
 
-function replayHeroAvatarAnimation() {
-  const indexLayout = (document.querySelector("#main-content") as HTMLElement)
-    ?.dataset?.layout;
-  if (indexLayout !== "index") return;
+const REPLAY_THROTTLE_MS = 300;
+let lastReplayAt = 0;
 
-  const homeWindow = window as HomeWindow;
+function replayHeroAvatarAnimation() {
   const now = performance.now();
-  if (
-    homeWindow.__homeAvatarLastReplayAt &&
-    now - homeWindow.__homeAvatarLastReplayAt < 300
-  ) {
-    return;
-  }
-  homeWindow.__homeAvatarLastReplayAt = now;
+  if (lastReplayAt && now - lastReplayAt < REPLAY_THROTTLE_MS) return;
+  lastReplayAt = now;
 
   document
     .querySelectorAll<HTMLImageElement>(".hero-avatar__image")
     .forEach(image => void replayAvatarImage(image));
 }
 
-function bindHeroAvatarReplay() {
-  const homeWindow = window as HomeWindow;
-  homeWindow.__homeAvatarHoverCleanup?.();
-  homeWindow.__homeAvatarHoverCleanup = undefined;
-
-  const indexLayout = (document.querySelector("#main-content") as HTMLElement)
-    ?.dataset?.layout;
-  if (indexLayout !== "index") return;
-
-  const avatar = document.querySelector<HTMLElement>(".hero-avatar");
+export function setupHomePage() {
+  const avatar = document.querySelector<HTMLElement>(
+    "#main-content[data-layout='index'] .hero-avatar"
+  );
   if (!avatar) return;
 
-  avatar.addEventListener("pointerenter", replayHeroAvatarAnimation);
-  homeWindow.__homeAvatarHoverCleanup = () => {
-    avatar.removeEventListener("pointerenter", replayHeroAvatarAnimation);
-  };
-}
-
-export function setupHomePage() {
-  storeHomeBackUrl();
   replayHeroAvatarAnimation();
-  bindHeroAvatarReplay();
+  avatar.addEventListener("pointerenter", replayHeroAvatarAnimation);
 }

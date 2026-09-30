@@ -65,7 +65,7 @@ const relatedProjects = projects
   ogImage={ogImage}
 >
   <Header />
-  <BackButton />
+  <BackButton href="/projects/" label="Projects" />
   <main
     id="main-content"
     class:list={[
@@ -194,20 +194,8 @@ const relatedProjects = projects
 </Layout>
 
 <script>
-  import { setupPostDetailsPage } from "@/scripts/postDetails.js";
+  import { onEveryPage } from "@/scripts/lifecycle";
+  import { setupPostDetailsPage } from "@/scripts/postDetails";
 
-  type PostDetailsWindow = Window & {
-    __postDetailsLifecycleCleanup?: () => void;
-  };
-
-  // Same lifecycle as post pages: heading anchors, code copy buttons,
-  // reading progress, and the active table-of-contents link.
-  (window as PostDetailsWindow).__postDetailsLifecycleCleanup?.();
-  document.addEventListener("astro:page-load", setupPostDetailsPage);
-  document.addEventListener("astro:after-swap", setupPostDetailsPage);
-  (window as PostDetailsWindow).__postDetailsLifecycleCleanup = () => {
-    document.removeEventListener("astro:page-load", setupPostDetailsPage);
-    document.removeEventListener("astro:after-swap", setupPostDetailsPage);
-  };
-  setupPostDetailsPage();
+  onEveryPage(setupPostDetailsPage);
 </script>
