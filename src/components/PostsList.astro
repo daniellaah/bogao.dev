@@ -1,5 +1,5 @@
 ---
-import CompactPostRow from "@/components/CompactPostRow.astro";
+import PostRow from "@/components/PostRow.astro";
 import type { SortedBlogPost } from "@/utils/getSortedPosts";
 
 type Props = {
@@ -12,9 +12,9 @@ const { posts, filterable = false } = Astro.props;
 
 {
   posts.length > 0 ? (
-    <ul class="ledger-list--subtle mt-6">
+    <ul class="post-list mt-4">
       {posts.map(post => (
-        <CompactPostRow {post} {filterable} />
+        <PostRow {post} {filterable} />
       ))}
     </ul>
   ) : (

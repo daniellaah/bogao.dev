@@ -5,18 +5,17 @@ import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
 import OpenSourceCard from "@/components/OpenSourceCard.astro";
+import PostRow from "@/components/PostRow.astro";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import IconFileText from "@/assets/icons/IconFileText.svg";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import IconLinkedInMark from "@/assets/icons/IconLinkedInMark.svg";
 import { SITE } from "@/config";
 import { HOMEPAGE_PROJECTS, OPEN_SOURCE, PROFILE } from "@/data/profile";
-import dayjs from "@/utils/dayjs";
 import getBlogEntries from "@/utils/getBlogEntries";
 import getSortedPosts from "@/utils/getSortedPosts";
 import getSortedProjects from "@/utils/getSortedProjects";
 import { getProjectAccent } from "@/utils/accent";
-import { getPostPath } from "@/utils/getPostPath";
 import { getProjectPath } from "@/utils/getProjectPath";
 import "@/styles/home.css";
 
@@ -161,33 +160,9 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
             </a>
           </div>
 
-          <ol class="writing-list">
+          <ol class="post-list">
             {recentPosts.map(post => (
-              <li>
-                <a
-                  class="writing-row hand-underline-trigger"
-                  href={getPostPath(post)}
-                >
-                  <time
-                    class="writing-row__date"
-                    datetime={post.data.pubDatetime.toISOString()}
-                  >
-                    {dayjs.utc(post.data.pubDatetime).format("D MMM YYYY")}
-                  </time>
-                  <span class="writing-row__text">
-                    <span class="writing-row__title hand-underline">
-                      {post.data.title}
-                    </span>
-                    <span class="writing-row__description">
-                      {post.data.description}
-                    </span>
-                  </span>
-                  <IconArrowRight
-                    class="writing-row__arrow"
-                    aria-hidden="true"
-                  />
-                </a>
-              </li>
+              <PostRow post={post} />
             ))}
           </ol>
         </section>

@@ -1,0 +1,169 @@
+/* Post detail page. Layout comes from doc-layout.css; the blue tape matches
+   the tag links. */
+
+.post-detail {
+  --doc-marker: var(--marker-blue);
+}
+
+.post-hero {
+  padding-bottom: 2rem;
+}
+
+.post-hero__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+}
+
+.post-hero__tags a {
+  color: var(--ink-blue);
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.post-hero__tags a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.post-hero__title {
+  max-width: 50rem;
+  margin-top: 0.75rem;
+  font-size: clamp(1.9rem, 3.6vw, 2.6rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.18;
+  text-wrap: balance;
+}
+
+.post-hero__description {
+  max-width: 46rem;
+  margin-top: 0.9rem;
+  color: var(--graphite);
+  font-size: clamp(1.02rem, 1.5vw, 1.15rem);
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.post-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.1rem;
+  margin-top: 1.1rem;
+  color: var(--graphite);
+  font-family: var(--font-code);
+  font-size: 0.78rem;
+}
+
+/* Dot separators only where the line fits; on phones items wrap cleanly. */
+@media (min-width: 40rem) {
+  .post-hero__meta {
+    column-gap: 0;
+  }
+
+  .post-hero__meta > * + *::before {
+    margin-inline: 0.6rem;
+    content: "·";
+    opacity: 0.6;
+  }
+}
+
+/* Inline table of contents: collapsed by default so the article starts on
+   the first screen. Hidden beside the sticky aside on wide screens. */
+.post-toc-inline {
+  display: block;
+  margin-bottom: 2rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px 10px 7px 9px / 9px 6px 10px 7px;
+  background: var(--surface);
+}
+
+.post-toc-inline > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--graphite);
+  font-family: var(--font-code);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+.post-toc-inline > summary::-webkit-details-marker {
+  display: none;
+}
+
+.post-toc-inline > summary::after {
+  font-size: 1rem;
+  content: "+";
+}
+
+.post-toc-inline[open] > summary::after {
+  content: "–";
+}
+
+.post-toc-inline[open] > nav {
+  margin-top: 0.75rem;
+}
+
+.post-toc-inline ol {
+  font-size: 0.9rem;
+}
+
+/* Matches the breakpoint where the sticky aside TOC takes over. */
+@media (min-width: 64rem) {
+  .post-toc-inline {
+    display: none;
+  }
+}
+
+/* Share */
+
+.share-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.share-links__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.share-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  color: var(--foreground);
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition:
+    background-color var(--motion-duration-fast) var(--motion-ease-standard),
+    transform var(--motion-duration-press) var(--motion-ease-standard);
+}
+
+.share-link:hover {
+  background-color: var(--surface);
+  transform: translate(-1px, -1px);
+}
+
+.share-link svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+/* The hidden back-to-top button must not catch clicks. */
+#btt-btn-container.opacity-0 {
+  pointer-events: none;
+}

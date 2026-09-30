@@ -38,17 +38,17 @@ const filterButtonClass =
       aria-label="Filter posts"
     >
       <div class="content-status">
+        {/* Filled in by the script only while a filter is active. */}
         <p
           class="content-status__message"
           data-filter-status
           aria-live="polite"
-        >
-          Showing all {posts.length} posts.
-        </p>
+        />
       </div>
 
       <div class="space-y-2">
-        <div class="toggle-control-row">
+        {/* A year filter with one year to pick is just noise. */}
+        <div class="toggle-control-row" hidden={years.length < 2}>
           <span class="notebook-kicker">Year</span>
           <div
             class="ink-toggle post-filter-toggle flex flex-wrap gap-2"

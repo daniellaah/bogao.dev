@@ -1,0 +1,103 @@
+/* Two-column document layout shared by project and post pages: the article,
+   plus a sticky side panel (taped card) with facts and a table of contents.
+   --doc-marker picks the tape color. */
+
+.doc-body {
+  display: grid;
+  /* minmax(0, …) keeps wide code blocks scrolling instead of widening the page. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--foreground);
+}
+
+.doc-panel {
+  position: relative;
+  padding: 1.2rem 1.3rem;
+  background-color: var(--surface);
+  box-shadow: var(--card-shadow);
+}
+
+/* Washi tape, matching the cards. */
+.doc-panel::before {
+  position: absolute;
+  top: -1.05rem;
+  left: 1rem;
+  width: 4.2rem;
+  height: 1.2rem;
+  background: color-mix(
+    in srgb,
+    var(--doc-marker, var(--marker-yellow)) calc(var(--marker-strength) * 0.8),
+    transparent
+  );
+  clip-path: polygon(
+    0 12%,
+    6% 0,
+    12% 14%,
+    100% 4%,
+    94% 30%,
+    100% 58%,
+    95% 100%,
+    8% 90%,
+    0 100%,
+    5% 56%
+  );
+  content: "";
+  transform: rotate(-4deg);
+}
+
+.doc-panel__label {
+  color: var(--graphite);
+  font-family: var(--font-code);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* The table of contents only earns its space next to the article. */
+.doc-toc {
+  display: none;
+}
+
+.doc-toc ol {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* An aside holding only the TOC has nothing to show on narrow screens. */
+.doc-aside--toc-only {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .doc-body {
+    grid-template-columns: minmax(0, 1fr) 17rem;
+    column-gap: 3.5rem;
+    align-items: start;
+  }
+
+  .doc-main {
+    grid-column: 1;
+    grid-row: 1;
+    min-width: 0;
+  }
+
+  .doc-aside {
+    position: sticky;
+    top: 1.5rem;
+    display: block;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .doc-toc {
+    display: block;
+  }
+
+  .doc-panel > * + .doc-toc {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line-subtle);
+  }
+}

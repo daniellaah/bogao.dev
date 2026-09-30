@@ -108,13 +108,23 @@
       font-family: var(--font-code);
     }
 
+    /* Upright, no injected quotes: CJK fonts have no italic, so browsers
+       would slant the glyphs artificially. */
     blockquote {
-      @apply border-s-foreground/70 wrap-break-word opacity-80;
+      @apply border-s-foreground/70 wrap-break-word;
+      color: var(--graphite);
       font-family: var(--font-body);
+      font-style: normal;
+      font-weight: 400;
+    }
+
+    blockquote p::before,
+    blockquote p::after {
+      content: none;
     }
 
     details {
-      @apply inline-block cursor-pointer text-foreground select-none [&_p]:hidden [&_ul]:my-0!;
+      @apply inline-block cursor-pointer text-foreground select-none [&_ul]:my-0!;
     }
 
     summary {

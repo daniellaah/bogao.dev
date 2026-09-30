@@ -1,46 +1,37 @@
 import type { Props } from "astro";
 import IconMail from "@/assets/icons/IconMail.svg";
 import IconBrandX from "@/assets/icons/IconBrandX.svg";
-import IconWhatsapp from "@/assets/icons/IconWhatsapp.svg";
-import IconFacebook from "@/assets/icons/IconFacebook.svg";
-import IconTelegram from "@/assets/icons/IconTelegram.svg";
-import IconPinterest from "@/assets/icons/IconPinterest.svg";
+import IconLinkedIn from "@/assets/icons/IconLinkedIn.svg";
 
 interface Social {
-  href: string;
+  label: string;
   linkTitle: string;
   icon: (_props: Props) => Element;
+  href: (url: string, title: string) => string;
 }
 
+// Where readers of an engineering post actually share it. "Copy link" is
+// rendered separately because it needs a script, not a URL.
 export const SHARE_LINKS: Social[] = [
   {
-    href: "https://wa.me/?text=",
-    linkTitle: `Share this post via WhatsApp`,
-    icon: IconWhatsapp,
+    label: "LinkedIn",
+    linkTitle: "Share this post on LinkedIn",
+    icon: IconLinkedIn,
+    href: url =>
+      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
   },
   {
-    href: "https://www.facebook.com/sharer.php?u=",
-    linkTitle: `Share this post on Facebook`,
-    icon: IconFacebook,
-  },
-  {
-    href: "https://x.com/intent/post?url=",
-    linkTitle: `Share this post on X`,
+    label: "X",
+    linkTitle: "Share this post on X",
     icon: IconBrandX,
+    href: (url, title) =>
+      `https://x.com/intent/post?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
   },
   {
-    href: "https://t.me/share/url?url=",
-    linkTitle: `Share this post via Telegram`,
-    icon: IconTelegram,
-  },
-  {
-    href: "https://pinterest.com/pin/create/button/?url=",
-    linkTitle: `Share this post on Pinterest`,
-    icon: IconPinterest,
-  },
-  {
-    href: "mailto:?subject=See%20this%20post&body=",
-    linkTitle: `Share this post via email`,
+    label: "Email",
+    linkTitle: "Share this post via email",
     icon: IconMail,
+    href: (url, title) =>
+      `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(url)}`,
   },
 ] as const;

@@ -1,26 +1,76 @@
 ---
+import IconLink from "@/assets/icons/IconLink.svg";
 import { SHARE_LINKS } from "@/constants";
-import LinkButton from "./LinkButton.astro";
 
-const URL = Astro.url;
+type Props = {
+  title: string;
+};
+
+const { title } = Astro.props;
+const url = Astro.url.href;
 ---
 
-{
-  SHARE_LINKS.length > 0 && (
-    <div class="flex flex-none flex-col items-center justify-center gap-1 md:items-start">
-      <span class="notebook-kicker">Share this post</span>
-      <div class="text-center">
-        {SHARE_LINKS.map(social => (
-          <LinkButton
-            href={`${social.href + URL}`}
-            class="scale-90 p-2 hover:rotate-6 sm:p-1"
-            title={social.linkTitle}
-          >
-            <social.icon class="inline-block size-6 scale-125 fill-transparent stroke-current stroke-2 opacity-90 group-hover:fill-transparent sm:scale-110" />
-            <span class="sr-only">{social.linkTitle}</span>
-          </LinkButton>
-        ))}
-      </div>
-    </div>
-  )
-}
+<div class="share-links">
+  <span class="notebook-kicker">Share this post</span>
+  <div class="share-links__list">
+    {
+      SHARE_LINKS.map(social => (
+        <a
+          class="share-link sketch-chip"
+          href={social.href(url, title)}
+          title={social.linkTitle}
+          rel="noreferrer"
+          target="_blank"
+        >
+          <social.icon aria-hidden="true" />
+          {social.label}
+        </a>
+      ))
+    }
+    <button
+      type="button"
+      class="share-link sketch-chip"
+      data-copy-link={url}
+      title="Copy the link to this post"
+    >
+      <IconLink aria-hidden="true" />
+      <span data-copy-link-label>Copy link</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  // Clipboard API first; fall back to a hidden textarea for contexts that
+  // block it (embedded browsers, some permission settings).
+  const copyText = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      const field = document.createElement("textarea");
+      field.value = text;
+      field.setAttribute("readonly", "");
+      field.style.position = "fixed";
+      field.style.opacity = "0";
+      document.body.appendChild(field);
+      field.select();
+      const copied = document.execCommand("copy");
+      field.remove();
+      return copied;
+    }
+  };
+
+  document.addEventListener("click", async event => {
+    const button = (event.target as Element | null)?.closest<HTMLElement>(
+      "[data-copy-link]"
+    );
+    if (!button) return;
+
+    const label = button.querySelector("[data-copy-link-label]");
+    const copied = await copyText(button.dataset.copyLink ?? "");
+    if (label) label.textContent = copied ? "Copied" : "Copy failed";
+    window.setTimeout(() => {
+      if (label) label.textContent = "Copy link";
+    }, 1800);
+  });
+</script>

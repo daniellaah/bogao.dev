@@ -127,54 +127,6 @@ body:has(.career-home) #top-nav-wrap {
   height: 1.1rem;
 }
 
-/* Writing */
-
-.writing-row {
-  display: grid;
-  grid-template-columns: 7.5rem minmax(0, 1fr) 1.25rem;
-  gap: 1.25rem;
-  align-items: baseline;
-  padding-block: 0.9rem;
-  background-image: var(--line-ledger);
-  background-position: left bottom;
-  background-repeat: repeat-x;
-  background-size: 160px 5px;
-}
-
-.writing-list li:last-child .writing-row {
-  background-image: none;
-}
-
-.writing-row__date {
-  color: var(--graphite);
-  font-family: var(--font-code);
-  font-size: 0.75rem;
-}
-
-.writing-row__text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.writing-row__title {
-  width: fit-content;
-  font-size: 1.05rem;
-  font-weight: 500;
-}
-
-.writing-row__description {
-  color: var(--graphite);
-  font-size: 0.88rem;
-  line-height: 1.5;
-}
-
-.writing-row__arrow {
-  width: 1.1rem;
-  height: 1.1rem;
-  align-self: center;
-}
-
 /* Responsive */
 
 @media (max-width: 52rem) {
@@ -193,14 +145,5 @@ body:has(.career-home) #top-nav-wrap {
 
   .career-hero__avatar {
     width: 7.5rem;
-  }
-
-  .writing-row {
-    grid-template-columns: 1fr;
-    gap: 0.3rem;
-  }
-
-  .writing-row__arrow {
-    display: none;
   }
 }

@@ -5,8 +5,8 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Pagination from "@/components/Pagination.astro";
+import PostRow from "@/components/PostRow.astro";
 import getUniqueTags from "@/utils/getUniqueTags";
-import { getPostPath } from "@/utils/getPostPath";
 import { slugifyStr } from "@/utils/slugifyCore";
 import getSortedPosts from "@/utils/getSortedPosts";
 import getBlogEntries from "@/utils/getBlogEntries";
@@ -17,21 +17,12 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const tags = getUniqueTags(posts);
 
   return tags.flatMap(({ tag, tagName }) => {
-    const taggedPosts = posts
-      .filter(post =>
-        post.data.tags.some(postTag => slugifyStr(postTag) === tag)
-      )
-      .map(post => ({
-        title: post.data.title,
-        href: getPostPath(post),
-        date: post.data.pubDatetime,
-      }));
-
-    const taggedItems = taggedPosts.sort(
-      (a, b) => b.date.getTime() - a.date.getTime()
+    // getSortedPosts already orders newest first.
+    const taggedPosts = posts.filter(post =>
+      post.data.tags.some(postTag => slugifyStr(postTag) === tag)
     );
 
-    return paginate(taggedItems, {
+    return paginate(taggedPosts, {
       params: { tag },
       props: { tagName },
       pageSize: SITE.postPerPage,
@@ -52,32 +43,8 @@ const { page, tagName } = Astro.props;
     pageDesc={`All posts with the tag "${tagName}".`}
   >
     <h1 slot="title" transition:name={tag}>{`Tag:${tag}`}</h1>
-    <ul class="mt-6">
-      {
-        page.data.map(item => (
-          <li class="ledger-row last:border-b-0">
-            <a
-              href={item.href}
-              class="hand-underline-trigger grid gap-1 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
-            >
-              <span class="min-w-0 text-base leading-none sm:text-[1.15rem] sm:leading-none">
-                <span class="hand-underline content-title">{item.title}</span>
-              </span>
-              <time
-                datetime={item.date.toISOString()}
-                class="font-code text-xs leading-none tracking-[0.04em] text-graphite sm:text-right"
-              >
-                {new Intl.DateTimeFormat("en-US", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                  timeZone: "UTC",
-                }).format(item.date)}
-              </time>
-            </a>
-          </li>
-        ))
-      }
+    <ul class="post-list mt-4">
+      {page.data.map(post => <PostRow post={post} />)}
     </ul>
   </Main>
 

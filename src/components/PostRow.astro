@@ -1,0 +1,45 @@
+---
+import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import dayjs from "@/utils/dayjs";
+import type { SortedBlogPost } from "@/utils/getSortedPosts";
+import { getPostPath } from "@/utils/getPostPath";
+import { slugifyStr } from "@/utils/slugifyCore";
+import "@/styles/post-row.css";
+
+type Props = {
+  post: SortedBlogPost;
+  filterable?: boolean;
+};
+
+const { post, filterable = false } = Astro.props;
+const { title, description, tags, pubDatetime } = post.data;
+const published = dayjs.utc(pubDatetime);
+---
+
+<li
+  data-post-list-item={filterable ? true : undefined}
+  data-post-year={filterable ? published.format("YYYY") : undefined}
+  data-post-tags={filterable
+    ? tags.map(tag => slugifyStr(tag)).join(" ")
+    : undefined}
+>
+  <a class="post-row hand-underline-trigger" href={getPostPath(post)}>
+    <time class="post-row__date" datetime={pubDatetime.toISOString()}>
+      {published.format("D MMM YYYY")}
+    </time>
+    <span class="post-row__text">
+      <span class="post-row__title hand-underline content-title">{title}</span>
+      <span class="post-row__description">{description}</span>
+      {
+        tags.length > 0 && (
+          <span class="post-row__tags">
+            {tags.map(tag => (
+              <span>#{tag}</span>
+            ))}
+          </span>
+        )
+      }
+    </span>
+    <IconArrowRight class="post-row__arrow" aria-hidden="true" />
+  </a>
+</li>

@@ -1958,3 +1958,38 @@ test("open-source cards preview the most recently merged PR", async () => {
     "https://github.com/o/r/pulls?q=is%3Apr%20is%3Amerged%20author%3Ame"
   );
 });
+
+test("reading time counts English words and CJK characters", async () => {
+  const { getReadingMinutes } = await loadTypeScriptModule(
+    "src/utils/readingTime.ts"
+  );
+
+  assert.equal(getReadingMinutes(""), 1);
+  assert.equal(getReadingMinutes("word ".repeat(460)), 2);
+  assert.equal(getReadingMinutes("检".repeat(800)), 2);
+  // Punctuation-only tokens are not words.
+  assert.equal(getReadingMinutes("word ".repeat(230) + "— — — ---"), 1);
+});
+
+test("table of contents prefers readable heading text over rendered math", async () => {
+  const { getTocHeadings } = await loadTypeScriptModule("src/utils/toc.ts");
+  const headings = [
+    { depth: 1, slug: "title", text: "Title" },
+    { depth: 2, slug: "what-k-controls", text: "What kkk controls" },
+    { depth: 3, slug: "details", text: "Details" },
+    { depth: 4, slug: "deep", text: "Deep" },
+  ];
+
+  assert.deepEqual(
+    getTocHeadings(headings, { "what-k-controls": "What k controls" }).map(
+      heading => heading.text
+    ),
+    ["What k controls", "Details", "Deep"]
+  );
+  assert.deepEqual(
+    getTocHeadings(headings, undefined, { depths: [2, 3] }).map(
+      heading => heading.slug
+    ),
+    ["what-k-controls", "details"]
+  );
+});

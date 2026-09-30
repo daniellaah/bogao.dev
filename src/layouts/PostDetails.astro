@@ -3,19 +3,22 @@ import { render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
-import Tag from "@/components/Tag.astro";
-import Datetime from "@/components/Datetime.astro";
 import ShareLinks from "@/components/ShareLinks.astro";
 import BackButton from "@/components/BackButton.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
 import type { SortedBlogPost } from "@/utils/getSortedPosts";
+import dayjs from "@/utils/dayjs";
 import { getPostPath } from "@/utils/getPostPath";
+import { getReadingMinutes } from "@/utils/readingTime";
+import { getTocHeadings } from "@/utils/toc";
 import { resolveOgImage } from "@/utils/ogImage";
 import { slugifyStr } from "@/utils/slugifyCore";
 import IconChevronLeft from "@/assets/icons/IconChevronLeft.svg";
 import IconChevronRight from "@/assets/icons/IconChevronRight.svg";
 import { SITE } from "@/config";
 import "katex/dist/katex.min.css";
+import "@/styles/doc-layout.css";
+import "@/styles/post.css";
 
 type Props = {
   post: SortedBlogPost;
@@ -35,13 +38,17 @@ const {
   tags,
 } = post.data;
 
-const { Content, headings } = await render(post);
-const tocHeadings = headings
-  .filter(
-    heading => heading.depth === 2 || heading.depth === 3 || heading.depth === 4
-  )
-  .slice(0, 12);
+const { Content, headings, remarkPluginFrontmatter } = await render(post);
+const tocHeadings = getTocHeadings(
+  headings,
+  remarkPluginFrontmatter.headingText
+);
 const showToc = tocHeadings.length >= 3;
+
+const published = dayjs.utc(pubDatetime);
+const modified = modDatetime ? dayjs.utc(modDatetime) : null;
+const showModified = modified !== null && !modified.isSame(published, "day");
+const readingMinutes = getReadingMinutes(post.body ?? "");
 
 const ogImage = resolveOgImage(initOgImage, Astro.url.origin);
 
@@ -73,42 +80,65 @@ const nextPost =
 
 <Layout {...layoutProps}>
   <Header />
-  <BackButton layoutClass="post-detail-layout" label="All Posts" />
+  <BackButton label="All Posts" />
   <main
     id="main-content"
-    class:list={["post-detail-layout pb-12", { "mt-8": !SITE.showBackButton }]}
+    class:list={[
+      "post-detail app-layout pb-12",
+      { "mt-8": !SITE.showBackButton },
+    ]}
   >
-    <div class="post-detail-grid">
-      <div class="post-content-column">
-        <h1
-          transition:name={slugifyStr(title.replaceAll(".", "-"))}
-          class="post-title inline-block text-2xl leading-tight font-semibold sm:text-3xl"
-        >
-          {title}
-        </h1>
-        <div class="post-meta my-3 flex flex-wrap items-center gap-2">
-          <Datetime
-            {pubDatetime}
-            {modDatetime}
-            size="lg"
-            showBothDates={true}
-          />
-        </div>
-        <hr class="post-header-rule sketch-rule" />
-        <article id="article" class="app-prose reading-column mt-8">
-          {
-            showToc && (
-              <nav
-                aria-label="On this page"
-                class="sketch-box sketch-border sketch-border-thin toc-panel post-toc-inline not-prose mb-8 px-5 py-5"
-              >
-                <ol class="space-y-2 text-sm leading-6">
+    <header class="post-hero">
+      {
+        tags.length > 0 && (
+          <ul class="post-hero__tags" aria-label="Tags">
+            {tags.map(tag => (
+              <li>
+                <a href={`/tags/${slugifyStr(tag)}/`}>{tag}</a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+      <h1
+        transition:name={slugifyStr(title.replaceAll(".", "-"))}
+        class="post-hero__title"
+      >
+        {title}
+      </h1>
+      <p class="post-hero__description">{description}</p>
+      <p class="post-hero__meta">
+        <time datetime={published.toISOString()}>
+          {published.format("D MMM YYYY")}
+        </time>
+        {
+          showModified && (
+            <span>
+              Updated{" "}
+              <time datetime={modified.toISOString()}>
+                {modified.format("D MMM YYYY")}
+              </time>
+            </span>
+          )
+        }
+        <span>{readingMinutes} min read</span>
+      </p>
+    </header>
+
+    <div class="doc-body">
+      {
+        showToc && (
+          <aside class="doc-aside doc-aside--toc-only">
+            <div class="doc-panel sketch-border sketch-border-thin">
+              <nav class="doc-toc" aria-label="On this page">
+                <p class="doc-panel__label">On this page</p>
+                <ol>
                   {tocHeadings.map(heading => (
                     <li>
                       <a
                         href={`#${heading.slug}`}
                         class:list={[
-                          "toc-link ink-link text-foreground/80 hover:text-foreground",
+                          "toc-link ink-link",
                           heading.depth === 3 && "level-3",
                           heading.depth === 4 && "level-4",
                         ]}
@@ -120,24 +150,47 @@ const nextPost =
                   ))}
                 </ol>
               </nav>
-            )
-          }
+            </div>
+          </aside>
+        )
+      }
+
+      <div class="doc-main">
+        {
+          showToc && (
+            <details class="post-toc-inline">
+              <summary>On this page</summary>
+              <nav aria-label="On this page">
+                <ol>
+                  {tocHeadings.map(heading => (
+                    <li>
+                      <a
+                        href={`#${heading.slug}`}
+                        class:list={[
+                          "toc-link ink-link",
+                          heading.depth === 3 && "level-3",
+                          heading.depth === 4 && "level-4",
+                        ]}
+                        data-toc-link
+                      >
+                        {heading.text}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+            </details>
+          )
+        }
+        <article id="article" class="app-prose">
           <Content />
         </article>
 
         <hr class="sketch-rule my-8" />
 
-        <ul class="mt-4 mb-8 flex flex-wrap gap-4 sm:my-8">
-          {
-            tags.map(tag => (
-              <Tag tag={slugifyStr(tag)} tagName={tag} size="sm" />
-            ))
-          }
-        </ul>
-
         <BackToTopButton />
 
-        <ShareLinks />
+        <ShareLinks title={title} />
 
         <hr class="sketch-rule my-6" />
 
@@ -176,36 +229,6 @@ const nextPost =
           }
         </div>
       </div>
-
-      {
-        showToc && (
-          <>
-            <div class="post-toc-divider" aria-hidden="true" />
-            <nav
-              aria-label="On this page"
-              class="toc-panel post-toc-aside px-4 py-4"
-            >
-              <ol class="space-y-2 text-sm leading-6">
-                {tocHeadings.map(heading => (
-                  <li>
-                    <a
-                      href={`#${heading.slug}`}
-                      class:list={[
-                        "toc-link ink-link text-foreground/75 hover:text-foreground",
-                        heading.depth === 3 && "level-3",
-                        heading.depth === 4 && "level-4",
-                      ]}
-                      data-toc-link
-                    >
-                      {heading.text}
-                    </a>
-                  </li>
-                ))}
-              </ol>
-            </nav>
-          </>
-        )
-      }
     </div>
   </main>
   <Footer />

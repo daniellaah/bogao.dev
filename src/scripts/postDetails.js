@@ -108,79 +108,6 @@ function attachCopyButtons() {
   }
 }
 
-function initTocDivider(addCleanup) {
-  const divider = document.querySelector(".post-toc-divider");
-  const contentColumn = document.querySelector(".post-content-column");
-  const article = document.getElementById("article");
-  const mediaQuery = window.matchMedia("(min-width: 80rem)");
-
-  if (!divider || !contentColumn || !article) return;
-
-  let frame = 0;
-
-  const lengthToPx = value => {
-    const trimmed = value.trim();
-    if (trimmed.endsWith("rem")) {
-      return (
-        Number.parseFloat(trimmed) *
-        Number.parseFloat(getComputedStyle(document.documentElement).fontSize)
-      );
-    }
-
-    return Number.parseFloat(trimmed) || 0;
-  };
-
-  const updateDivider = () => {
-    frame = 0;
-
-    if (!mediaQuery.matches) {
-      divider.style.visibility = "hidden";
-      return;
-    }
-
-    const rootStyles = getComputedStyle(document.documentElement);
-    const viewportGap = lengthToPx(
-      rootStyles.getPropertyValue("--post-toc-divider-viewport-gap")
-    );
-    const columnRect = contentColumn.getBoundingClientRect();
-    const articleRect = article.getBoundingClientRect();
-    const top = Math.max(viewportGap, columnRect.top);
-    const bottom = Math.min(
-      window.innerHeight - viewportGap,
-      articleRect.bottom
-    );
-    const height = Math.max(0, bottom - top);
-
-    if (height < 80) {
-      divider.style.visibility = "hidden";
-      divider.style.height = "0px";
-      return;
-    }
-
-    divider.style.visibility = "visible";
-    divider.style.top = `${Math.round(top)}px`;
-    divider.style.height = `${Math.round(height)}px`;
-  };
-
-  const requestDividerUpdate = () => {
-    if (frame) return;
-    frame = requestAnimationFrame(updateDivider);
-  };
-
-  window.addEventListener("scroll", requestDividerUpdate, { passive: true });
-  window.addEventListener("resize", requestDividerUpdate);
-  mediaQuery.addEventListener("change", requestDividerUpdate);
-
-  addCleanup(() => {
-    if (frame) cancelAnimationFrame(frame);
-    window.removeEventListener("scroll", requestDividerUpdate);
-    window.removeEventListener("resize", requestDividerUpdate);
-    mediaQuery.removeEventListener("change", requestDividerUpdate);
-  });
-
-  requestDividerUpdate();
-}
-
 function initActiveToc(addCleanup) {
   window.__activeTocCleanup?.();
   window.__activeTocCleanup = undefined;
@@ -383,7 +310,6 @@ export function setupPostDetailsPage() {
   updateScrollProgress(addPostPageCleanup);
   addHeadingLinks();
   attachCopyButtons();
-  initTocDivider(addPostPageCleanup);
   initActiveToc(addPostPageCleanup);
   scrollToPageStartAfterSwap();
 }

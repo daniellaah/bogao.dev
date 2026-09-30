@@ -82,7 +82,7 @@ export function setupPostFiltersPage() {
     if (status) {
       status.textContent =
         year === "all" && tag === "all"
-          ? `Showing all ${posts.length} posts.`
+          ? ""
           : `Showing ${visibleCount} post${visibleCount === 1 ? "" : "s"}.`;
     }
   };

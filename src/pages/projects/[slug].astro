@@ -13,7 +13,9 @@ import { getProjectAccent } from "@/utils/accent";
 import getSortedProjects from "@/utils/getSortedProjects";
 import { getProjectPath } from "@/utils/getProjectPath";
 import { resolveOgImage } from "@/utils/ogImage";
+import { getTocHeadings } from "@/utils/toc";
 import { SITE } from "@/config";
+import "@/styles/doc-layout.css";
 import "@/styles/project.css";
 
 export const getStaticPaths = (async () => {
@@ -26,7 +28,7 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { project, projects } = Astro.props;
-const { Content, headings } = await render(project);
+const { Content, headings, remarkPluginFrontmatter } = await render(project);
 
 const {
   title,
@@ -44,9 +46,11 @@ const ogImage = resolveOgImage(project.data.ogImage, Astro.url.origin);
 const projectIds = projects.map(({ id }) => id);
 const accent = getProjectAccent(project.id, projectIds);
 
-const tocHeadings = headings
-  .filter(heading => heading.depth === 2 || heading.depth === 3)
-  .slice(0, 12);
+const tocHeadings = getTocHeadings(
+  headings,
+  remarkPluginFrontmatter.headingText,
+  { depths: [2, 3] }
+);
 const showToc = tocHeadings.length >= 3;
 
 const relatedProjects = projects
@@ -107,12 +111,12 @@ const relatedProjects = projects
       }
     </header>
 
-    <div class="project-detail__body">
-      <aside class="project-facts" aria-label="Project details">
-        <div class="project-facts__panel sketch-border sketch-border-thin">
+    <div class="doc-body">
+      <aside class="doc-aside" aria-label="Project details">
+        <div class="doc-panel sketch-border sketch-border-thin">
           <dl class="project-facts__list">
             <div>
-              <dt class="project-facts__label">Status</dt>
+              <dt class="doc-panel__label">Status</dt>
               <dd class="project-facts__value">
                 <ProjectStatusBadge status={status} />
               </dd>
@@ -120,7 +124,7 @@ const relatedProjects = projects
             {
               year && (
                 <div>
-                  <dt class="project-facts__label">Year</dt>
+                  <dt class="doc-panel__label">Year</dt>
                   <dd class="project-facts__value font-code">{year}</dd>
                 </div>
               )
@@ -128,7 +132,7 @@ const relatedProjects = projects
             {
               stack.length > 0 && (
                 <div class="project-facts__stack">
-                  <dt class="project-facts__label">Stack</dt>
+                  <dt class="doc-panel__label">Stack</dt>
                   <dd class="project-facts__value">
                     {stack.map(item => (
                       <span>{item}</span>
@@ -141,8 +145,8 @@ const relatedProjects = projects
 
           {
             showToc && (
-              <nav class="project-toc" aria-label="On this page">
-                <p class="project-toc__label">On this page</p>
+              <nav class="doc-toc" aria-label="On this page">
+                <p class="doc-panel__label">On this page</p>
                 <ol>
                   {tocHeadings.map(heading => (
                     <li>
@@ -165,7 +169,7 @@ const relatedProjects = projects
         </div>
       </aside>
 
-      <article id="article" class="app-prose">
+      <article id="article" class="doc-main app-prose">
         <Content />
       </article>
     </div>

@@ -24,12 +24,9 @@ const pubDatetime = dayjs.utc(post.data.pubDatetime);
 >
   <a
     href={getPostPath(post)}
-    class="hand-underline-trigger grid gap-1 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
+    class="hand-underline-trigger grid gap-1.5 pb-3 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
   >
-    <span
-      class="block min-w-0 truncate text-base leading-none sm:text-[1.15rem] sm:leading-none"
-      title={post.data.title}
-    >
+    <span class="block min-w-0 text-base leading-snug sm:text-[1.15rem]">
       <span class="hand-underline content-title">{post.data.title}</span>
     </span>
     <time
