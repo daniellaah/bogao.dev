@@ -1,11 +1,12 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import WorkCard from "./WorkCard.astro";
+import type { Accent } from "@/utils/accent";
 import { getProjectPath } from "@/utils/getProjectPath";
 
-type Props = CollectionEntry<"projects">;
+type Props = CollectionEntry<"projects"> & { accent: Accent };
 
-const { id, data } = Astro.props;
+const { id, data, accent } = Astro.props;
 ---
 
 <WorkCard
@@ -14,4 +15,5 @@ const { id, data } = Astro.props;
   title={data.title}
   description={data.description}
   tags={data.tags}
+  accent={accent}
 />

@@ -5,11 +5,16 @@ import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import BackButton from "@/components/BackButton.astro";
+import ProjectCard from "@/components/ProjectCard.astro";
 import ProjectStatusBadge from "@/components/ProjectStatusBadge.astro";
+import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import IconGitHub from "@/assets/icons/IconGitHub.svg";
+import { getProjectAccent } from "@/utils/accent";
 import getSortedProjects from "@/utils/getSortedProjects";
 import { getProjectPath } from "@/utils/getProjectPath";
 import { resolveOgImage } from "@/utils/ogImage";
 import { SITE } from "@/config";
+import "@/styles/project.css";
 
 export const getStaticPaths = (async () => {
   const projects = getSortedProjects(await getCollection("projects"));
@@ -21,10 +26,11 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 const { project, projects } = Astro.props;
-const { Content } = await render(project);
+const { Content, headings } = await render(project);
 
 const {
   title,
+  kicker,
   description,
   status,
   stack,
@@ -34,6 +40,14 @@ const {
   canonicalURL,
 } = project.data;
 const ogImage = resolveOgImage(project.data.ogImage, Astro.url.origin);
+
+const projectIds = projects.map(({ id }) => id);
+const accent = getProjectAccent(project.id, projectIds);
+
+const tocHeadings = headings
+  .filter(heading => heading.depth === 2 || heading.depth === 3)
+  .slice(0, 12);
+const showToc = tocHeadings.length >= 3;
 
 const relatedProjects = projects
   .filter(({ id }) => id !== project.id)
@@ -48,61 +62,124 @@ const relatedProjects = projects
 >
   <Header />
   <BackButton />
-  <main id="main-content" class="app-layout pb-12">
-    <section class="sketch-edge-bottom pb-8">
-      <div>
-        <div class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-2">
-          <ProjectStatusBadge status={status} />
-          {year && <span class="font-code text-xs text-graphite">{year}</span>}
-          {
-            stack.length > 0 && (
-              <span
-                class="min-w-0 truncate text-sm text-graphite"
-                title={stack.join(" · ")}
-              >
-                {stack.join(" · ")}
-              </span>
-            )
-          }
-        </div>
-        <h1 class="mt-5 text-3xl font-semibold sm:text-4xl">
+  <main
+    id="main-content"
+    class:list={[
+      "project-detail app-layout pb-12",
+      `project-detail--${accent}`,
+    ]}
+  >
+    <header class="project-hero">
+      {kicker && <p class="project-hero__kicker">{kicker}</p>}
+      <h1 class="project-hero__title">
+        <span class:list={["marker-swipe", `marker-swipe--${accent}`]}>
           {title}
-        </h1>
-        <p class="mt-4 max-w-3xl text-base leading-8 text-graphite">
-          {description}
-        </p>
-        <div class="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium">
-          {
-            demoUrl && (
-              <a href={demoUrl} class="ink-link underline decoration-dashed">
-                Demo
+        </span>
+      </h1>
+      <p class="project-hero__description">{description}</p>
+      {
+        (repoUrl || demoUrl) && (
+          <div class="project-hero__actions">
+            {repoUrl && (
+              <a
+                class="hero-action hero-action--github"
+                href={repoUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                <IconGitHub aria-hidden="true" />
+                View on GitHub
               </a>
-            )
-          }
-          {
-            repoUrl && (
-              <a href={repoUrl} class="ink-link underline decoration-dashed">
-                GitHub
+            )}
+            {demoUrl && (
+              <a
+                class="hero-action"
+                href={demoUrl}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Live demo
+                <IconArrowRight aria-hidden="true" />
               </a>
+            )}
+          </div>
+        )
+      }
+    </header>
+
+    <div class="project-detail__body">
+      <aside class="project-facts" aria-label="Project details">
+        <div class="project-facts__panel sketch-border sketch-border-thin">
+          <dl class="project-facts__list">
+            <div>
+              <dt class="project-facts__label">Status</dt>
+              <dd class="project-facts__value">
+                <ProjectStatusBadge status={status} />
+              </dd>
+            </div>
+            {
+              year && (
+                <div>
+                  <dt class="project-facts__label">Year</dt>
+                  <dd class="project-facts__value font-code">{year}</dd>
+                </div>
+              )
+            }
+            {
+              stack.length > 0 && (
+                <div class="project-facts__stack">
+                  <dt class="project-facts__label">Stack</dt>
+                  <dd class="project-facts__value">
+                    {stack.map(item => (
+                      <span>{item}</span>
+                    ))}
+                  </dd>
+                </div>
+              )
+            }
+          </dl>
+
+          {
+            showToc && (
+              <nav class="project-toc" aria-label="On this page">
+                <p class="project-toc__label">On this page</p>
+                <ol>
+                  {tocHeadings.map(heading => (
+                    <li>
+                      <a
+                        href={`#${heading.slug}`}
+                        class:list={[
+                          "toc-link ink-link",
+                          heading.depth === 3 && "level-3",
+                        ]}
+                        data-toc-link
+                      >
+                        {heading.text}
+                      </a>
+                    </li>
+                  ))}
+                </ol>
+              </nav>
             )
           }
         </div>
-      </div>
-    </section>
+      </aside>
 
-    <article class="app-prose reading-column mt-8">
-      <Content />
-    </article>
+      <article id="article" class="app-prose">
+        <Content />
+      </article>
+    </div>
 
     {
       relatedProjects.length > 0 && (
-        <section class="sketch-edge-top mt-12 pt-8">
-          <h2 class="text-2xl font-semibold">More Projects</h2>
-          <div class="mt-6 grid gap-4 md:grid-cols-2">
+        <section class="project-related">
+          <h2 class="project-related__title">More projects</h2>
+          <div class="work-grid">
             {relatedProjects.map(item => (
-              <a href={getProjectPath(item.id)} class="ink-link pb-2">
-                {item.data.title}
-              </a>
+              <ProjectCard
+                {...item}
+                accent={getProjectAccent(item.id, projectIds)}
+              />
             ))}
           </div>
         </section>
@@ -111,3 +188,22 @@ const relatedProjects = projects
   </main>
   <Footer />
 </Layout>
+
+<script>
+  import { setupPostDetailsPage } from "@/scripts/postDetails.js";
+
+  type PostDetailsWindow = Window & {
+    __postDetailsLifecycleCleanup?: () => void;
+  };
+
+  // Same lifecycle as post pages: heading anchors, code copy buttons,
+  // reading progress, and the active table-of-contents link.
+  (window as PostDetailsWindow).__postDetailsLifecycleCleanup?.();
+  document.addEventListener("astro:page-load", setupPostDetailsPage);
+  document.addEventListener("astro:after-swap", setupPostDetailsPage);
+  (window as PostDetailsWindow).__postDetailsLifecycleCleanup = () => {
+    document.removeEventListener("astro:page-load", setupPostDetailsPage);
+    document.removeEventListener("astro:after-swap", setupPostDetailsPage);
+  };
+  setupPostDetailsPage();
+</script>

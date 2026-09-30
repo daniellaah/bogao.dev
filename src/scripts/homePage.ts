@@ -11,6 +11,44 @@ function storeHomeBackUrl() {
   }
 }
 
+// Avatar SVG markup, fetched once per URL. A replay restarts the SVG's SMIL
+// animation by pointing the <img> at a fresh blob URL of the same markup, so
+// replays never re-download the file.
+const avatarMarkup = new Map<string, Promise<string>>();
+
+function loadAvatarMarkup(src: string) {
+  let markup = avatarMarkup.get(src);
+  if (!markup) {
+    markup = fetch(src).then(response => {
+      if (!response.ok) throw new Error(`${response.status} ${src}`);
+      return response.text();
+    });
+    markup.catch(() => avatarMarkup.delete(src));
+    avatarMarkup.set(src, markup);
+  }
+  return markup;
+}
+
+async function replayAvatarImage(image: HTMLImageElement) {
+  const baseSrc =
+    image.dataset.avatarSrc ?? image.getAttribute("src")?.split("?")[0] ?? "";
+  if (!baseSrc || baseSrc.startsWith("blob:")) return;
+  image.dataset.avatarSrc = baseSrc;
+
+  try {
+    const markup = await loadAvatarMarkup(baseSrc);
+    const previousUrl = image.dataset.avatarBlob;
+    const url = URL.createObjectURL(
+      new Blob([markup], { type: "image/svg+xml" })
+    );
+    image.dataset.avatarBlob = url;
+    image.src = url;
+    if (previousUrl) URL.revokeObjectURL(previousUrl);
+  } catch {
+    // Keep showing the current image; the replay is decorative.
+  }
+}
+
 function replayHeroAvatarAnimation() {
   const indexLayout = (document.querySelector("#main-content") as HTMLElement)
     ?.dataset?.layout;
@@ -26,19 +64,9 @@ function replayHeroAvatarAnimation() {
   }
   homeWindow.__homeAvatarLastReplayAt = now;
 
-  const replayKey = `${Date.now()}-${Math.round(now)}`;
   document
     .querySelectorAll<HTMLImageElement>(".hero-avatar__image")
-    .forEach((image, index) => {
-      const baseSrc =
-        image.dataset.avatarSrc ??
-        image.getAttribute("src")?.split("?")[0] ??
-        "";
-      if (!baseSrc) return;
-
-      image.dataset.avatarSrc = baseSrc;
-      image.src = `${baseSrc}?replay=${replayKey}-${index}`;
-    });
+    .forEach(image => void replayAvatarImage(image));
 }
 
 function bindHeroAvatarReplay() {

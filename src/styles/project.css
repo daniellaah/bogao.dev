@@ -1,0 +1,199 @@
+/* Project detail page. --project-marker/--project-ink follow the project's card color. */
+
+.project-detail {
+  --project-marker: var(--marker-yellow);
+  --project-ink: var(--ink-yellow);
+}
+
+.project-detail--blue {
+  --project-marker: var(--marker-blue);
+  --project-ink: var(--ink-blue);
+}
+
+.project-detail--pink {
+  --project-marker: var(--marker-pink);
+  --project-ink: var(--ink-pink);
+}
+
+.project-detail--green {
+  --project-marker: var(--marker-green);
+  --project-ink: var(--ink-green);
+}
+
+/* Header */
+
+.project-hero {
+  padding-block: 0.5rem 2rem;
+}
+
+.project-hero__kicker {
+  color: var(--project-ink);
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.project-hero__title {
+  margin-top: 0.7rem;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.project-hero__description {
+  max-width: 46rem;
+  margin-top: 1rem;
+  color: var(--graphite);
+  font-size: clamp(1rem, 1.5vw, 1.12rem);
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+
+.project-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.5rem;
+}
+
+/* Body: article + facts panel */
+
+.project-detail__body {
+  display: grid;
+  /* minmax(0, …) keeps wide code blocks scrolling instead of widening the page. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--foreground);
+}
+
+.project-facts__panel {
+  position: relative;
+  padding: 1.2rem 1.3rem;
+  background-color: var(--surface);
+  box-shadow: var(--card-shadow);
+}
+
+/* Washi tape, matching the project's cards. */
+.project-facts__panel::before {
+  position: absolute;
+  top: -1.05rem;
+  left: 1rem;
+  width: 4.2rem;
+  height: 1.2rem;
+  background: color-mix(
+    in srgb,
+    var(--project-marker) calc(var(--marker-strength) * 0.8),
+    transparent
+  );
+  clip-path: polygon(
+    0 12%,
+    6% 0,
+    12% 14%,
+    100% 4%,
+    94% 30%,
+    100% 58%,
+    95% 100%,
+    8% 90%,
+    0 100%,
+    5% 56%
+  );
+  content: "";
+  transform: rotate(-4deg);
+}
+
+.project-facts__list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.5rem;
+}
+
+.project-facts__label,
+.project-toc__label {
+  color: var(--graphite);
+  font-family: var(--font-code);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.project-facts__value {
+  margin-top: 0.4rem;
+  font-size: 0.92rem;
+}
+
+.project-facts__stack {
+  grid-column: 1 / -1;
+}
+
+.project-facts__stack .project-facts__value {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.project-facts__stack .project-facts__value > span {
+  border: var(--control-border-width) solid var(--control-border-color-subtle);
+  border-radius: 3px 6px 4px 5px / 6px 3px 5px 4px;
+  padding: 0.25rem 0.5rem;
+  background: color-mix(
+    in srgb,
+    var(--project-marker) calc(var(--marker-strength) * 0.22),
+    transparent
+  );
+  font-size: 0.75rem;
+  line-height: 1.1;
+}
+
+/* The table of contents only earns its space next to the article. */
+.project-toc {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .project-detail__body {
+    grid-template-columns: minmax(0, 1fr) 17rem;
+    column-gap: 3.5rem;
+    align-items: start;
+  }
+
+  .project-detail__body > .app-prose {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .project-facts {
+    position: sticky;
+    top: 1.5rem;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .project-toc {
+    display: block;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line-subtle);
+  }
+
+  .project-toc ol {
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+  }
+}
+
+.project-related {
+  margin-top: 3rem;
+  padding-top: 1.35rem;
+  border-top: 1px solid var(--foreground);
+}
+
+.project-related__title {
+  font-size: clamp(1.3rem, 2.2vw, 1.6rem);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}

@@ -14,11 +14,14 @@ import { HOMEPAGE_PROJECTS, OPEN_SOURCE, PROFILE } from "@/data/profile";
 import dayjs from "@/utils/dayjs";
 import getBlogEntries from "@/utils/getBlogEntries";
 import getSortedPosts from "@/utils/getSortedPosts";
+import getSortedProjects from "@/utils/getSortedProjects";
+import { getProjectAccent } from "@/utils/accent";
 import { getPostPath } from "@/utils/getPostPath";
 import { getProjectPath } from "@/utils/getProjectPath";
 import "@/styles/home.css";
 
 const projects = await getCollection("projects", ({ data }) => !data.draft);
+const sortedProjectIds = getSortedProjects(projects).map(({ id }) => id);
 
 const homepageProjects = HOMEPAGE_PROJECTS.flatMap(slug => {
   const project = projects.find(
@@ -113,7 +116,14 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
       </div>
 
       <div class="work-grid">
-        {homepageProjects.map(project => <ProjectCard {...project} />)}
+        {
+          homepageProjects.map(project => (
+            <ProjectCard
+              {...project}
+              accent={getProjectAccent(project.id, sortedProjectIds)}
+            />
+          ))
+        }
       </div>
     </section>
 
@@ -130,7 +140,7 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
         </h2>
       </div>
 
-      <div class="work-grid work-grid--alt">
+      <div class="work-grid">
         {OPEN_SOURCE.map(entry => <OpenSourceCard {...entry} />)}
       </div>
     </section>

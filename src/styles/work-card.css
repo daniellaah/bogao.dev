@@ -62,28 +62,17 @@
   transform: rotate(-6deg) translateY(-1px);
 }
 
-.work-grid > :nth-child(4n + 2) {
+.work-card--blue {
   --card-marker: var(--marker-blue);
   --card-ink: var(--ink-blue);
 }
 
-.work-grid > :nth-child(4n + 3) {
+.work-card--pink {
   --card-marker: var(--marker-pink);
   --card-ink: var(--ink-pink);
 }
 
-.work-grid > :nth-child(4n + 4) {
-  --card-marker: var(--marker-green);
-  --card-ink: var(--ink-green);
-}
-
-/* Offset the open-source grid so it doesn't repeat the projects' colors. */
-.work-grid--alt > :nth-child(odd) {
-  --card-marker: var(--marker-pink);
-  --card-ink: var(--ink-pink);
-}
-
-.work-grid--alt > :nth-child(even) {
+.work-card--green {
   --card-marker: var(--marker-green);
   --card-ink: var(--ink-green);
 }

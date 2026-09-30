@@ -1,5 +1,6 @@
 ---
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import type { Accent } from "@/utils/accent";
 import "@/styles/work-card.css";
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
   tags: readonly string[];
   external?: boolean;
   preview?: { label: string; meta: string; title: string };
+  accent?: Accent;
 };
 
 const {
@@ -20,11 +22,12 @@ const {
   tags,
   external = false,
   preview,
+  accent = "yellow",
 } = Astro.props;
 ---
 
 <a
-  class="work-card sketch-border hand-underline-trigger"
+  class={`work-card work-card--${accent} sketch-border hand-underline-trigger`}
   href={href}
   rel={external ? "noreferrer" : undefined}
   target={external ? "_blank" : undefined}

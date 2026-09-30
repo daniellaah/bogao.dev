@@ -28,6 +28,7 @@ export const OPEN_SOURCE = [
     name: "inspect_ai",
     owner: "UK AI Security Institute",
     repo: "UKGovernmentBEIS/inspect_ai",
+    accent: "pink",
     description:
       "A framework for large language model evaluations, created by the UK AI Security Institute.",
     tags: ["LLM evaluation", "Computer use", "Python"],
@@ -36,6 +37,7 @@ export const OPEN_SOURCE = [
     name: "mlx-lm",
     owner: "Apple · ml-explore",
     repo: "ml-explore/mlx-lm",
+    accent: "green",
     description:
       "A Python package for generating text and fine-tuning large language models on Apple silicon with MLX.",
     tags: ["LLM inference", "Fine-tuning", "MLX"],

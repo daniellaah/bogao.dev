@@ -813,10 +813,9 @@ test("home page client script preserves back link and avatar replay behavior", a
   const { setupHomePage } = await loadProjectModule("src/scripts/homePage.ts", [
     "src/scripts/homePage.ts",
   ]);
-  const originalDateNow = Date.now;
   const storage = new Map();
+  const fetched = [];
   let currentNow = 1000;
-  let currentDateNow = 1700000000000;
   const makeImage = src => ({
     dataset: {},
     src,
@@ -844,75 +843,70 @@ test("home page client script preserves back link and avatar replay behavior", a
   const mainContent = { dataset: { layout: "index" } };
   const homeWindow = {};
 
-  Date.now = () => currentDateNow;
-
-  try {
-    await withGlobalMocks(
-      {
-        window: homeWindow,
-        sessionStorage: {
-          setItem: (key, value) => storage.set(key, value),
-        },
-        performance: { now: () => currentNow },
-        document: makeQueryDocument({
-          one: {
-            "#main-content": mainContent,
-            ".hero-avatar": avatar,
-          },
-          all: {
-            ".hero-avatar__image": [lightAvatar, darkAvatar],
-          },
-        }),
+  await withGlobalMocks(
+    {
+      window: homeWindow,
+      sessionStorage: {
+        setItem: (key, value) => storage.set(key, value),
       },
-      async () => {
-        setupHomePage();
+      performance: { now: () => currentNow },
+      fetch: async src => {
+        fetched.push(src);
+        return { ok: true, text: async () => `<svg data-src="${src}"/>` };
+      },
+      document: makeQueryDocument({
+        one: {
+          "#main-content": mainContent,
+          ".hero-avatar": avatar,
+        },
+        all: {
+          ".hero-avatar__image": [lightAvatar, darkAvatar],
+        },
+      }),
+    },
+    async () => {
+      setupHomePage();
+      await flushAsyncUpdates();
 
-        assert.equal(storage.get("backUrl"), "/");
-        assert.equal(lightAvatar.dataset.avatarSrc, "/images/site/avatar.svg");
-        assert.equal(
-          darkAvatar.dataset.avatarSrc,
-          "/images/site/avatar-dark.svg"
-        );
-        assert.equal(
-          lightAvatar.src,
-          "/images/site/avatar.svg?replay=1700000000000-1000-0"
-        );
-        assert.equal(
-          darkAvatar.src,
-          "/images/site/avatar-dark.svg?replay=1700000000000-1000-1"
-        );
-        assert.equal(avatar.handlerCount("pointerenter"), 1);
+      assert.equal(storage.get("backUrl"), "/");
+      assert.equal(lightAvatar.dataset.avatarSrc, "/images/site/avatar.svg");
+      assert.equal(
+        darkAvatar.dataset.avatarSrc,
+        "/images/site/avatar-dark.svg"
+      );
+      assert.match(lightAvatar.src, /^blob:/);
+      assert.match(darkAvatar.src, /^blob:/);
+      assert.equal(avatar.handlerCount("pointerenter"), 1);
 
-        currentNow = 1100;
-        currentDateNow = 1700000000100;
-        avatar.dispatch("pointerenter");
+      const firstLightSrc = lightAvatar.src;
 
-        assert.equal(
-          lightAvatar.src,
-          "/images/site/avatar.svg?replay=1700000000000-1000-0"
-        );
+      // Replays inside the 300ms window are ignored.
+      currentNow = 1100;
+      avatar.dispatch("pointerenter");
+      await flushAsyncUpdates();
+      assert.equal(lightAvatar.src, firstLightSrc);
 
-        currentNow = 1401;
-        currentDateNow = 1700000000401;
-        avatar.dispatch("pointerenter");
+      currentNow = 1401;
+      avatar.dispatch("pointerenter");
+      await flushAsyncUpdates();
+      assert.match(lightAvatar.src, /^blob:/);
+      assert.notEqual(lightAvatar.src, firstLightSrc);
 
-        assert.equal(
-          lightAvatar.src,
-          "/images/site/avatar.svg?replay=1700000000401-1401-0"
-        );
+      // Each SVG is downloaded once, however often the animation replays.
+      assert.deepEqual(fetched, [
+        "/images/site/avatar.svg",
+        "/images/site/avatar-dark.svg",
+      ]);
 
-        setupHomePage();
+      setupHomePage();
 
-        assert.equal(avatar.handlerCount("pointerenter"), 1);
+      assert.equal(avatar.handlerCount("pointerenter"), 1);
 
-        homeWindow.__homeAvatarHoverCleanup();
+      homeWindow.__homeAvatarHoverCleanup();
 
-        assert.equal(avatar.handlerCount("pointerenter"), 0);
-      }
-    );
-  } finally {
-    Date.now = originalDateNow;
-  }
+      assert.equal(avatar.handlerCount("pointerenter"), 0);
+    }
+  );
 });
 
 test("back navigation client script preserves stored back link behavior", async () => {

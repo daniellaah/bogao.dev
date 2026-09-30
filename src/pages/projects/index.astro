@@ -8,9 +8,11 @@ import ProjectCard from "@/components/ProjectCard.astro";
 import OpenSourceCard from "@/components/OpenSourceCard.astro";
 import { OPEN_SOURCE } from "@/data/profile";
 import getSortedProjects from "@/utils/getSortedProjects";
+import { getProjectAccent } from "@/utils/accent";
 import { SITE } from "@/config";
 
 const projects = getSortedProjects(await getCollection("projects"));
+const sortedProjectIds = projects.map(({ id }) => id);
 ---
 
 <Layout
@@ -23,7 +25,10 @@ const projects = getSortedProjects(await getCollection("projects"));
       projects.length > 0 ? (
         <div class="work-grid">
           {projects.map(project => (
-            <ProjectCard {...project} />
+            <ProjectCard
+              {...project}
+              accent={getProjectAccent(project.id, sortedProjectIds)}
+            />
           ))}
         </div>
       ) : (
@@ -44,7 +49,7 @@ const projects = getSortedProjects(await getCollection("projects"));
       <h2 id="open-source-heading" class="text-2xl font-semibold">
         Open Source Contributions
       </h2>
-      <div class="work-grid work-grid--alt mt-6">
+      <div class="work-grid mt-6">
         {OPEN_SOURCE.map(entry => <OpenSourceCard {...entry} />)}
       </div>
     </section>

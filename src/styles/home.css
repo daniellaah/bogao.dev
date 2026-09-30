@@ -58,10 +58,10 @@ body:has(.career-home) #top-nav-wrap {
 }
 
 .career-hero__title {
-  font-family: var(--font-body);
-  font-size: clamp(2.25rem, 4.2vw, 3.25rem);
-  font-weight: 500;
-  letter-spacing: -0.045em;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 4.6vw, 3.5rem);
+  font-weight: 400;
+  letter-spacing: -0.01em;
   line-height: 1.02;
   text-wrap: balance;
 }
@@ -87,82 +87,6 @@ body:has(.career-home) #top-nav-wrap {
 
 .career-hero__actions {
   margin-top: 1.5rem;
-}
-
-.hero-action {
-  display: inline-flex;
-  min-height: 2.6rem;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 0.95rem;
-  border: var(--control-border-width) solid var(--control-border-color);
-  border-radius: var(--control-border-radius);
-  font-size: 0.92rem;
-  font-weight: 500;
-  transition:
-    background-color var(--motion-duration-base) var(--motion-ease-standard),
-    color var(--motion-duration-base) var(--motion-ease-standard),
-    transform var(--motion-duration-press) var(--motion-ease-standard);
-}
-
-.hero-action svg {
-  width: 1.1rem;
-  height: 1.1rem;
-  flex: 0 0 auto;
-}
-
-.hero-action--icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  justify-content: center;
-  padding: 0;
-}
-
-.hero-action--icon svg {
-  width: 1.5rem;
-  height: 1.5rem;
-}
-
-.hero-action--linkedin svg {
-  width: 1.3rem;
-  height: 1.3rem;
-}
-
-.hero-action:hover {
-  background-color: var(--surface);
-  transform: translate(-1px, -1px);
-}
-
-/* Brand-colored profile buttons. */
-.hero-action--github,
-.hero-action--linkedin {
-  border-color: var(--brand-bg);
-  background-color: var(--brand-bg);
-  color: var(--brand-fg);
-}
-
-.hero-action--github:hover,
-.hero-action--linkedin:hover {
-  background-color: color-mix(in srgb, var(--brand-bg) 86%, var(--brand-fg));
-}
-
-.hero-action--github {
-  --brand-bg: #1f2328;
-  --brand-fg: #ffffff;
-}
-
-html[data-theme="dark"] .hero-action--github {
-  --brand-bg: #f0f6fc;
-  --brand-fg: #1f2328;
-}
-
-.hero-action--linkedin {
-  --brand-bg: #0a66c2;
-  --brand-fg: #ffffff;
-}
-
-.hero-action:active {
-  transform: translate(0, 0);
 }
 
 /* Sections */
@@ -278,11 +202,5 @@ html[data-theme="dark"] .hero-action--github {
 
   .writing-row__arrow {
     display: none;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .hero-action {
-    transition: none;
   }
 }

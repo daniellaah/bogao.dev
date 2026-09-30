@@ -5,14 +5,6 @@
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @font-face {
-  font-family: "LXGW WenKai";
-  src: url("/fonts/LXGWWenKai-Regular.woff2") format("woff2");
-  font-weight: 400 700;
-  font-style: normal;
-  font-display: optional;
-}
-
-@font-face {
   font-family: "Handlee";
   src: url("/fonts/Handlee-Regular.woff2") format("woff2");
   font-weight: 400;
@@ -127,15 +119,16 @@ html[data-theme="dark"] {
 }
 
 @theme inline {
+  /* System fonts only: nothing to download for body text, CJK included. */
   --font-body:
-    "LXGW WenKai", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
-    "Noto Sans CJK SC", "Segoe UI", sans-serif;
+    "Avenir Next", Avenir, -apple-system, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
   --font-ui:
     "Avenir Next", Avenir, "PingFang SC", "Hiragino Sans GB", "Segoe UI",
     "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
   --font-display:
-    "Handlee", "LXGW WenKai", "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", "Noto Sans CJK SC", "Segoe UI", sans-serif;
+    "Handlee", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Noto Sans CJK SC", "Segoe UI", sans-serif;
   --font-code:
     "SFMono-Regular", "JetBrains Mono", "Cascadia Code", "Fira Code",
     ui-monospace, monospace;
@@ -1243,6 +1236,89 @@ html[data-theme="dark"] .hero-avatar__image--light {
 
 html[data-theme="dark"] .hero-avatar__image--dark {
   display: block;
+}
+
+/* Sketchy action buttons (profile links, project links). */
+.hero-action {
+  display: inline-flex;
+  min-height: 2.6rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.95rem;
+  border: var(--control-border-width) solid var(--control-border-color);
+  border-radius: var(--control-border-radius);
+  font-size: 0.92rem;
+  font-weight: 500;
+  transition:
+    background-color var(--motion-duration-base) var(--motion-ease-standard),
+    color var(--motion-duration-base) var(--motion-ease-standard),
+    transform var(--motion-duration-press) var(--motion-ease-standard);
+}
+
+.hero-action svg {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
+}
+
+.hero-action--icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  justify-content: center;
+  padding: 0;
+}
+
+.hero-action--icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.hero-action--linkedin svg {
+  width: 1.3rem;
+  height: 1.3rem;
+}
+
+.hero-action:hover {
+  background-color: var(--surface);
+  transform: translate(-1px, -1px);
+}
+
+/* Brand-colored profile buttons. */
+.hero-action--github,
+.hero-action--linkedin {
+  border-color: var(--brand-bg);
+  background-color: var(--brand-bg);
+  color: var(--brand-fg);
+}
+
+.hero-action--github:hover,
+.hero-action--linkedin:hover {
+  background-color: color-mix(in srgb, var(--brand-bg) 86%, var(--brand-fg));
+}
+
+.hero-action--github {
+  --brand-bg: #1f2328;
+  --brand-fg: #ffffff;
+}
+
+html[data-theme="dark"] .hero-action--github {
+  --brand-bg: #f0f6fc;
+  --brand-fg: #1f2328;
+}
+
+.hero-action--linkedin {
+  --brand-bg: #0a66c2;
+  --brand-fg: #ffffff;
+}
+
+.hero-action:active {
+  transform: translate(0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-action {
+    transition: none;
+  }
 }
 
 /* Highlighter swipe behind inline text. Set --marker to pick the color. */
