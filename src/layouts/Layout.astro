@@ -13,25 +13,32 @@ import { getOgLocale } from "@/utils/contentLang";
 type Props = {
   title?: string;
   author?: string;
-  profile?: string;
   description?: string;
   ogImage?: string;
   canonicalURL?: string;
   pubDatetime?: Date;
   modDatetime?: Date | null;
   lang?: string;
+  // schema.org JSON-LD for the page; defaults to a WebPage.
+  structuredData?: Record<string, unknown>;
 };
 
 const {
   title = SITE.title,
   author = SITE.author,
-  profile = SITE.profile,
   description = SITE.desc,
   ogImage = SITE.ogImage ? `/${SITE.ogImage}` : "/og.png",
   canonicalURL = new URL(Astro.url.pathname, Astro.url),
   pubDatetime,
   modDatetime,
   lang = SITE.lang,
+  structuredData = {
+    "@type": "WebPage",
+    name: title,
+    description,
+    url: `${canonicalURL}`,
+    inLanguage: lang,
+  },
 } = Astro.props;
 
 const socialImageURL = new URL(ogImage, Astro.url);
@@ -39,22 +46,11 @@ const isArticle = Boolean(pubDatetime);
 const ogType = isArticle ? "article" : "website";
 const socialImageAlt = `${title} | ${SITE.title}`;
 
-const structuredData = {
+// Escape "<" so no string in the data can close the <script> element.
+const jsonLd = JSON.stringify({
   "@context": "https://schema.org",
-  "@type": isArticle ? "BlogPosting" : "WebSite",
-  headline: `${title}`,
-  inLanguage: lang,
-  image: `${socialImageURL}`,
-  ...(pubDatetime && { datePublished: pubDatetime.toISOString() }),
-  ...(modDatetime && { dateModified: modDatetime.toISOString() }),
-  author: [
-    {
-      "@type": "Person",
-      name: `${author}`,
-      ...(profile && { url: profile }),
-    },
-  ],
-};
+  ...structuredData,
+}).replaceAll("<", "\\u003c");
 ---
 
 <!doctype html>
@@ -119,11 +115,7 @@ const structuredData = {
     <meta property="twitter:image:alt" content={socialImageAlt} />
 
     <!-- Google JSON-LD Structured data -->
-    <script
-      type="application/ld+json"
-      is:inline
-      set:html={JSON.stringify(structuredData).replaceAll("<", "\\u003c")}
-    />
+    <script type="application/ld+json" is:inline set:html={jsonLd} />
 
     <!-- Enable RSS feed auto-discovery  -->
     <!-- https://docs.astro.build/en/recipes/rss/#enabling-rss-feed-auto-discovery -->

@@ -322,6 +322,28 @@ describe("tags index", () => {
 });
 
 describe("header", () => {
+  it("marks the current page and, more loosely, its section", async () => {
+    createDom("https://bogao.dev/");
+    const current = async (url: string) => {
+      document.body.innerHTML = await renderComponent(Header, {}, url);
+      return Object.fromEntries(
+        Array.from(
+          document.querySelectorAll<HTMLAnchorElement>("header a[href$='/']"),
+          link => [link.getAttribute("href"), link.getAttribute("aria-current")]
+        ).filter(([href]) => href !== "/")
+      );
+    };
+
+    expect(await current("https://bogao.dev/posts/")).toEqual({
+      "/projects/": null,
+      "/posts/": "page",
+      "/search/": null,
+    });
+    expect(await current("https://bogao.dev/posts/rrf/")).toMatchObject({
+      "/posts/": "true",
+    });
+  });
+
   it("toggles the mobile menu", async () => {
     createDom("https://bogao.dev/");
     const { setupHeaderNav } = await import("@/scripts/headerNav");
@@ -389,7 +411,11 @@ describe("post details", () => {
       ({ top: 900 }) as DOMRect;
     const cleanup = setupPostDetailsPage();
 
-    expect(document.querySelectorAll(".heading-link")).toHaveLength(2);
+    expect(
+      Array.from(document.querySelectorAll(".heading-link"), link =>
+        link.getAttribute("aria-label")
+      )
+    ).toEqual(["Link to section: First", "Link to section: Second"]);
     expect(document.querySelectorAll(".progress-container")).toHaveLength(1);
     expect(document.querySelector('[data-toc-link][aria-current="true"]')).toBe(
       document.querySelector('[data-toc-link][href="#first"]')

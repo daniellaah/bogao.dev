@@ -46,6 +46,10 @@ function addHeadingLinks(article: HTMLElement) {
     link.className =
       "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
     link.href = `#${heading.id}`;
+    link.setAttribute(
+      "aria-label",
+      `Link to section: ${heading.textContent?.trim() ?? ""}`
+    );
 
     const mark = document.createElement("span");
     mark.ariaHidden = "true";

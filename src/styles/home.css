@@ -81,18 +81,15 @@ body:has(.career-home) #top-nav-wrap {
 
 /* Job-search status: the one line a recruiter should not miss. */
 .career-hero__status {
-  display: inline-flex;
+  display: flex;
   align-items: flex-start;
   gap: 0.6rem;
   max-width: 44rem;
-  margin-top: 1.1rem;
-  padding: 0.5rem 0.85rem;
-  border: 1px solid var(--rule);
-  border-radius: var(--control-border-radius);
-  background: var(--surface);
+  margin-top: 1rem;
   font-size: 0.95rem;
+  font-weight: 500;
   line-height: 1.45;
-  text-wrap: balance;
+  text-wrap: pretty;
 }
 
 .career-hero__status-dot {

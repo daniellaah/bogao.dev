@@ -46,10 +46,14 @@ let container: AstroContainer | undefined;
 
 export async function renderComponent(
   component: Parameters<AstroContainer["renderToString"]>[0],
-  props: Record<string, unknown> = {}
+  props: Record<string, unknown> = {},
+  url = "https://bogao.dev/"
 ) {
   container ??= await AstroContainer.create();
-  return container.renderToString(component, { props });
+  return container.renderToString(component, {
+    props,
+    request: new Request(url),
+  });
 }
 
 /** Let rAF callbacks, timers and promise chains queued by a script settle. */

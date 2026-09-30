@@ -23,11 +23,27 @@ const homepageProjects = HOMEPAGE_PROJECTS.flatMap(slug => {
 });
 
 const recentPosts = (await getPosts()).slice(0, 3);
+
+// A portfolio homepage is a profile of one person.
+const structuredData = {
+  "@type": "ProfilePage",
+  url: Astro.site?.href,
+  mainEntity: {
+    "@type": "Person",
+    name: PROFILE.name,
+    jobTitle: PROFILE.role,
+    description: PROFILE.summary,
+    image: new URL("/images/site/avatar.svg", Astro.url).href,
+    url: Astro.site?.href,
+    sameAs: [SITE.profile, SITE.linkedin],
+  },
+};
 ---
 
 <Layout
   title={`${PROFILE.name} — ${PROFILE.role} | ${SITE.title}`}
   description={`${PROFILE.summary} ${PROFILE.availability}`}
+  structuredData={structuredData}
 >
   <Header />
   <main
@@ -38,7 +54,11 @@ const recentPosts = (await getPosts()).slice(0, 3);
   >
     <section class="career-hero" aria-labelledby="career-hero-title">
       <div class="hero-avatar career-hero__avatar">
+        {
+          /* Lazy: only the image for the active theme is rendered, so only it loads. */
+        }
         <img
+          loading="lazy"
           src="/images/site/avatar.svg"
           alt={`Illustrated portrait of ${PROFILE.name}`}
           width="1254"
@@ -47,6 +67,7 @@ const recentPosts = (await getPosts()).slice(0, 3);
           class="hero-avatar__image h-full w-full rounded-full object-cover dark:hidden"
         />
         <img
+          loading="lazy"
           src="/images/site/avatar-dark.svg"
           alt={`Illustrated portrait of ${PROFILE.name}`}
           width="1254"

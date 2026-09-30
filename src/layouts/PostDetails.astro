@@ -54,6 +54,9 @@ const readingMinutes = getReadingMinutes(post.body ?? "");
 
 const ogImage = resolveOgImage(initOgImage, Astro.url.origin);
 
+const lang = getContentLang(post.data);
+const url = canonicalURL ?? new URL(Astro.url.pathname, Astro.url).href;
+
 const layoutProps = {
   title: `${title} | ${SITE.title}`,
   author,
@@ -62,7 +65,20 @@ const layoutProps = {
   modDatetime,
   canonicalURL,
   ogImage,
-  lang: getContentLang(post.data),
+  lang,
+  structuredData: {
+    "@type": "BlogPosting",
+    headline: title,
+    description,
+    url,
+    mainEntityOfPage: url,
+    inLanguage: lang,
+    image: new URL(ogImage ?? `/${SITE.ogImage}`, Astro.url).href,
+    datePublished: published.toISOString(),
+    ...(modDatetime && { dateModified: modDatetime.toISOString() }),
+    ...(tags.length > 0 && { keywords: tags.join(", ") }),
+    author: { "@type": "Person", name: author, url: SITE.profile },
+  },
 };
 
 // `posts` is newest first: the older post follows this one in the list.

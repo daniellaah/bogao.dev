@@ -12,6 +12,9 @@ import { getPosts } from "@/utils/posts";
 // A nav link is current anywhere in its section: "/posts/" on /posts/x/.
 const section = Astro.url.pathname.split("/")[1];
 const isActive = (href: string) => href.split("/")[1] === section;
+// "page" only on the linked page itself; elsewhere in its section, "true".
+const ariaCurrent = (href: string) =>
+  Astro.url.pathname === href ? "page" : isActive(href) ? "true" : undefined;
 
 // Posts stays out of the nav until at least one post is published.
 const hasPosts = (await getPosts()).length > 0;
@@ -46,7 +49,11 @@ const navItems = [
       class="site-brand site-wordmark absolute top-[1.125rem] py-1 text-xl leading-none font-semibold whitespace-nowrap sm:top-[1.625rem] lg:static lg:my-auto lg:text-2xl"
     >
       <span class="site-avatar" aria-hidden="true">
+        {
+          /* Lazy: only the image for the active theme is rendered, so only it loads. */
+        }
         <img
+          loading="lazy"
           src="/images/site/avatar.svg"
           alt=""
           class="site-avatar__image dark:hidden"
@@ -54,6 +61,7 @@ const navItems = [
           height="32"
         />
         <img
+          loading="lazy"
           src="/images/site/avatar-dark.svg"
           alt=""
           class="site-avatar__image hidden dark:block"
@@ -97,7 +105,7 @@ const navItems = [
                   href={href}
                   data-nav-item={label}
                   class="hover-underline-trigger"
-                  aria-current={active ? "page" : undefined}
+                  aria-current={ariaCurrent(href)}
                 >
                   <span
                     class:list={["hover-underline", { "active-nav": active }]}
@@ -119,7 +127,7 @@ const navItems = [
             class="search-nav-link hover-underline-trigger flex min-h-11 items-center justify-center px-2 py-2 lg:min-h-0 lg:p-1"
             title="Search (⌘K / Ctrl+K)"
             aria-label="Search. Press Command K or Control K to open quick search."
-            aria-current={isActive("/search/") ? "page" : undefined}
+            aria-current={ariaCurrent("/search/")}
             disableHoverOpacity
           >
             <span class="search-nav-mark" aria-hidden="true">

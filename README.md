@@ -25,6 +25,7 @@ npm run new:project -- "Project title"
 npm test
 npm run lint
 npm run format
+npm run check   # lint + format + content + test + build，与 CI 相同
 ```
 
 ## 目录说明
@@ -35,8 +36,11 @@ src/content/projects/ 项目内容
 src/pages/          页面路由
 src/components/     通用组件
 src/config.ts       站点元信息
+src/scripts/        客户端脚本（统一通过 lifecycle.ts 的 onEveryPage 注册）
+src/styles/         global.css 放 token 与通用样式，其余按组件拆分
 public/images/      站点与内容图片
 templates/          内容创建模板
+tests/              vitest 测试：工具函数、路由、客户端脚本（Container API + happy-dom）、内容脚本
 ```
 
 ## 当前状态
@@ -140,14 +144,10 @@ npm run new:project -- "My project" --stack Python,Astro --repoUrl https://githu
 
 ## 检查
 
-推送到 `master` 和每个 PR 都会由 `.github/workflows/ci.yml` 运行下面这些检查。本地提交前也可以手动运行：
+推送到 `master` 和每个 PR 都会由 `.github/workflows/ci.yml` 运行 lint、格式、内容检查、测试和构建。本地提交前运行同一组检查：
 
 ```bash
-npm run content:check
-npm test
-npm run lint
-npm run format:check
-npm run build
+npm run check
 ```
 
 ## 图片目录规范

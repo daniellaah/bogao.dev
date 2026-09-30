@@ -95,7 +95,7 @@ export function setupSearchPage() {
       .map((record: RankedSearchRecord) => {
         // Body text only adds context when there is body text to show.
         const excerpt = record.content
-          ? `<p class="mt-2 text-sm leading-6 text-graphite/80">${highlightSearchTerms(buildSearchExcerpt(record.content, terms), terms)}</p>`
+          ? `<p class="mt-2 text-sm leading-6 text-graphite">${highlightSearchTerms(buildSearchExcerpt(record.content, terms), terms)}</p>`
           : "";
         return `
             <li class="list-row py-5">
@@ -106,7 +106,7 @@ export function setupSearchPage() {
                   </span>
                   <span class="notebook-kicker shrink-0">${escapeSearchHtml(record.kind)}</span>
                 </div>
-                <p class="mt-2 text-sm leading-6 text-graphite">${highlightSearchTerms(record.description, terms)}</p>
+                <p class="mt-2 text-sm leading-6">${highlightSearchTerms(record.description, terms)}</p>
                 ${excerpt}
               </a>
             </li>

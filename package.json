@@ -2,6 +2,9 @@
   "name": "bogao-dev",
   "type": "module",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro check && astro build",
@@ -14,7 +17,8 @@
     "test": "vitest run",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "check": "npm run lint && npm run format:check && npm run content:check && npm test && npm run build"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.14",
