@@ -8,7 +8,7 @@ import WorkCard from "@/components/WorkCard.astro";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import IconFileText from "@/assets/icons/IconFileText.svg";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
-import IconLinkedIn from "@/assets/icons/IconLinkedIn.svg";
+import IconLinkedInMark from "@/assets/icons/IconLinkedInMark.svg";
 import { SITE } from "@/config";
 import { HOMEPAGE_PROJECTS, OPEN_SOURCE, PROFILE } from "@/data/profile";
 import dayjs from "@/utils/dayjs";
@@ -58,7 +58,7 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
 
       <div class="career-hero__content">
         <h1 id="career-hero-title" class="career-hero__title">
-          {PROFILE.name}
+          <span class="marker-swipe">{PROFILE.name}</span>
         </h1>
         <p class="career-hero__role">{PROFILE.role}</p>
         <div class="career-hero__summary">
@@ -67,7 +67,7 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
 
         <div class="career-hero__actions" aria-label="Contact and profiles">
           <a
-            class="hero-action hero-action--icon"
+            class="hero-action hero-action--icon hero-action--github"
             href={SITE.profile}
             rel="me noreferrer"
             target="_blank"
@@ -77,14 +77,14 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
             <IconGitHub aria-hidden="true" />
           </a>
           <a
-            class="hero-action hero-action--icon"
+            class="hero-action hero-action--icon hero-action--linkedin"
             href={SITE.linkedin}
             rel="me noreferrer"
             target="_blank"
             aria-label="LinkedIn"
             title="LinkedIn"
           >
-            <IconLinkedIn aria-hidden="true" />
+            <IconLinkedInMark aria-hidden="true" />
           </a>
           {
             SITE.resumeUrl && (
@@ -104,7 +104,9 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
 
     <section id="work" class="career-section" aria-labelledby="work-heading">
       <div class="career-section__heading">
-        <h2 id="work-heading" class="notebook-kicker">Projects</h2>
+        <h2 id="work-heading" class="notebook-kicker">
+          <span class="marker-swipe marker-swipe--blue">Projects</span>
+        </h2>
         <a class="career-section__link ink-link" href="/projects/">
           All projects <IconArrowRight aria-hidden="true" />
         </a>
@@ -122,11 +124,13 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
     >
       <div class="career-section__heading">
         <h2 id="open-source-heading" class="notebook-kicker">
-          Open Source Contributions
+          <span class="marker-swipe marker-swipe--green">
+            Open Source Contributions
+          </span>
         </h2>
       </div>
 
-      <div class="work-grid">
+      <div class="work-grid work-grid--alt">
         {
           OPEN_SOURCE.map(({ name, owner, description, tags, href }) => (
             <WorkCard
@@ -151,7 +155,7 @@ const recentPosts = getSortedPosts(await getBlogEntries()).slice(0, 3);
         >
           <div class="career-section__heading">
             <h2 id="writing-heading" class="notebook-kicker">
-              Recent Posts
+              <span class="marker-swipe marker-swipe--pink">Recent Posts</span>
             </h2>
             <a class="career-section__link ink-link" href="/posts/">
               All posts <IconArrowRight aria-hidden="true" />

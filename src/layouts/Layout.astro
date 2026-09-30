@@ -130,7 +130,7 @@ const structuredData = {
       href={new URL("rss.xml", Astro.site)}
     />
 
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#f6f1e7" />
     <script is:inline>
       (() => {
         const storedTheme = (() => {
@@ -151,7 +151,7 @@ const structuredData = {
         document.documentElement.style.colorScheme = theme;
         document
           .querySelector("meta[name='theme-color']")
-          ?.setAttribute("content", theme === "dark" ? "#181817" : "#ffffff");
+          ?.setAttribute("content", theme === "dark" ? "#12151d" : "#f6f1e7");
       })();
     </script>
 

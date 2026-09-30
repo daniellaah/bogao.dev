@@ -52,7 +52,7 @@ const projects = getSortedProjects(await getCollection("projects"));
       <h2 id="open-source-heading" class="text-2xl font-semibold">
         Open Source Contributions
       </h2>
-      <div class="work-grid mt-6">
+      <div class="work-grid work-grid--alt mt-6">
         {
           OPEN_SOURCE.map(({ name, owner, description, tags, href }) => (
             <WorkCard

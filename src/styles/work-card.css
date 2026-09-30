@@ -1,18 +1,91 @@
 /* Shared card for projects and open-source contributions. */
 
 .work-card {
+  --card-marker: var(--marker-yellow);
+  --card-ink: var(--ink-yellow);
+
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.7rem;
   padding: 1.25rem 1.4rem;
+  background-color: var(--surface);
+  box-shadow: var(--card-shadow);
   transition:
     background-color var(--motion-duration-base) var(--motion-ease-standard),
+    box-shadow var(--motion-duration-base) var(--motion-ease-standard),
     transform var(--motion-duration-press) var(--motion-ease-standard);
 }
 
+/* Washi tape holding the card to the page. */
+.work-card::before {
+  position: absolute;
+  top: -1.05rem;
+  left: 1.1rem;
+  width: 4.6rem;
+  height: 1.3rem;
+  background: color-mix(
+    in srgb,
+    var(--card-marker) calc(var(--marker-strength) * 0.8),
+    transparent
+  );
+  clip-path: polygon(
+    0 12%,
+    6% 0,
+    12% 14%,
+    100% 4%,
+    94% 30%,
+    100% 58%,
+    95% 100%,
+    8% 90%,
+    0 100%,
+    5% 56%
+  );
+  content: "";
+  transform: rotate(-4deg);
+  transition: transform var(--motion-duration-medium) var(--motion-ease-smooth);
+}
+
 .work-card:hover {
-  background-color: color-mix(in srgb, var(--surface) 60%, transparent);
-  transform: translate(-1px, -1px);
+  background-color: color-mix(
+    in srgb,
+    var(--card-marker) calc(var(--marker-strength) * 0.16),
+    var(--surface)
+  );
+  box-shadow:
+    var(--card-shadow),
+    0 14px 30px -18px color-mix(in srgb, var(--card-marker) 80%, transparent);
+  transform: translate(-1px, -2px);
+}
+
+.work-card:hover::before {
+  transform: rotate(-6deg) translateY(-1px);
+}
+
+.work-grid > :nth-child(4n + 2) {
+  --card-marker: var(--marker-blue);
+  --card-ink: var(--ink-blue);
+}
+
+.work-grid > :nth-child(4n + 3) {
+  --card-marker: var(--marker-pink);
+  --card-ink: var(--ink-pink);
+}
+
+.work-grid > :nth-child(4n + 4) {
+  --card-marker: var(--marker-green);
+  --card-ink: var(--ink-green);
+}
+
+/* Offset the open-source grid so it doesn't repeat the projects' colors. */
+.work-grid--alt > :nth-child(odd) {
+  --card-marker: var(--marker-pink);
+  --card-ink: var(--ink-pink);
+}
+
+.work-grid--alt > :nth-child(even) {
+  --card-marker: var(--marker-green);
+  --card-ink: var(--ink-green);
 }
 
 .work-card__kicker {
@@ -20,7 +93,7 @@
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.14em;
-  color: var(--graphite);
+  color: var(--card-ink);
   text-transform: uppercase;
 }
 
@@ -57,6 +130,11 @@
 
 .work-card__tags > span {
   border: var(--control-border-width) solid var(--control-border-color-subtle);
+  background: color-mix(
+    in srgb,
+    var(--card-marker) calc(var(--marker-strength) * 0.22),
+    transparent
+  );
   border-radius: 3px 6px 4px 5px / 6px 3px 5px 4px;
   padding: 0.25rem 0.5rem;
   font-size: 0.72rem;

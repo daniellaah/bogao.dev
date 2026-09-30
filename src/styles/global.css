@@ -26,15 +26,27 @@
 
 :root,
 html[data-theme="light"] {
-  --background: #ffffff;
-  --surface: #f5f4f0;
-  --surface-strong: #eceae4;
+  --background: #f6f1e7;
+  --surface: #fffdf8;
+  --surface-strong: #eee7da;
   --foreground: #171717;
   --accent: #171717;
-  --muted: #efede7;
-  --border: #d6d1c8;
-  --graphite: #625f59;
-  --line-subtle: #d6d1c8;
+  --muted: #ebe3d4;
+  --border: #d8cebd;
+  --graphite: #5c574f;
+  --line-subtle: #dcd2c1;
+  --card-shadow:
+    0 1px 2px rgb(60 45 20 / 6%), 0 8px 24px -12px rgb(60 45 20 / 22%);
+  /* Highlighter-marker accents: fills for swipes/tape/tints, inks for text. */
+  --marker-yellow: #ffd54a;
+  --marker-blue: #8cc4ff;
+  --marker-pink: #ffa9c8;
+  --marker-green: #93dfae;
+  --ink-yellow: #8a5a00;
+  --ink-blue: #1d5bb8;
+  --ink-pink: #a8285a;
+  --ink-green: #1b7040;
+  --marker-strength: 100%;
   --site-shell: 72rem;
   --site-shell-padding: 1rem;
   --reading-measure: 68ch;
@@ -86,15 +98,25 @@ html[data-theme="light"] {
 }
 
 html[data-theme="dark"] {
-  --background: #181817;
-  --surface: #232321;
-  --surface-strong: #292927;
+  --background: #12151d;
+  --surface: #1a1f2a;
+  --surface-strong: #212735;
   --foreground: #ecebe5;
   --accent: #ecebe5;
-  --muted: #2d2c29;
-  --border: #484640;
-  --graphite: #aaa79f;
-  --line-subtle: #3d3b37;
+  --muted: #262c3a;
+  --border: #3a4254;
+  --graphite: #a6abb8;
+  --line-subtle: #2d3444;
+  --card-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 10px 28px -14px rgb(0 0 0 / 70%);
+  --marker-yellow: #e0b53a;
+  --marker-blue: #5f9ee6;
+  --marker-pink: #e27aa2;
+  --marker-green: #5dbb82;
+  --ink-yellow: #f3cf62;
+  --ink-blue: #93c1ff;
+  --ink-pink: #ff9cc2;
+  --ink-green: #86dba6;
+  --marker-strength: 46%;
   --hand-underline: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 5' preserveAspectRatio='none'%3E%3Cpath d='M.5 3.1C10 2.1 18 3.8 28 2.9S47 2.2 57 3.1s18 .7 25-.1 9-.8 13.5.1' fill='none' stroke='%23ecebe5' stroke-opacity='.88' stroke-width='1.35' stroke-linecap='round'/%3E%3C/svg%3E");
   --ledger-rule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 5' preserveAspectRatio='none'%3E%3Cpath d='M.5 2.6C34 2.45 57 2.7 80 2.55s48 .12 79.5-.05' fill='none' stroke='%23aaa79f' stroke-opacity='.24' stroke-width='.8' stroke-linecap='round'/%3E%3C/svg%3E");
   --hand-rule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 5' preserveAspectRatio='none'%3E%3Cpath d='M.5 2.8C18 1.9 35 3.5 52 2.6S88 2.1 106 2.9s35 1 53.5-.1' fill='none' stroke='%23aaa79f' stroke-opacity='.38' stroke-width='1' stroke-linecap='round'/%3E%3C/svg%3E");
@@ -1207,18 +1229,8 @@ html[data-theme="light"] .tags-tag-card:hover .tag-count-badge {
   isolation: isolate;
   padding: 4px;
   border: 1.5px solid var(--foreground);
-  border-radius: 48% 52% 47% 53% / 52% 48% 54% 46%;
+  border-radius: 50%;
   background: #ffffff;
-}
-
-.hero-avatar::after {
-  position: absolute;
-  inset: 2px -3px -2px 1px;
-  z-index: -1;
-  border: 1px solid color-mix(in srgb, var(--foreground) 42%, transparent);
-  border-radius: 52% 48% 54% 46% / 47% 53% 48% 52%;
-  pointer-events: none;
-  content: "";
 }
 
 .hero-avatar__image--dark {
@@ -1231,6 +1243,54 @@ html[data-theme="dark"] .hero-avatar__image--light {
 
 html[data-theme="dark"] .hero-avatar__image--dark {
   display: block;
+}
+
+/* Highlighter swipe behind inline text. Set --marker to pick the color. */
+.marker-swipe {
+  --marker: var(--marker-yellow);
+
+  position: relative;
+  z-index: 0;
+  display: inline-block;
+}
+
+.marker-swipe::before {
+  position: absolute;
+  inset: 48% -0.2em 0.04em -0.14em;
+  z-index: -1;
+  background: color-mix(
+    in srgb,
+    var(--marker) var(--marker-strength),
+    transparent
+  );
+  content: "";
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 20' preserveAspectRatio='none'%3E%3Cpath d='M4 4.5C42 2.2 88 3.6 132 2.6s52 .4 63 1.2l1.6 4-2 3.2 2.4 3.8-1.4 3.4C150 18.6 104 16.8 62 17.8S14 18.6 3.2 17.6L1 14l2.2-3.6L1.4 7z'/%3E%3C/svg%3E")
+    center / 100% 100% no-repeat;
+  transform: rotate(-0.8deg);
+  transform-origin: left center;
+  animation: marker-draw 620ms 180ms var(--motion-ease-smooth) both;
+}
+
+.marker-swipe--blue {
+  --marker: var(--marker-blue);
+}
+
+.marker-swipe--pink {
+  --marker: var(--marker-pink);
+}
+
+.marker-swipe--green {
+  --marker: var(--marker-green);
+}
+
+@keyframes marker-draw {
+  from {
+    transform: rotate(-0.8deg) scaleX(0);
+  }
+
+  to {
+    transform: rotate(-0.8deg) scaleX(1);
+  }
 }
 
 .notebook-kicker {

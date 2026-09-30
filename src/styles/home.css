@@ -5,6 +5,28 @@
   padding-block: 0 1rem;
 }
 
+/* Dot-grid "notebook paper" behind the header and hero, fading out downward. */
+body:has(.career-home)::before {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 40rem;
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--foreground) 14%, transparent) 0.7px,
+    transparent 1px
+  );
+  background-position: center top;
+  background-size: 22px 22px;
+  content: "";
+  mask-image: linear-gradient(to bottom, #000 30%, transparent);
+  pointer-events: none;
+}
+
+body:has(.career-home) #top-nav-wrap {
+  background-color: transparent;
+}
+
 /* Hero */
 
 .career-hero {
@@ -90,13 +112,18 @@
 }
 
 .hero-action--icon {
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 2.5rem;
+  height: 2.5rem;
   justify-content: center;
   padding: 0;
 }
 
 .hero-action--icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.hero-action--linkedin svg {
   width: 1.3rem;
   height: 1.3rem;
 }
@@ -104,6 +131,34 @@
 .hero-action:hover {
   background-color: var(--surface);
   transform: translate(-1px, -1px);
+}
+
+/* Brand-colored profile buttons. */
+.hero-action--github,
+.hero-action--linkedin {
+  border-color: var(--brand-bg);
+  background-color: var(--brand-bg);
+  color: var(--brand-fg);
+}
+
+.hero-action--github:hover,
+.hero-action--linkedin:hover {
+  background-color: color-mix(in srgb, var(--brand-bg) 86%, var(--brand-fg));
+}
+
+.hero-action--github {
+  --brand-bg: #1f2328;
+  --brand-fg: #ffffff;
+}
+
+html[data-theme="dark"] .hero-action--github {
+  --brand-bg: #f0f6fc;
+  --brand-fg: #1f2328;
+}
+
+.hero-action--linkedin {
+  --brand-bg: #0a66c2;
+  --brand-fg: #ffffff;
 }
 
 .hero-action:active {
@@ -124,6 +179,10 @@
   justify-content: space-between;
   gap: 1rem;
   margin-bottom: 1.1rem;
+}
+
+.career-section .notebook-kicker {
+  color: var(--foreground);
 }
 
 .career-section__link {

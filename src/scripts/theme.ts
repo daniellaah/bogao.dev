@@ -44,7 +44,7 @@ function applyTheme(theme: Theme) {
   document.documentElement.style.colorScheme = theme;
   document
     .querySelector<HTMLMetaElement>("meta[name='theme-color']")
-    ?.setAttribute("content", theme === DARK_THEME ? "#181817" : "#ffffff");
+    ?.setAttribute("content", theme === DARK_THEME ? "#12151d" : "#f6f1e7");
   updateThemeControls(theme);
 }
 
@@ -87,7 +87,7 @@ document.addEventListener("astro:before-swap", event => {
   newDocument.documentElement.style.colorScheme = theme;
   newDocument
     .querySelector<HTMLMetaElement>("meta[name='theme-color']")
-    ?.setAttribute("content", theme === DARK_THEME ? "#181817" : "#ffffff");
+    ?.setAttribute("content", theme === DARK_THEME ? "#12151d" : "#f6f1e7");
 });
 
 prefersDark.addEventListener("change", () => {
