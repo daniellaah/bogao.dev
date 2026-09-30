@@ -8,13 +8,10 @@ import {
   splitSearchTerms,
   type SearchRecord,
 } from "../utils/search";
-import { loadSearchIndex as loadRecords } from "./searchIndex";
-
-const COMMAND_PALETTE_CLOSE_MS = 220;
+import { loadSearchIndex } from "./searchIndex";
 
 export function setupCommandPalettePage() {
-  const root = document.querySelector<HTMLElement>("#command-palette");
-  const panel = document.querySelector<HTMLElement>(".command-palette__panel");
+  const dialog = document.querySelector<HTMLDialogElement>("#command-palette");
   const input = document.querySelector<HTMLInputElement>(
     "#command-palette-input"
   );
@@ -28,78 +25,38 @@ export function setupCommandPalettePage() {
   const thinking = document.querySelector<HTMLElement>(
     "#command-palette-thinking"
   );
-  const closeButtons = Array.from(
-    document.querySelectorAll<HTMLButtonElement>("[data-command-close]")
-  );
-  const openButtons = Array.from(
-    document.querySelectorAll<HTMLAnchorElement>("[data-command-open]")
-  );
-
-  if (
-    !root ||
-    !panel ||
-    !input ||
-    !status ||
-    !results ||
-    !resultsPanel ||
-    !thinking
-  )
+  if (!dialog || !input || !status || !results || !resultsPanel || !thinking) {
     return;
+  }
 
-  let previousActiveElement: Element | null = null;
-  let closeTimer: number | undefined;
+  // Bumped by every search and every opening, so a slow index load never
+  // renders stale results.
   let searchRunId = 0;
-  let searchTrigger: HTMLElement | null = null;
 
   const setThinking = (active: boolean) => {
     thinking.classList.toggle("is-active", active);
     input.setAttribute("aria-busy", String(active));
   };
 
-  const setResultsPanelVisible = (visible: boolean) => {
-    resultsPanel.toggleAttribute("data-empty", !visible);
-    resultsPanel.setAttribute("aria-hidden", String(!visible));
-  };
-
-  const clearCloseTimer = () => {
-    if (closeTimer) {
-      window.clearTimeout(closeTimer);
-      closeTimer = undefined;
-    }
-  };
-
-  const shouldAnimateClose = () =>
-    window.matchMedia("(min-width: 64rem)").matches &&
-    !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  const setNavSearchActive = (active: boolean) => {
-    searchTrigger?.toggleAttribute("data-command-active", active);
-  };
-
   const renderResults = (records: SearchRecord[], query: string) => {
     const terms = splitSearchTerms(query);
+    setThinking(false);
+    resultsPanel.hidden = !terms.length;
     if (!terms.length) {
       status.textContent = "";
       results.innerHTML = "";
-      setResultsPanelVisible(false);
-      setThinking(false);
       return;
     }
 
-    setResultsPanelVisible(true);
-
-    const sorted = rankSearchRecords(records, terms, 8);
-
-    setThinking(false);
-
-    if (!sorted.length) {
+    const ranked = rankSearchRecords(records, terms, 8);
+    if (!ranked.length) {
       status.textContent = formatNoSearchResults(query);
       results.innerHTML = "";
       return;
     }
 
-    status.textContent = formatSearchResultSummary(sorted.length, query);
-    results.innerHTML = sorted
+    status.textContent = formatSearchResultSummary(ranked.length, query);
+    results.innerHTML = ranked
       .map(
         record => `
             <li class="command-palette__result">
@@ -120,206 +77,70 @@ export function setupCommandPalettePage() {
 
   const runSearch = async () => {
     const query = input.value.trim();
-    const currentRunId = ++searchRunId;
+    const runId = ++searchRunId;
     if (!splitSearchTerms(query).length) {
       renderResults([], "");
       return;
     }
 
     setThinking(true);
-    setResultsPanelVisible(true);
+    resultsPanel.hidden = false;
     status.textContent = "Thinking through the notebook...";
 
     try {
-      const records = await loadRecords();
-      if (
-        currentRunId !== searchRunId ||
-        root.classList.contains("hidden") ||
-        root.classList.contains("command-palette--closing")
-      ) {
-        return;
-      }
-
-      renderResults(records, query);
+      const records = await loadSearchIndex();
+      if (runId === searchRunId && dialog.open) renderResults(records, query);
     } catch {
-      if (currentRunId !== searchRunId) return;
+      if (runId !== searchRunId) return;
       setThinking(false);
       status.textContent = SEARCH_LOAD_ERROR_MESSAGE;
     }
   };
 
-  const finishClose = () => {
-    closeTimer = undefined;
-    root.hidden = true;
-    root.classList.add("hidden");
-    root.setAttribute("aria-hidden", "true");
-    root.classList.remove(
-      "command-palette--expanded",
-      "command-palette--closing"
-    );
-    setNavSearchActive(false);
-    input.value = "";
-    renderResults([], "");
-    if (previousActiveElement instanceof HTMLElement) {
-      previousActiveElement.focus();
-    }
-  };
-
-  const closePalette = () => {
-    if (root.classList.contains("hidden")) return;
-
-    clearCloseTimer();
-    searchRunId += 1;
-    input.blur();
-    setThinking(false);
-
-    if (!shouldAnimateClose()) {
-      finishClose();
-      return;
-    }
-
-    root.classList.add("command-palette--closing");
-    window.requestAnimationFrame(() => {
-      root.classList.remove("command-palette--expanded");
-    });
-    closeTimer = window.setTimeout(finishClose, COMMAND_PALETTE_CLOSE_MS);
-  };
-
-  const positionPalette = () => {
-    const navWrap = document.querySelector<HTMLElement>("#top-nav-wrap");
-    const siteBrand = document.querySelector<HTMLElement>(".site-brand");
-    const firstNavItem = document.querySelector<HTMLElement>("[data-nav-item]");
-    searchTrigger = document.querySelector<HTMLElement>("[data-command-open]");
-
-    if (!navWrap || !firstNavItem || !searchTrigger) return;
-
-    const navRect = navWrap.getBoundingClientRect();
-    const brandRect = siteBrand?.getBoundingClientRect();
-    const firstNavRect = firstNavItem.getBoundingClientRect();
-    const searchRect = searchTrigger.getBoundingClientRect();
-    const searchMarkRect = searchTrigger
-      .querySelector<HTMLElement>(".search-nav-mark")
-      ?.getBoundingClientRect();
-    const brandGap = 24;
-    const minWidth = 280;
-    const targetLeft = brandRect
-      ? brandRect.right + brandGap
-      : firstNavRect.left;
-    const minLeft = navRect.left + 12;
-    const maxLeft = searchRect.right - minWidth;
-    const left = Math.max(minLeft, Math.min(targetLeft, maxLeft));
-    const width = searchRect.right - left;
-    const inputHeight = 40;
-    const top = searchRect.top + (searchRect.height - inputHeight) / 2;
-
-    panel.style.setProperty("--command-top", `${Math.round(top)}px`);
-    panel.style.setProperty("--command-left", `${Math.round(left)}px`);
-    panel.style.setProperty("--command-width", `${Math.round(width)}px`);
-    panel.style.setProperty(
-      "--command-collapsed-scale",
-      `${Math.min(1, (searchMarkRect?.width ?? searchRect.width) / width).toFixed(4)}`
-    );
-  };
-
   const openPalette = () => {
-    clearCloseTimer();
-
-    if (!root.classList.contains("hidden")) {
-      root.classList.remove("command-palette--closing");
-      root.classList.add("command-palette--expanded");
-      root.hidden = false;
-      root.setAttribute("aria-hidden", "false");
-      setNavSearchActive(true);
-      positionPalette();
-      input.focus();
-      return;
+    if (!dialog.open) {
+      // Start empty. Resetting here rather than on "close" keeps it
+      // independent of when the browser dispatches that event.
+      searchRunId += 1;
+      input.value = "";
+      renderResults([], "");
+      dialog.showModal();
     }
-
-    searchRunId += 1;
-    previousActiveElement = document.activeElement;
-    searchTrigger = document.querySelector<HTMLElement>("[data-command-open]");
-    setNavSearchActive(true);
-    root.hidden = false;
-    root.classList.remove("hidden");
-    root.setAttribute("aria-hidden", "false");
-    root.classList.remove(
-      "command-palette--expanded",
-      "command-palette--closing"
-    );
-    positionPalette();
-    window.requestAnimationFrame(() => {
-      root.classList.add("command-palette--expanded");
-      input.focus();
-    });
-    void loadRecords().catch(() => {
-      // Retry state is reset inside createSearchIndexLoader.
+    input.focus();
+    // Warm the index while the reader types.
+    void loadSearchIndex().catch(() => {
+      // The loader resets itself so the next search retries.
     });
   };
 
   const handleKeydown = (event: KeyboardEvent) => {
-    const key = event.key.toLowerCase();
-    if ((event.metaKey || event.ctrlKey) && key === "k") {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
       event.preventDefault();
       openPalette();
-      return;
     }
-
-    if (event.key === "Escape" && !root.classList.contains("hidden")) {
-      event.preventDefault();
-      closePalette();
-    }
-
-    if (event.key === "Tab" && !root.classList.contains("hidden")) {
-      const focusable = Array.from(
-        root.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])'
-        )
-      ).filter(
-        element => element.offsetParent !== null && element.tabIndex >= 0
-      );
-
-      if (!focusable.length) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      if (event.shiftKey && document.activeElement === first) {
-        event.preventDefault();
-        last.focus();
-      } else if (!event.shiftKey && document.activeElement === last) {
-        event.preventDefault();
-        first.focus();
-      }
-    }
-  };
-
-  const handleResize = () => {
-    if (!root.classList.contains("hidden")) positionPalette();
-  };
-
-  const handleInput = () => {
-    void runSearch();
-  };
-
-  const handleOpenClick = (event: MouseEvent) => {
-    event.preventDefault();
-    openPalette();
   };
 
   document.addEventListener("keydown", handleKeydown);
-  window.addEventListener("resize", handleResize);
-  input.addEventListener("input", handleInput);
-  closeButtons.forEach(button =>
-    button.addEventListener("click", closePalette)
-  );
-  openButtons.forEach(button =>
-    button.addEventListener("click", handleOpenClick)
-  );
+  input.addEventListener("input", () => void runSearch());
+  // Clicks inside the panel target its content; only the backdrop
+  // targets the dialog element itself.
+  dialog.addEventListener("click", event => {
+    if (event.target === dialog) dialog.close();
+  });
+  for (const button of dialog.querySelectorAll("[data-command-close]")) {
+    button.addEventListener("click", () => dialog.close());
+  }
+  for (const link of document.querySelectorAll("[data-command-open]")) {
+    link.addEventListener("click", event => {
+      event.preventDefault();
+      openPalette();
+    });
+  }
 
-  // The palette and nav buttons are replaced on every swap; only the
-  // document and window listeners outlive the page.
+  // The dialog and its triggers are replaced on every page swap; only the
+  // document listener outlives the page.
   return () => {
     document.removeEventListener("keydown", handleKeydown);
-    window.removeEventListener("resize", handleResize);
-    clearCloseTimer();
+    if (dialog.open) dialog.close();
   };
 }

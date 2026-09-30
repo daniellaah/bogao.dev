@@ -1,83 +1,57 @@
-/* Quick search dialog (Cmd/Ctrl+K). From 64rem it grows out of the header
-   search button instead of opening as a centered panel. */
-
-@keyframes thinking-dot {
-  0%,
-  100% {
-    opacity: 0.36;
-    transform: translateY(0) scale(0.85);
-  }
-
-  45% {
-    opacity: 1;
-    transform: translateY(-0.12rem) scale(1);
-  }
-}
-
-.search-nav-link[data-command-active] {
-  z-index: 70;
-}
-
-.search-nav-link[data-command-active]:active .search-nav-mark {
-  transform: translate(1px, 1px) scale(0.94);
-}
+/* Quick search dialog (Cmd/Ctrl+K), a native <dialog> opened with
+   showModal(). The dialog is a transparent frame; the panel inside it is the
+   visible box, so clicks outside the panel reach the dialog (the backdrop). */
 
 .command-palette {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
+  width: min(42rem, calc(100vw - 2rem));
+  max-width: none;
+  max-height: min(78svh, 42rem);
+  margin: min(8rem, 12svh) auto auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--foreground);
+  overflow: visible;
 }
 
-.command-palette__backdrop {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  min-height: 100%;
-  border: 0;
+.command-palette::backdrop {
   background: color-mix(in srgb, var(--background) 72%, transparent);
   backdrop-filter: blur(3px);
 }
 
+.command-palette[open] {
+  animation: command-palette-in var(--motion-duration-medium)
+    var(--motion-ease-smooth);
+}
+
+@keyframes command-palette-in {
+  from {
+    opacity: 0;
+    transform: translateY(-0.4rem) scale(0.98);
+  }
+}
+
 .command-palette__panel {
-  position: fixed;
-  top: min(8rem, 12svh);
-  left: 50%;
-  width: min(42rem, calc(100vw - 2rem));
-  max-height: min(72svh, 42rem);
+  max-height: inherit;
   overflow: auto;
   padding: 1.1rem;
-  transform: translateX(-50%);
-  transform-origin: right top;
 }
 
 .command-palette__input-wrap {
   position: relative;
+  margin-top: 1rem;
   border: 2px solid var(--foreground);
   border-radius: 8px;
   background: var(--background);
-}
-
-.command-palette__inline-close {
-  position: absolute;
-  top: 50%;
-  right: 0.7rem;
-  font-family: var(--font-code);
-  font-size: 1.2rem;
-  line-height: 1;
-  color: var(--graphite);
-  transform: translateY(-50%);
 }
 
 .command-palette__icon {
   position: absolute;
   top: 50%;
   left: 0.9rem;
-  display: block;
   width: 1.25rem;
   height: 1.25rem;
-  color: var(--foreground);
   transform: translateY(-50%);
-  transition: transform var(--motion-duration-base) var(--motion-ease-snappy);
   pointer-events: none;
 }
 
@@ -85,25 +59,17 @@
   width: 100%;
   border: 0;
   background: transparent;
-  padding: 0.9rem 5.4rem 0.9rem 3rem;
-  color: var(--foreground);
-  font-family: var(--font-ui);
+  padding: 0.9rem 3.25rem 0.9rem 3rem;
   font-size: 1.15rem;
   outline: 0;
 }
 
 .command-palette__results-panel {
-  position: relative;
-  isolation: isolate;
   margin-top: 0.75rem;
   border: 1.5px solid color-mix(in srgb, var(--foreground) 82%, transparent);
   border-radius: 8px;
   background: color-mix(in srgb, var(--background) 94%, var(--surface));
   padding: 0.7rem 0.85rem 0.78rem;
-}
-
-.command-palette__results-panel[data-empty] {
-  display: none;
 }
 
 .command-palette__results-list:not(:empty) {
@@ -115,9 +81,8 @@
   padding-block: 0.62rem;
   padding-inline: 0.2rem;
   border-bottom: 1px solid var(--rule-subtle);
-  transition:
-    background-color var(--motion-duration-press) var(--motion-ease-standard),
-    transform var(--motion-duration-press) var(--motion-ease-standard);
+  transition: background-color var(--motion-duration-press)
+    var(--motion-ease-standard);
 }
 
 .command-palette__result:last-child {
@@ -126,174 +91,18 @@
 
 .command-palette__result:hover {
   background-color: color-mix(in srgb, var(--surface) 48%, transparent);
-  transform: translateX(1px);
 }
 
-.command-palette__status:empty {
-  display: none;
-}
-
-.command-palette--closing .command-palette__results-panel {
-  opacity: 0;
-  pointer-events: none;
-}
-
+/* Shown while the search index loads. */
 .thinking-dots {
   position: absolute;
   top: 50%;
-  right: 3.35rem;
+  right: 1.1rem;
   display: inline-flex;
   gap: 0.28rem;
   opacity: 0;
   transform: translateY(-50%);
   transition: opacity var(--motion-duration-fast) var(--motion-ease-standard);
-}
-
-@media (min-width: 64rem) {
-  .command-palette__backdrop {
-    background: transparent;
-    backdrop-filter: none;
-  }
-
-  .command-palette__panel.panel {
-    top: var(--command-top);
-    left: var(--command-left);
-    width: var(--command-width);
-    max-height: min(72svh, 34rem);
-    padding: 0;
-    overflow: visible;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    transform: none;
-  }
-
-  .command-palette__intro {
-    display: none;
-  }
-
-  .command-palette__input-wrap {
-    margin-left: auto;
-    width: var(--command-width);
-    min-height: 2.5rem;
-    overflow: visible;
-    opacity: 1;
-    border: 0;
-    background: transparent;
-    contain: paint;
-  }
-
-  .command-palette__input-wrap::before {
-    position: absolute;
-    inset: 0;
-    border: 2px solid var(--foreground);
-    border-radius: 8px;
-    background: var(--background);
-    content: "";
-    opacity: 0;
-    transform: scaleX(var(--command-collapsed-scale));
-    transform-origin: right center;
-    transition:
-      transform var(--motion-duration-base) var(--motion-ease-snappy),
-      opacity 80ms var(--motion-ease-out);
-    will-change: transform, opacity;
-    pointer-events: none;
-  }
-
-  .command-palette__input {
-    position: relative;
-    z-index: 1;
-    min-height: 2.5rem;
-    padding-block: 0.52rem;
-    padding-left: 1.1rem;
-    padding-right: 6.4rem;
-    font-size: 1rem;
-    opacity: 0;
-    transition: opacity 90ms var(--motion-ease-standard);
-  }
-
-  .command-palette--expanded .command-palette__input-wrap::before {
-    opacity: 1;
-    transform: scaleX(1);
-  }
-
-  .command-palette--closing .command-palette__input-wrap::before {
-    opacity: 0;
-  }
-
-  .command-palette--expanded .command-palette__input {
-    opacity: 1;
-    transition-delay: 70ms;
-  }
-
-  .command-palette--closing .command-palette__input {
-    opacity: 0;
-    transition-delay: 0ms;
-  }
-
-  .command-palette__inline-close {
-    z-index: 2;
-    right: 2.65rem;
-    display: grid;
-    width: 2rem;
-    height: 2rem;
-    place-items: center;
-    border: 0;
-    background: transparent;
-    color: var(--foreground);
-    font-family: var(--font-code);
-    font-size: 1.7rem;
-    font-weight: 400;
-    line-height: 1;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-50%);
-    transition:
-      opacity var(--motion-duration-fast) var(--motion-ease-standard),
-      transform var(--motion-duration-fast) var(--motion-ease-standard);
-  }
-
-  .command-palette--expanded .command-palette__inline-close {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateY(-50%) scale(1);
-    transition-delay: 140ms;
-  }
-
-  .command-palette--closing .command-palette__inline-close {
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-50%) scale(0.82);
-    transition-delay: 0ms;
-  }
-
-  .command-palette__inline-close:active {
-    transform: translateY(calc(-50% + 1px)) scale(0.9);
-  }
-
-  .command-palette__inline-close span {
-    transform: translateY(-0.04em);
-  }
-
-  .command-palette__icon {
-    display: none;
-  }
-
-  .thinking-dots {
-    right: 5rem;
-  }
-
-  .command-palette__results-panel {
-    width: var(--command-width);
-    margin-left: auto;
-    margin-top: 0.65rem;
-  }
-
-  .command-palette__results-list {
-    max-height: min(54svh, 28rem);
-    overflow: auto;
-  }
 }
 
 .thinking-dots.is-active {
@@ -315,4 +124,17 @@
 
 .thinking-dots span:nth-child(3) {
   animation-delay: 240ms;
+}
+
+@keyframes thinking-dot {
+  0%,
+  100% {
+    opacity: 0.36;
+    transform: translateY(0) scale(0.85);
+  }
+
+  45% {
+    opacity: 1;
+    transform: translateY(-0.12rem) scale(1);
+  }
 }

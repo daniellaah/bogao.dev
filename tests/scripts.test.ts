@@ -182,27 +182,38 @@ describe("command palette", () => {
     },
   ];
 
-  it("opens with Cmd+K, searches, closes with Escape and cleans up", async () => {
-    // Below 64rem the palette closes without the collapse animation.
-    createDom("https://bogao.dev/", { width: 800 });
+  const setupPalette = async () => {
+    createDom("https://bogao.dev/");
     const fetch = vi.fn(async () => ({ ok: true, json: async () => records }));
     vi.stubGlobal("fetch", fetch);
     vi.resetModules();
     const { setupCommandPalettePage } =
       await import("@/scripts/commandPalette");
 
-    document.body.innerHTML = `<a href="/search" data-command-open>Search</a>
+    document.body.innerHTML = `<a href="/search/" data-command-open>Search</a>
       ${await renderComponent(CommandPalette)}`;
     const cleanup = setupCommandPalettePage();
-    const root = document.querySelector<HTMLElement>("#command-palette")!;
-    const input = document.querySelector<HTMLInputElement>(
-      "#command-palette-input"
-    )!;
+    return {
+      cleanup,
+      fetch,
+      trigger: document.querySelector<HTMLAnchorElement>(
+        "[data-command-open]"
+      )!,
+      dialog: document.querySelector<HTMLDialogElement>("#command-palette")!,
+      input: document.querySelector<HTMLInputElement>(
+        "#command-palette-input"
+      )!,
+    };
+  };
+
+  it("opens with Cmd+K and shows highlighted results", async () => {
+    const { dialog, input, fetch } = await setupPalette();
 
     document.dispatchEvent(
       new KeyboardEvent("keydown", { key: "k", metaKey: true })
     );
-    expect(root.hidden).toBe(false);
+    expect(dialog.open).toBe(true);
+    expect(document.activeElement).toBe(input);
 
     input.value = "gradient";
     input.dispatchEvent(new Event("input"));
@@ -213,20 +224,53 @@ describe("command palette", () => {
       "/posts/gradient",
     ]);
     expect(results[0].textContent).toContain("Gradient <Descent>");
+    expect(results[0].querySelector("mark")?.textContent).toBe("Gradient");
     expect(document.querySelector("#command-palette-status")?.textContent).toBe(
       "1 result for gradient"
     );
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
 
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
-    expect(root.hidden).toBe(true);
+  it("closes from the Esc button or the backdrop and reopens empty", async () => {
+    const { dialog, input, trigger } = await setupPalette();
+
+    trigger.click();
+    expect(dialog.open).toBe(true);
+    input.value = "gradient";
+    input.dispatchEvent(new Event("input"));
+    await settle();
+
+    document.querySelector<HTMLButtonElement>("[data-command-close]")!.click();
+    expect(dialog.open).toBe(false);
+    // Browsers return focus to the trigger; happy-dom does not once focus
+    // has moved into the dialog, so that is checked in a browser.
+
+    trigger.click();
+    expect(dialog.open).toBe(true);
     expect(input.value).toBe("");
+    expect(
+      document.querySelector<HTMLElement>("#command-palette-results-panel")!
+        .hidden
+    ).toBe(true);
+    dialog.close();
+
+    trigger.click();
+    // A click inside the panel keeps it open; one on the dialog frame (the
+    // backdrop) closes it.
+    input.click();
+    expect(dialog.open).toBe(true);
+    dialog.click();
+    expect(dialog.open).toBe(false);
+  });
+
+  it("stops listening for Cmd+K after cleanup", async () => {
+    const { dialog, cleanup } = await setupPalette();
 
     cleanup?.();
     document.dispatchEvent(
       new KeyboardEvent("keydown", { key: "k", metaKey: true })
     );
-    expect(root.hidden).toBe(true);
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(dialog.open).toBe(false);
   });
 });
 

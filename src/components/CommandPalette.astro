@@ -9,29 +9,18 @@ const searchInputPlaceholder = formatSearchInputPlaceholder(
 );
 ---
 
-<div
+<!--
+  A native modal dialog: showModal() traps focus, makes the page inert, closes
+  on Escape and returns focus to the opener. The dialog itself is a bare frame
+  so that a click landing on it (not on the panel) is a click on the backdrop.
+-->
+<dialog
   id="command-palette"
-  class="command-palette hidden"
-  role="dialog"
-  aria-modal="true"
-  aria-hidden="true"
+  class="command-palette"
   aria-labelledby="command-palette-title"
-  hidden
 >
-  <button
-    type="button"
-    class="command-palette__backdrop"
-    data-command-close
-    aria-label="Close search"
-    tabindex="-1"
-  >
-  </button>
-  <div
-    class="command-palette__panel panel card-border"
-    role="document"
-    style="--command-top: 0px; --command-left: 0px; --command-width: min(42rem, calc(100vw - 2rem)); --command-collapsed-scale: 0.1;"
-  >
-    <div class="command-palette__intro flex items-center justify-between gap-4">
+  <div class="command-palette__panel panel card-border">
+    <div class="flex items-center justify-between gap-4">
       <div>
         <p class="notebook-kicker">Command search</p>
         <h2 id="command-palette-title" class="mt-1 text-xl font-semibold">
@@ -40,7 +29,8 @@ const searchInputPlaceholder = formatSearchInputPlaceholder(
       </div>
       <button
         type="button"
-        class="command-palette__close chip px-2 py-1 font-code text-xs"
+        class="chip px-2 py-1 font-code text-xs"
+        aria-label="Close search"
         data-command-close
       >
         Esc
@@ -69,25 +59,16 @@ const searchInputPlaceholder = formatSearchInputPlaceholder(
         <span></span>
         <span></span>
       </span>
-      <button
-        type="button"
-        class="command-palette__inline-close"
-        data-command-close
-        aria-label="Close search"
-      >
-        <span aria-hidden="true">×</span>
-      </button>
     </div>
 
     <div
       id="command-palette-results-panel"
       class="command-palette__results-panel"
-      aria-hidden="true"
-      data-empty
+      hidden
     >
       <p
         id="command-palette-status"
-        class="command-palette__status font-code text-xs text-graphite"
+        class="font-code text-xs text-graphite"
         role="status"
         aria-live="polite"
         aria-atomic="true"
@@ -101,7 +82,7 @@ const searchInputPlaceholder = formatSearchInputPlaceholder(
       </ul>
     </div>
   </div>
-</div>
+</dialog>
 
 <script>
   import { onEveryPage } from "@/scripts/lifecycle";

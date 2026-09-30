@@ -68,9 +68,7 @@ html[data-theme="light"] {
   --motion-duration-morph: 460ms;
   --motion-duration-thinking: 760ms;
   --motion-ease-standard: ease;
-  --motion-ease-out: ease-out;
   --motion-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
-  --motion-ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
   --motion-ease-thinking: ease-in-out;
 }
 
