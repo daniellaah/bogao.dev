@@ -90,7 +90,7 @@ const navItems: { href: string; label: string; match?: string }[] = [
         id="menu-items"
         class:list={[
           "mt-4 grid w-full max-w-xs grid-cols-2 place-content-center gap-1",
-          "sketch-edge-y sketch-mobile-menu py-3 lg:py-0",
+          "rule-y mobile-menu py-3 lg:py-0",
           "[&>li>a]:flex [&>li>a]:min-h-11 [&>li>a]:items-center [&>li>a]:justify-center [&>li>a]:px-3 [&>li>a]:py-2 [&>li>a]:text-center [&>li>a]:text-base [&>li>a]:font-medium lg:[&>li>a]:min-h-0 lg:[&>li>a]:px-2 lg:[&>li>a]:py-1 lg:[&>li>a]:text-sm",
           "hidden",
           "lg:mt-0 lg:flex lg:w-auto lg:max-w-none lg:gap-x-2 lg:gap-y-0",
@@ -105,11 +105,11 @@ const navItems: { href: string; label: string; match?: string }[] = [
                 <a
                   href={href}
                   data-nav-item={label}
-                  class="hand-underline-trigger"
+                  class="hover-underline-trigger"
                   aria-current={active ? "page" : undefined}
                 >
                   <span
-                    class:list={["hand-underline", { "active-nav": active }]}
+                    class:list={["hover-underline", { "active-nav": active }]}
                   >
                     {label}
                   </span>
@@ -125,7 +125,7 @@ const navItems: { href: string; label: string; match?: string }[] = [
           <LinkButton
             href="/search"
             data-command-open
-            class="search-nav-link hand-underline-trigger flex min-h-11 items-center justify-center px-2 py-2 lg:min-h-0 lg:p-1"
+            class="search-nav-link hover-underline-trigger flex min-h-11 items-center justify-center px-2 py-2 lg:min-h-0 lg:p-1"
             title="Search (⌘K / Ctrl+K)"
             aria-label="Search. Press Command K or Control K to open quick search."
             aria-current={isActive("/search") ? "page" : undefined}
@@ -136,7 +136,7 @@ const navItems: { href: string; label: string; match?: string }[] = [
             </span>
             <span
               class:list={[
-                "hand-underline ms-1 lg:sr-only",
+                "hover-underline ms-1 lg:sr-only",
                 { "active-nav": isActive("/search") },
               ]}>Search</span
             >

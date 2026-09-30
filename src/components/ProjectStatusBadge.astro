@@ -14,7 +14,7 @@ const labelMap = {
 
 const styleMap = {
   active: "border-solid",
-  shipping: "sketch-chip--filled",
+  shipping: "chip--filled",
   archived: "border-dashed text-graphite",
   lab: "border-dotted",
 } as const;
@@ -22,7 +22,7 @@ const styleMap = {
 
 <span
   class:list={[
-    "sketch-chip inline-flex min-h-0 items-center px-2.5 py-1 font-code text-[11px] font-semibold tracking-[0.16em] uppercase",
+    "chip inline-flex min-h-0 items-center px-2.5 py-1 font-code text-[11px] font-semibold tracking-[0.16em] uppercase",
     styleMap[status],
   ]}
 >

@@ -23,12 +23,12 @@ const published = dayjs.utc(pubDatetime);
     ? tags.map(tag => slugifyStr(tag)).join(" ")
     : undefined}
 >
-  <a class="post-row hand-underline-trigger" href={getPostPath(post)}>
+  <a class="post-row hover-underline-trigger" href={getPostPath(post)}>
     <time class="post-row__date" datetime={pubDatetime.toISOString()}>
       {published.format("D MMM YYYY")}
     </time>
     <span class="post-row__text">
-      <span class="post-row__title hand-underline content-title">{title}</span>
+      <span class="post-row__title hover-underline content-title">{title}</span>
       <span class="post-row__description">{description}</span>
       {
         tags.length > 0 && (

@@ -27,13 +27,13 @@ const {
 ---
 
 <a
-  class={`work-card work-card--${accent} sketch-border hand-underline-trigger`}
+  class={`work-card work-card--${accent} card-border hover-underline-trigger`}
   href={href}
   rel={external ? "noreferrer" : undefined}
   target={external ? "_blank" : undefined}
 >
   {kicker && <span class="work-card__kicker">{kicker}</span>}
-  <span class="work-card__title hand-underline">{title}</span>
+  <span class="work-card__title hover-underline">{title}</span>
   <span class="work-card__description">{description}</span>
   {
     preview && (

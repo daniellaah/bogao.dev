@@ -52,7 +52,7 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
             >
               <button
                 type="button"
-                class="ink-toggle-button tags-sort-button sketch-chip ui-text inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium"
+                class="ink-toggle-button tags-sort-button chip ui-text inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium"
                 data-tag-sort="popular"
                 data-active
                 aria-pressed="true"
@@ -61,7 +61,7 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
               </button>
               <button
                 type="button"
-                class="ink-toggle-button tags-sort-button sketch-chip ui-text inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium"
+                class="ink-toggle-button tags-sort-button chip ui-text inline-flex min-h-11 items-center px-3 py-1 text-sm font-medium"
                 data-tag-sort="az"
                 aria-pressed="false"
               >
@@ -82,10 +82,10 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
               >
                 <a
                   href={`/tags/${tag.slug}/`}
-                  class="tags-tag-card sketch-border hand-underline-trigger"
+                  class="tags-tag-card card-border hover-underline-trigger"
                 >
                   <span class="min-w-0">
-                    <span class="hand-underline content-title text-lg">
+                    <span class="hover-underline content-title text-lg">
                       #<span transition:name={tag.slug}>{tag.tagName}</span>
                     </span>
                     <span class="mt-1 block font-code text-xs text-graphite">
@@ -101,7 +101,7 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
 
         {
           tags.length === 0 && (
-            <div class="sketch-box sketch-border sketch-border-thin mt-4 px-4 py-5 text-sm text-graphite">
+            <div class="panel card-border mt-4 px-4 py-5 text-sm text-graphite">
               No tags yet.
             </div>
           )

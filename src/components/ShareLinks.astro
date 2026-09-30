@@ -16,7 +16,7 @@ const url = Astro.url.href;
     {
       SHARE_LINKS.map(social => (
         <a
-          class="share-link sketch-chip"
+          class="share-link chip"
           href={social.href(url, title)}
           title={social.linkTitle}
           rel="noreferrer"
@@ -29,7 +29,7 @@ const url = Astro.url.href;
     }
     <button
       type="button"
-      class="share-link sketch-chip"
+      class="share-link chip"
       data-copy-link={url}
       title="Copy the link to this post"
     >

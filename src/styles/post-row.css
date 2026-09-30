@@ -1,7 +1,7 @@
 /* Post list row, shared by the homepage, /posts, and tag pages. */
 
 .post-list > li:last-child .post-row {
-  background-image: none;
+  border-bottom: 0;
 }
 
 .post-row {
@@ -10,10 +10,7 @@
   gap: 1.25rem;
   align-items: baseline;
   padding-block: 1rem;
-  background-image: var(--line-ledger);
-  background-position: left bottom;
-  background-repeat: repeat-x;
-  background-size: 160px 5px;
+  border-bottom: 1px solid var(--rule-subtle);
 }
 
 .post-row__date {

@@ -1,6 +1,5 @@
 @import "tailwindcss";
 @import "./typography.css";
-@import "./sketch-border.css";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
@@ -55,7 +54,11 @@ html[data-theme="light"] {
     transparent
   );
   --control-border-color-strong: var(--foreground);
-  --control-border-radius: 7px 11px 8px 10px / 10px 7px 11px 8px;
+  --control-border-radius: 6px;
+  /* Hairline rules, from faint row separators to section breaks. */
+  --rule-subtle: color-mix(in srgb, var(--foreground) 12%, transparent);
+  --rule: color-mix(in srgb, var(--foreground) 22%, transparent);
+  --rule-strong: color-mix(in srgb, var(--foreground) 40%, transparent);
   --toggle-label-width: 4.5rem;
   --toggle-gap: 0.5rem;
   --motion-duration-press: 120ms;
@@ -70,19 +73,6 @@ html[data-theme="light"] {
   --motion-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
   --motion-ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
   --motion-ease-thinking: ease-in-out;
-  --hand-underline: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 5' preserveAspectRatio='none'%3E%3Cpath d='M.5 3.1C10 2.1 18 3.8 28 2.9S47 2.2 57 3.1s18 .7 25-.1 9-.8 13.5.1' fill='none' stroke='%23171717' stroke-width='1.35' stroke-linecap='round'/%3E%3C/svg%3E");
-  --ledger-rule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 5' preserveAspectRatio='none'%3E%3Cpath d='M.5 2.6C34 2.45 57 2.7 80 2.55s48 .12 79.5-.05' fill='none' stroke='%23171717' stroke-opacity='.18' stroke-width='.8' stroke-linecap='round'/%3E%3C/svg%3E");
-  --hand-rule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 5' preserveAspectRatio='none'%3E%3Cpath d='M.5 2.8C18 1.9 35 3.5 52 2.6S88 2.1 106 2.9s35 1 53.5-.1' fill='none' stroke='%23171717' stroke-opacity='.34' stroke-width='1' stroke-linecap='round'/%3E%3C/svg%3E");
-  --hand-rule-strong: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 5' preserveAspectRatio='none'%3E%3Cpath d='M.5 2.9C17 1.7 34 3.6 53 2.5s35-.4 53 0 35 1.5 53.5.2' fill='none' stroke='%23171717' stroke-opacity='.56' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");
-  --hand-divider: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 8' preserveAspectRatio='none'%3E%3Cpath d='M1 2.7c17-1 29 1 46 .1S78 2 95 2.8M3 6c15-.7 29 .8 45 0s31-.5 45 .1' fill='none' stroke='%23171717' stroke-linecap='round'/%3E%3C/svg%3E");
-  --chalk-rule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 8' preserveAspectRatio='none'%3E%3Cpath d='M2 4.2C34 3.4 62 4.9 94 4.1s62-.8 95-.1 37 .8 49-.2' fill='none' stroke='%23171717' stroke-opacity='.32' stroke-width='1.15' stroke-linecap='round'/%3E%3Cpath d='M3 5.2c31-.7 64 .6 94-.1s59-.4 92 .2 38 .3 48-.4' fill='none' stroke='%23171717' stroke-opacity='.13' stroke-width='.8' stroke-linecap='round'/%3E%3C/svg%3E");
-  --chalk-rule-vertical: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 240' preserveAspectRatio='none'%3E%3Cpath d='M4.1 2c-.7 31 .8 61 .1 93s-.9 63-.1 96 .8 36-.1 47' fill='none' stroke='%23171717' stroke-opacity='.32' stroke-width='1.15' stroke-linecap='round'/%3E%3Cpath d='M5.1 3c-.6 31 .5 63-.1 93s-.5 61 .2 94 .2 37-.4 47' fill='none' stroke='%23171717' stroke-opacity='.13' stroke-width='.8' stroke-linecap='round'/%3E%3C/svg%3E");
-  --line-ledger: var(--ledger-rule);
-  --line-section: var(--hand-rule);
-  --line-section-strong: var(--hand-rule-strong);
-  --line-divider: var(--hand-divider);
-  --line-chalk: var(--chalk-rule);
-  --line-chalk-vertical: var(--chalk-rule-vertical);
 }
 
 html[data-theme="dark"] {
@@ -105,13 +95,6 @@ html[data-theme="dark"] {
   --ink-pink: #ff9cc2;
   --ink-green: #86dba6;
   --marker-strength: 46%;
-  --hand-underline: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 5' preserveAspectRatio='none'%3E%3Cpath d='M.5 3.1C10 2.1 18 3.8 28 2.9S47 2.2 57 3.1s18 .7 25-.1 9-.8 13.5.1' fill='none' stroke='%23ecebe5' stroke-opacity='.88' stroke-width='1.35' stroke-linecap='round'/%3E%3C/svg%3E");
-  --ledger-rule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 5' preserveAspectRatio='none'%3E%3Cpath d='M.5 2.6C34 2.45 57 2.7 80 2.55s48 .12 79.5-.05' fill='none' stroke='%23aaa79f' stroke-opacity='.24' stroke-width='.8' stroke-linecap='round'/%3E%3C/svg%3E");
-  --hand-rule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 5' preserveAspectRatio='none'%3E%3Cpath d='M.5 2.8C18 1.9 35 3.5 52 2.6S88 2.1 106 2.9s35 1 53.5-.1' fill='none' stroke='%23aaa79f' stroke-opacity='.38' stroke-width='1' stroke-linecap='round'/%3E%3C/svg%3E");
-  --hand-rule-strong: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 5' preserveAspectRatio='none'%3E%3Cpath d='M.5 2.9C17 1.7 34 3.6 53 2.5s35-.4 53 0 35 1.5 53.5.2' fill='none' stroke='%23aaa79f' stroke-opacity='.58' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");
-  --hand-divider: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 8' preserveAspectRatio='none'%3E%3Cpath d='M1 2.7c17-1 29 1 46 .1S78 2 95 2.8M3 6c15-.7 29 .8 45 0s31-.5 45 .1' fill='none' stroke='%23aaa79f' stroke-opacity='.76' stroke-linecap='round'/%3E%3C/svg%3E");
-  --chalk-rule: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 8' preserveAspectRatio='none'%3E%3Cpath d='M2 4.2C34 3.4 62 4.9 94 4.1s62-.8 95-.1 37 .8 49-.2' fill='none' stroke='%23ecebe5' stroke-opacity='.46' stroke-width='1.15' stroke-linecap='round'/%3E%3Cpath d='M3 5.2c31-.7 64 .6 94-.1s59-.4 92 .2 38 .3 48-.4' fill='none' stroke='%23ecebe5' stroke-opacity='.18' stroke-width='.8' stroke-linecap='round'/%3E%3C/svg%3E");
-  --chalk-rule-vertical: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 240' preserveAspectRatio='none'%3E%3Cpath d='M4.1 2c-.7 31 .8 61 .1 93s-.9 63-.1 96 .8 36-.1 47' fill='none' stroke='%23ecebe5' stroke-opacity='.46' stroke-width='1.15' stroke-linecap='round'/%3E%3Cpath d='M5.1 3c-.6 31 .5 63-.1 93s-.5 61 .2 94 .2 37-.4 47' fill='none' stroke='%23ecebe5' stroke-opacity='.18' stroke-width='.8' stroke-linecap='round'/%3E%3C/svg%3E");
 }
 
 @theme inline {
@@ -259,7 +242,7 @@ html[data-theme="dark"] {
 .toc-link.is-active {
   color: var(--foreground);
   background-image: none;
-  background-size: 0 5px;
+  background-size: 0 1.5px;
 }
 
 .toc-link[aria-current="true"]::before,
@@ -314,11 +297,8 @@ html[data-theme="dark"] {
   right: 0;
   bottom: 0;
   left: 0;
-  height: 8px;
-  background-image: var(--line-chalk);
-  background-position: left center;
-  background-repeat: no-repeat;
-  background-size: 100% 8px;
+  height: 1px;
+  background: var(--rule);
   pointer-events: none;
   content: "";
 }
@@ -386,11 +366,9 @@ html[data-theme="dark"] .site-avatar__image--dark {
   right: 8%;
   bottom: -0.2rem;
   left: 8%;
-  height: 5px;
-  background-image: var(--hand-underline);
-  background-position: left bottom;
-  background-repeat: repeat-x;
-  background-size: 96px 5px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: currentColor;
   opacity: 0;
   content: "";
 }
@@ -409,11 +387,13 @@ html[data-theme="dark"] .site-avatar__image--dark {
   transform: translate(1px, 1px) scale(0.9);
 }
 
-.hand-underline,
+/* Underline that draws in from the left on hover. */
+.hover-underline,
 .ink-link {
+  background-image: linear-gradient(currentColor, currentColor);
   background-position: left bottom;
   background-repeat: no-repeat;
-  background-size: 0 5px;
+  background-size: 0 1.5px;
   text-decoration: none;
   transition:
     background-size var(--motion-duration-base) var(--motion-ease-standard),
@@ -422,19 +402,18 @@ html[data-theme="dark"] .site-avatar__image--dark {
   box-decoration-break: clone;
 }
 
-.hand-underline:is(:hover, :focus-visible),
-.hand-underline-trigger:is(:hover, :focus-visible) .hand-underline,
+.hover-underline:is(:hover, :focus-visible),
+.hover-underline-trigger:is(:hover, :focus-visible) .hover-underline,
 .ink-link:is(:hover, :focus-visible),
 .active-nav {
-  background-image: var(--hand-underline);
-  background-size: 100% 5px;
+  background-size: 100% 1.5px;
   text-decoration: none;
 }
 
 .toc-link.ink-link:is(:hover, :focus-visible),
 .toc-link.ink-link:is(.is-active, [aria-current="true"]) {
   background-image: none;
-  background-size: 0 5px;
+  background-size: 0 1.5px;
 }
 
 @keyframes thinking-dot {
@@ -473,29 +452,15 @@ html[data-theme="dark"] .site-avatar__image--dark {
   }
 }
 
-.sketch-divider {
-  height: 8px;
-  border: 0;
-  background-image: var(--line-divider);
-  background-position: left center;
-  background-repeat: no-repeat;
-  background-size: 100% 8px;
-  opacity: 0.65;
-}
-
 .page-heading > h1 {
   margin: 0;
 }
 
-.sketch-chip {
+.chip {
   position: relative;
   min-height: var(--control-height);
   border: var(--control-border-width) solid var(--control-border-color);
   border-radius: var(--control-border-radius);
-}
-
-.sketch-chip::after {
-  content: none;
 }
 
 .copy-code {
@@ -522,9 +487,9 @@ html[data-theme="dark"] .site-avatar__image--dark {
   color: var(--background);
 }
 
-.sketch-chip[data-active],
-.sketch-chip[aria-current="page"],
-.sketch-chip--filled {
+.chip[data-active],
+.chip[aria-current="page"],
+.chip--filled {
   border-color: var(--control-border-color-strong);
   background-color: var(--foreground);
   color: var(--background);
@@ -533,10 +498,7 @@ html[data-theme="dark"] .site-avatar__image--dark {
 .filter-panel {
   padding-bottom: 0.75rem;
   border-block: 0;
-  background-image: var(--line-ledger);
-  background-position: left bottom;
-  background-repeat: repeat-x;
-  background-size: 160px 5px;
+  border-bottom: 1px solid var(--rule-subtle);
 }
 
 .content-status {
@@ -559,31 +521,30 @@ html[data-theme="dark"] .site-avatar__image--dark {
   gap: 0.85rem;
 }
 
-.sketch-box {
+.card-border {
+  border: 1px solid color-mix(in srgb, var(--foreground) 78%, transparent);
+  border-radius: 8px;
+}
+
+/* Surface box; pair with .card-border for the outline. */
+.panel {
   position: relative;
   isolation: isolate;
-  border: 1px solid var(--foreground);
-  border-radius: 6px 13px 8px 11px / 11px 7px 13px 8px;
+  border-radius: 8px;
   background: var(--surface);
 }
 
 .search-box {
-  border-width: 2px;
-  border-color: var(--foreground);
-  border-radius: 10px 15px 9px 13px / 13px 9px 15px 10px;
   background: var(--background);
   transition:
     border-color var(--motion-duration-fast) var(--motion-ease-standard),
-    background-color var(--motion-duration-fast) var(--motion-ease-standard);
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
-.search-box::before {
-  content: none;
-}
-
+/* Focus thickens the outline with a ring so the layout does not shift. */
 .search-box:focus-within {
   border-color: var(--foreground);
-  background: var(--background);
+  box-shadow: 0 0 0 1px var(--foreground);
 }
 
 .search-input {
@@ -605,10 +566,7 @@ html[data-theme="dark"] .site-avatar__image--dark {
 
 .toggle-panel-rule {
   padding-bottom: 0.85rem;
-  background-image: var(--line-ledger);
-  background-position: left bottom;
-  background-repeat: repeat-x;
-  background-size: 160px 5px;
+  border-bottom: 1px solid var(--rule-subtle);
 }
 
 .toggle-control-row {
@@ -648,7 +606,7 @@ html[data-theme="dark"] .site-avatar__image--dark {
     height var(--motion-duration-medium) var(--motion-ease-smooth);
 }
 
-.ink-toggle-button.sketch-chip {
+.ink-toggle-button.chip {
   position: relative;
   z-index: 1;
   border-color: var(--control-border-color);
@@ -660,26 +618,25 @@ html[data-theme="dark"] .site-avatar__image--dark {
     color var(--motion-duration-base) var(--motion-ease-standard);
 }
 
-.ink-toggle-button.sketch-chip[data-active] {
+.ink-toggle-button.chip[data-active] {
   border-color: var(--control-border-color-strong);
   background: transparent;
   color: var(--background);
 }
 
-.ink-toggle:not([data-ink-ready="true"])
-  .ink-toggle-button.sketch-chip[data-active] {
+.ink-toggle:not([data-ink-ready="true"]) .ink-toggle-button.chip[data-active] {
   background: var(--foreground);
   color: var(--background);
 }
 
-.ink-toggle-button.sketch-chip:not([data-active]):hover {
+.ink-toggle-button.chip:not([data-active]):hover {
   border-color: var(--control-border-color);
   background: transparent;
   color: var(--graphite);
 }
 
-.ink-toggle-button.sketch-chip:active,
-.ink-toggle-button.sketch-chip:not([data-active]):active {
+.ink-toggle-button.chip:active,
+.ink-toggle-button.chip:not([data-active]):active {
   transform: scale(0.96);
 }
 
@@ -697,8 +654,6 @@ html[data-theme="dark"] .site-avatar__image--dark {
 }
 
 .tags-tag-card {
-  border: 0;
-  border-radius: 9px 13px 8px 12px / 12px 8px 13px 9px;
   background: color-mix(in srgb, var(--surface) 62%, transparent);
   color: var(--foreground);
   transition:
@@ -714,7 +669,7 @@ html[data-theme="dark"] .site-avatar__image--dark {
   min-height: 3.85rem;
   max-width: min(100%, 28rem);
   gap: 0.75rem;
-  padding: 0.62rem 0.8rem;
+  padding: 0.92rem 1.1rem;
 }
 
 .tags-tag-card .content-title {
@@ -732,10 +687,8 @@ html[data-theme="light"] .tags-tag-card .text-graphite {
 }
 
 .tags-tag-card:hover {
-  --sketch-border-image: var(--sketch-border-expressive-image);
-
   background: color-mix(in srgb, var(--muted) 54%, transparent);
-  transform: translate(-1px, -1px) rotate(-0.2deg);
+  transform: translate(-1px, -1px);
 }
 
 .tags-tag-card:hover .tag-count-badge {
@@ -813,7 +766,7 @@ html[data-theme="light"] .tags-tag-card:hover .tag-count-badge {
 .command-palette__input-wrap {
   position: relative;
   border: 2px solid var(--foreground);
-  border-radius: 9px 14px 8px 12px / 12px 8px 14px 9px;
+  border-radius: 8px;
   background: var(--background);
 }
 
@@ -866,7 +819,7 @@ html[data-theme="light"] .tags-tag-card:hover .tag-count-badge {
   isolation: isolate;
   margin-top: 0.75rem;
   border: 1.5px solid color-mix(in srgb, var(--foreground) 82%, transparent);
-  border-radius: 11px 8px 13px 9px / 8px 13px 9px 11px;
+  border-radius: 8px;
   background: color-mix(in srgb, var(--background) 94%, var(--surface));
   padding: 0.7rem 0.85rem 0.78rem;
 }
@@ -880,20 +833,17 @@ html[data-theme="light"] .tags-tag-card:hover .tag-count-badge {
 }
 
 .command-palette__result {
-  border-radius: 7px 5px 8px 6px / 5px 8px 6px 7px;
+  border-radius: 6px;
   padding-block: 0.62rem;
   padding-inline: 0.2rem;
-  background-image: var(--line-ledger);
-  background-position: left bottom;
-  background-repeat: repeat-x;
-  background-size: 160px 5px;
+  border-bottom: 1px solid var(--rule-subtle);
   transition:
     background-color var(--motion-duration-press) var(--motion-ease-standard),
     transform var(--motion-duration-press) var(--motion-ease-standard);
 }
 
 .command-palette__result:last-child {
-  background-image: none;
+  border-bottom: 0;
 }
 
 .command-palette__result:hover {
@@ -927,7 +877,7 @@ html[data-theme="light"] .tags-tag-card:hover .tag-count-badge {
     backdrop-filter: none;
   }
 
-  .command-palette__panel.sketch-box {
+  .command-palette__panel.panel {
     top: var(--command-top);
     left: var(--command-left);
     width: var(--command-width);
@@ -960,7 +910,7 @@ html[data-theme="light"] .tags-tag-card:hover .tag-count-badge {
     position: absolute;
     inset: 0;
     border: 2px solid var(--foreground);
-    border-radius: 9px 14px 8px 12px / 12px 8px 14px 9px;
+    border-radius: 8px;
     background: var(--background);
     content: "";
     opacity: 0;
@@ -1110,7 +1060,7 @@ html[data-theme="dark"] .hero-avatar__image--dark {
   display: block;
 }
 
-/* Sketchy action buttons (profile links, project links). */
+/* Outlined action buttons (profile links, project links). */
 .hero-action {
   display: inline-flex;
   min-height: 2.6rem;
@@ -1250,72 +1200,38 @@ html[data-theme="dark"] .hero-action--github {
 }
 
 .ledger-row,
-.sketch-list-row,
-.sketch-edge-bottom,
-.sketch-edge-top,
-.sketch-edge-y {
-  border-color: transparent !important;
-  background-repeat: repeat-x;
-  background-size: 160px 5px;
-}
-
-.ledger-row,
-.sketch-list-row {
-  background-image: var(--line-ledger);
-  background-position: left bottom;
-}
-
-.sketch-edge-bottom {
-  background-image: var(--line-chalk);
-  background-position: left bottom;
-}
-
-.sketch-edge-top {
-  background-image: var(--line-section);
-  background-position: left top;
-}
-
-.sketch-edge-y {
-  background-image: var(--line-section), var(--line-section);
-  background-position:
-    left top,
-    left bottom;
+.list-row {
+  border-bottom: 1px solid var(--rule-subtle);
 }
 
 .ledger-row:last-child,
-.sketch-list-row:last-child {
-  background-image: none;
+.list-row:last-child {
+  border-bottom: 0;
 }
 
-.ledger-list--subtle > .ledger-row,
 .ledger-list--subtle > .ledger-row:last-child {
-  background-image: var(--line-ledger);
+  border-bottom: 1px solid var(--rule-subtle);
 }
 
-html[data-theme="dark"] .ledger-list--subtle > .ledger-row,
-html[data-theme="dark"] .ledger-list--subtle > .ledger-row:last-child {
-  background-image: linear-gradient(
-    to right,
-    var(--line-subtle),
-    var(--line-subtle)
-  );
-  background-size: 100% 1px;
+.rule-top {
+  border-top: 1px solid var(--rule);
 }
 
-.sketch-section:first-child {
-  background-image: none;
+.rule-y {
+  border-block: 1px solid var(--rule);
 }
 
-.sketch-rule {
-  height: 5px;
+.rule-section:first-child {
+  border-top: 0;
+}
+
+.divider {
+  height: 0;
   border: 0;
-  background-image: var(--line-section-strong);
-  background-position: left center;
-  background-repeat: repeat-x;
-  background-size: 160px 5px;
+  border-top: 1px solid var(--rule-strong);
 }
 
-.sketch-timeline {
+.timeline {
   border-inline-start: 0;
   background-image: repeating-linear-gradient(
     to bottom,
@@ -1328,8 +1244,11 @@ html[data-theme="dark"] .ledger-list--subtle > .ledger-row:last-child {
 }
 
 @media (min-width: 40rem) {
-  .sketch-mobile-menu,
-  .sketch-timeline {
+  .mobile-menu {
+    border-block: 0;
+  }
+
+  .timeline {
     background-image: none;
   }
 }

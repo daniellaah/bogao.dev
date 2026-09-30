@@ -76,7 +76,7 @@ function attachCopyButtons() {
     const topClass = hasFileNameOffset ? "top-(--file-name-offset)" : "-top-3";
 
     const copyButton = document.createElement("button");
-    copyButton.className = `copy-code sketch-chip absolute end-3 ${topClass} bg-surface-strong px-2 py-1 text-xs leading-4 text-foreground font-medium`;
+    copyButton.className = `copy-code chip absolute end-3 ${topClass} bg-surface-strong px-2 py-1 text-xs leading-4 text-foreground font-medium`;
     copyButton.innerHTML = copyButtonLabel;
     copyButton.setAttribute("aria-label", "Copy code");
     codeBlock.setAttribute("tabindex", "0");

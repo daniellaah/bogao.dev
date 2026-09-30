@@ -58,7 +58,7 @@ const groupedPosts = posts.reduce(
           const yearCount = Object.values(monthGroups).flat().length;
 
           return (
-            <section class="sketch-edge-top sketch-section py-8 first:pt-0">
+            <section class="rule-top rule-section py-8 first:pt-0">
               <h2 class="font-code text-2xl font-semibold">
                 {year}
                 <sup class="ms-1 text-xs font-medium text-graphite">
@@ -70,7 +70,7 @@ const groupedPosts = posts.reduce(
                 {Object.entries(monthGroups)
                   .sort(([monthA], [monthB]) => Number(monthB) - Number(monthA))
                   .map(([month, monthGroup]) => (
-                    <div class="sketch-timeline grid gap-3 ps-4 sm:grid-cols-[8rem_minmax(0,1fr)] sm:ps-0">
+                    <div class="timeline grid gap-3 ps-4 sm:grid-cols-[8rem_minmax(0,1fr)] sm:ps-0">
                       <div class="notebook-kicker pt-4 sm:pt-0">
                         {months[Number(month) - 1]}
                         <sup class="ms-1 text-xs font-medium">

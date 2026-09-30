@@ -24,10 +24,10 @@ const pubDatetime = dayjs.utc(post.data.pubDatetime);
 >
   <a
     href={getPostPath(post)}
-    class="hand-underline-trigger grid gap-1.5 pb-3 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
+    class="hover-underline-trigger grid gap-1.5 pb-3 sm:grid-cols-[minmax(0,1fr)_9rem] sm:items-baseline sm:gap-3"
   >
     <span class="block min-w-0 text-base leading-snug sm:text-[1.15rem]">
-      <span class="hand-underline content-title">{post.data.title}</span>
+      <span class="hover-underline content-title">{post.data.title}</span>
     </span>
     <time
       datetime={post.data.pubDatetime.toISOString()}

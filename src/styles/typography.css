@@ -46,15 +46,9 @@
 
     a {
       @apply wrap-break-word text-foreground underline decoration-dashed underline-offset-4;
-      background-position: left bottom;
-      background-repeat: repeat-x;
-      background-size: 96px 5px;
-      -webkit-box-decoration-break: clone;
-      box-decoration-break: clone;
 
       &:is(:hover, :focus-visible) {
-        background-image: var(--hand-underline);
-        text-decoration: none;
+        text-decoration-style: solid;
       }
     }
 
@@ -68,11 +62,7 @@
 
     hr {
       @apply border-0;
-      height: 5px;
-      background-image: var(--line-section-strong);
-      background-position: left center;
-      background-repeat: repeat-x;
-      background-size: 160px 5px;
+      border-top: 1px solid var(--rule-strong);
     }
 
     img {

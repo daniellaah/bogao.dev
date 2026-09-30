@@ -13,7 +13,7 @@
 
 .doc-panel {
   position: relative;
-  padding: 1.2rem 1.3rem;
+  padding: 1.4rem 1.5rem;
   background-color: var(--surface);
   box-shadow: var(--card-shadow);
 }
@@ -21,8 +21,8 @@
 /* Washi tape, matching the cards. */
 .doc-panel::before {
   position: absolute;
-  top: -1.05rem;
-  left: 1rem;
+  top: -0.9rem;
+  left: 1.15rem;
   width: 4.2rem;
   height: 1.2rem;
   background: color-mix(
@@ -79,7 +79,7 @@
 
 .doc-facts__chips > * {
   border: var(--control-border-width) solid var(--control-border-color-subtle);
-  border-radius: 3px 6px 4px 5px / 6px 3px 5px 4px;
+  border-radius: 4px;
   padding: 0.25rem 0.5rem;
   background: color-mix(
     in srgb,

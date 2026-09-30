@@ -18,9 +18,7 @@ const searchInputPlaceholder = formatSearchInputPlaceholder(searchAllScope);
   <Header />
   <Main pageTitle="Search" pageDesc={`${searchInputPlaceholder}.`}>
     <section class="space-y-5">
-      <div
-        class="sketch-box sketch-border sketch-border-thin search-box relative"
-      >
+      <div class="panel card-border search-box relative">
         <label class="sr-only" for="search-input">Search</label>
         <input
           id="search-input"
@@ -48,7 +46,7 @@ const searchInputPlaceholder = formatSearchInputPlaceholder(searchAllScope);
             <button
               type="button"
               data-search-kind={kind.filter}
-              class="sketch-chip ui-text inline-flex items-center px-3 py-1 text-sm font-medium text-graphite transition hover:bg-muted/70 hover:text-foreground"
+              class="chip ui-text inline-flex items-center px-3 py-1 text-sm font-medium text-graphite transition hover:bg-muted/70 hover:text-foreground"
               aria-pressed={kind.filter === "all" ? "true" : "false"}
               data-active={kind.filter === "all" ? true : undefined}
             >
