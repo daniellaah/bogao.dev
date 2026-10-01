@@ -51,3 +51,7 @@ export const getPostPath = (
 
   return includeBase ? `/posts/${param}/` : param;
 };
+
+/** URL of the post's generated social card; see pages/og/posts. */
+export const getPostOgImagePath = (post: CollectionEntry<"blog">) =>
+  `/og/posts/${getPostPath(post, false)}.png`;

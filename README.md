@@ -51,7 +51,10 @@ tests/              vitest 测试：工具函数、路由、客户端脚本（Co
 - 文章页支持 KaTeX 编译期数学公式渲染
 - 站内搜索使用 `/search-index.json`，覆盖 posts、projects 和 tags
 - 已配置 sitemap、RSS、Open Graph 和 light/dark theme
-- 默认分享图来自 `public/og.png`
+- 每篇文章和每个 project 在构建时生成独立分享图（`/og/posts/*.png`、`/og/projects/*.png`），其他页面用 `public/og.png`
+- 文章和 project 支持 `.mdx`，以及 GitHub 风格的 callout 提示块
+- Project 页面按案例研究组织：角色、关键指标、封面图
+- 文章页可接 Giscus 评论；生产环境启用 Vercel Web Analytics
 
 ## GitHub + Vercel 部署
 
@@ -131,6 +134,33 @@ npm run new:project -- "My project" --stack Python,Astro --repoUrl https://githu
 - Project URL 固定由文件名生成；`new:project --slug` 只用于控制生成的文件名，不会写入 frontmatter `slug`
 - 文章语言默认按标题 / 描述自动判断（含汉字即 `zh-CN`，否则 `en`），用于 `<html lang>` 和 `og:locale`；需要时可在 frontmatter 里写 `lang: ja` 等显式指定
 
+### MDX
+
+`src/content/blog/` 和 `src/content/projects/` 里可以直接写 `.mdx`，用法和 `.md` 相同，数学公式、代码高亮和 callout 都照常工作。正文里可以 import 组件：
+
+```mdx
+import ProjectStatusBadge from "@/components/ProjectStatusBadge.astro";
+
+<ProjectStatusBadge status="shipping" />
+```
+
+### Callout 提示块
+
+使用 GitHub 的写法，支持 `NOTE`、`TIP`、`IMPORTANT`、`WARNING`、`CAUTION`，标记后面可以跟自定义标题：
+
+```md
+> [!TIP] Start with k = 60
+> RRF 的常数几乎不需要调。
+```
+
+### Project 案例研究
+
+`templates/project.md` 按 Problem → Approach → Results → What I learned 组织正文。frontmatter 里还有三个可选字段：
+
+- `role`：你在项目里负责什么，显示在侧栏
+- `metrics`：最多 4 个 `{ value, label }`，以大号数字显示在标题下方，放可验证的结果
+- `cover`：`{ src, alt, caption? }`，显示在正文前的架构图或截图。`src` 是相对于 md 文件的路径（例如 `./images/arkb-architecture.png`，放在 `src/content/projects/images/`），会经过 Astro 图片优化
+
 ## 定时发布与自动重建
 
 站点是静态构建的：`pubDatetime` 在未来的文章，以及首页开源卡片里的最新 merged PR，都要等下一次构建才会更新。
@@ -191,4 +221,19 @@ public/images/posts/sorting-algorithm-merge-sort.png
 public/og.png
 ```
 
-如果你要替换默认分享图，直接替换这个文件，或者在文章 frontmatter 中单独指定 `ogImage`。
+它用于首页、列表页等非文章页面。文章和 project 的分享图在构建时由 `src/utils/og/render.ts` 用 satori 生成，包含标题、描述、标签、日期和阅读时长，中文标题会按需加载 Noto Sans SC 的字符子集。在 frontmatter 中指定 `ogImage` 可以覆盖生成图。
+
+## 评论（Giscus）
+
+文章底部的评论基于 GitHub Discussions。`src/config.ts` 里的 `GISCUS.categoryId` 为空时不显示评论区。启用步骤：
+
+1. 在仓库 Settings → General → Features 里勾选 Discussions
+2. 在 Discussions 里新建一个名为 `Comments`、类型为 Announcements 的分类（只有 giscus 能创建讨论）
+3. 安装 [giscus GitHub App](https://github.com/apps/giscus) 并授权这个仓库
+4. 在 [giscus.app](https://giscus.app) 里填入仓库和分类，把生成的 `data-category-id` 填到 `GISCUS.categoryId`
+
+每篇文章按 URL 路径对应一个讨论，评论区主题跟随站点的明暗切换。
+
+## 访问统计
+
+生产构建会注入 Vercel Web Analytics（无 cookie，不需要 cookie 横幅），本地开发不加载。在 Vercel 项目的 Analytics 页面点 Enable 后，下次部署开始收集数据。

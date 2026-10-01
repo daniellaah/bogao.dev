@@ -70,3 +70,55 @@
   font-weight: 600;
   letter-spacing: -0.015em;
 }
+
+/* Case-study results under the hero: the value reads first. */
+.project-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: 0.75rem;
+  max-width: 50rem;
+  margin-top: 1.75rem;
+}
+
+.project-metric {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.3rem;
+  padding: 0.9rem 1rem;
+  background: color-mix(
+    in srgb,
+    var(--doc-marker) calc(var(--marker-strength) * 0.18),
+    var(--surface)
+  );
+}
+
+.project-metric__value {
+  color: var(--project-ink);
+  font-family: var(--font-ui);
+  font-size: clamp(1.45rem, 2.6vw, 1.8rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.project-metric__label {
+  color: var(--graphite);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.project-cover {
+  margin-bottom: 2rem;
+}
+
+.project-cover img {
+  width: 100%;
+  height: auto;
+}
+
+.project-cover figcaption {
+  margin-top: 0.6rem;
+  color: var(--graphite);
+  font-size: 0.85rem;
+  text-align: center;
+}

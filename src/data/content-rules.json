@@ -32,6 +32,9 @@
         "stack",
         "demoUrl",
         "repoUrl",
+        "role",
+        "metrics",
+        "cover",
         "ogImage",
         "canonicalURL"
       ]

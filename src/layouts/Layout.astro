@@ -6,6 +6,7 @@ import {
   PUBLIC_BAIDU_SITE_VERIFICATION,
   PUBLIC_GOOGLE_SITE_VERIFICATION,
 } from "astro:env/client";
+import Analytics from "@vercel/analytics/astro";
 import CommandPalette from "@/components/CommandPalette.astro";
 import { SITE } from "@/config";
 import { getOgLocale } from "@/utils/contentLang";
@@ -176,6 +177,11 @@ const jsonLd = JSON.stringify({
   <body>
     <slot />
     <CommandPalette />
+    {
+      // Vercel Web Analytics: cookieless page views. In the body so the
+      // ClientRouter swaps it in, and reports a view, on every navigation.
+      import.meta.env.PROD && <Analytics />
+    }
     <script>
       import "@/scripts/theme";
       import { onEveryPage } from "@/scripts/lifecycle";

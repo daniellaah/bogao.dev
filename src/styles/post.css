@@ -174,3 +174,11 @@
 #btt-btn-container.opacity-0 {
   pointer-events: none;
 }
+
+.post-comments {
+  margin-top: 3rem;
+}
+
+.post-comments .giscus {
+  margin-top: 1rem;
+}

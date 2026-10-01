@@ -47,3 +47,7 @@ export const getProjectSlug = (id: string): string => getResolvedSlug(id);
 
 export const getProjectPath = (id: string) =>
   `/projects/${getProjectSlug(id)}/`;
+
+/** URL of the project's generated social card; see pages/og/projects. */
+export const getProjectOgImagePath = (id: string) =>
+  `/og/projects/${getProjectSlug(id)}.png`;

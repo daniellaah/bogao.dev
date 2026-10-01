@@ -141,6 +141,24 @@ const validateBlog = (file, data, seenSlugs) => {
   warnImplicitSlug(file, data);
 };
 
+const validateMetrics = (file, data) => {
+  const { metrics } = data;
+  if (metrics == null) return;
+  if (!Array.isArray(metrics)) {
+    errors.push(`${file}: metrics must be a YAML array`);
+    return;
+  }
+
+  if (metrics.length > 4) {
+    errors.push(`${file}: metrics allows at most 4 entries`);
+  }
+  metrics.forEach((metric, index) => {
+    if (!isPresent(metric?.value) || !isPresent(metric?.label)) {
+      errors.push(`${file}: metrics[${index}] needs a value and a label`);
+    }
+  });
+};
+
 const validateProject = (file, data, seenSlugs) => {
   requireFields(file, data, ["title", "description", "status", "order"]);
   validateDate(file, data, "startDate");
@@ -169,6 +187,15 @@ const validateProject = (file, data, seenSlugs) => {
 
   if (isPresent(data.year) && !Number.isInteger(data.year)) {
     errors.push(`${file}: year must be an integer`);
+  }
+
+  validateMetrics(file, data);
+
+  if (
+    data.cover != null &&
+    (!isPresent(data.cover.src) || !isPresent(data.cover.alt))
+  ) {
+    errors.push(`${file}: cover needs a src and alt text`);
   }
 };
 

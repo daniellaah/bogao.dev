@@ -7,8 +7,9 @@ import ShareLinks from "@/components/ShareLinks.astro";
 import BackButton from "@/components/BackButton.astro";
 import TocList from "@/components/TocList.astro";
 import BackToTopButton from "@/components/BackToTopButton.astro";
+import Comments from "@/components/Comments.astro";
 import { formatDate, isSameDay } from "@/utils/date";
-import { getPostPath, type Post } from "@/utils/posts";
+import { getPostOgImagePath, getPostPath, type Post } from "@/utils/posts";
 import { getReadingMinutes } from "@/utils/readingTime";
 import { getTocHeadings } from "@/utils/toc";
 import { resolveOgImage } from "@/utils/ogImage";
@@ -52,7 +53,9 @@ const modified =
   modDatetime && !isSameDay(modDatetime, published) ? modDatetime : null;
 const readingMinutes = getReadingMinutes(post.body ?? "");
 
-const ogImage = resolveOgImage(initOgImage, Astro.url.origin);
+// A frontmatter ogImage wins over the generated card.
+const ogImage =
+  resolveOgImage(initOgImage, Astro.url.origin) ?? getPostOgImagePath(post);
 
 const lang = getContentLang(post.data);
 const url = canonicalURL ?? new URL(Astro.url.pathname, Astro.url).href;
@@ -73,7 +76,7 @@ const layoutProps = {
     url,
     mainEntityOfPage: url,
     inLanguage: lang,
-    image: new URL(ogImage ?? `/${SITE.ogImage}`, Astro.url).href,
+    image: new URL(ogImage, Astro.url).href,
     datePublished: published.toISOString(),
     ...(modDatetime && { dateModified: modDatetime.toISOString() }),
     ...(tags.length > 0 && { keywords: tags.join(", ") }),
@@ -242,6 +245,8 @@ const newerPost = postIndex > 0 ? toLink(posts[postIndex - 1]) : undefined;
             )
           }
         </div>
+
+        <Comments lang={lang} />
       </div>
     </div>
   </main>

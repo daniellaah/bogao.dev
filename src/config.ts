@@ -34,3 +34,15 @@ export const SITE = {
   lang: "en", // default <html lang>; posts can override it
   dir: "ltr", // "rtl" | "auto"
 } as const;
+
+// Giscus comments under posts, stored in GitHub Discussions. They stay hidden
+// until `categoryId` is set: enable Discussions on the repo, add a "Comments"
+// category of the Announcements type (so only giscus opens discussions),
+// install https://github.com/apps/giscus, then copy the category ID from
+// https://giscus.app.
+export const GISCUS = {
+  repo: "daniellaah/bogao.dev",
+  repoId: "MDEwOlJlcG9zaXRvcnk1MzQyMTQ1NQ==",
+  category: "Comments",
+  categoryId: "",
+} as const;

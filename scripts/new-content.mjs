@@ -159,7 +159,14 @@ featured: false
 draft: true
 year: ${year}
 ${yamlArrayField("stack", stack)}
-${options.demoUrl ? `demoUrl: ${quoteYaml(options.demoUrl)}\n` : ""}${options.repoUrl ? `repoUrl: ${quoteYaml(options.repoUrl)}\n` : ""}---
+${options.demoUrl ? `demoUrl: ${quoteYaml(options.demoUrl)}\n` : ""}${options.repoUrl ? `repoUrl: ${quoteYaml(options.repoUrl)}\n` : ""}# role: "Solo: design, build and evaluation"
+# metrics:
+#   - value: "+12%"
+#     label: "nDCG@10 over BM25"
+# cover:
+#   src: "./images/${slug}-architecture.png"
+#   alt: "Architecture diagram of ${options.title}"
+---
 
 ${templateBody}
 `,

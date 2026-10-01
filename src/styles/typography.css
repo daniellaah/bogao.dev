@@ -113,6 +113,65 @@
       content: none;
     }
 
+    /* "> [!NOTE]" blockquotes; see src/utils/remarkCallouts.ts. */
+    .callout {
+      --callout-marker: var(--marker-blue);
+      --callout-ink: var(--ink-blue);
+      margin-block: 1.6em;
+      padding: 0.85rem 1.1rem;
+      border-inline-start: 3px solid var(--callout-ink);
+      border-radius: 0 var(--control-border-radius) var(--control-border-radius)
+        0;
+      background: color-mix(
+        in srgb,
+        var(--callout-marker) calc(var(--marker-strength) * 0.22),
+        var(--surface)
+      );
+
+      > :first-child {
+        margin-top: 0;
+      }
+
+      > :last-child {
+        margin-bottom: 0;
+      }
+
+      > p:not(.callout__title) {
+        margin-block: 0.6em;
+      }
+    }
+
+    .callout__title {
+      margin-bottom: 0.35em;
+      color: var(--callout-ink);
+      font-family: var(--font-code);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      line-height: 1.5;
+      text-transform: uppercase;
+    }
+
+    .callout--tip {
+      --callout-marker: var(--marker-green);
+      --callout-ink: var(--ink-green);
+    }
+
+    .callout--important {
+      --callout-marker: var(--marker-pink);
+      --callout-ink: var(--ink-pink);
+    }
+
+    .callout--warning {
+      --callout-marker: var(--marker-yellow);
+      --callout-ink: var(--ink-yellow);
+    }
+
+    .callout--caution {
+      --callout-marker: var(--marker-red);
+      --callout-ink: var(--ink-red);
+    }
+
     details {
       @apply inline-block cursor-pointer text-foreground select-none [&_ul]:my-0!;
     }

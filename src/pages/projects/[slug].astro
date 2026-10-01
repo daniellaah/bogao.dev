@@ -1,6 +1,7 @@
 ---
 import type { GetStaticPaths } from "astro";
 import { render } from "astro:content";
+import { Image } from "astro:assets";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
@@ -10,7 +11,11 @@ import ProjectCard from "@/components/ProjectCard.astro";
 import ProjectStatusBadge from "@/components/ProjectStatusBadge.astro";
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
-import { getProjects, getProjectSlug } from "@/utils/projects";
+import {
+  getProjectOgImagePath,
+  getProjects,
+  getProjectSlug,
+} from "@/utils/projects";
 import { resolveOgImage } from "@/utils/ogImage";
 import { getTocHeadings } from "@/utils/toc";
 import { SITE } from "@/config";
@@ -40,8 +45,14 @@ const {
   demoUrl,
   repoUrl,
   canonicalURL,
+  role,
+  metrics,
+  cover,
 } = project.data;
-const ogImage = resolveOgImage(project.data.ogImage, Astro.url.origin);
+// A frontmatter ogImage wins over the generated card.
+const ogImage =
+  resolveOgImage(project.data.ogImage, Astro.url.origin) ??
+  getProjectOgImagePath(project.id);
 
 const { accent } = project;
 
@@ -108,12 +119,46 @@ const relatedProjects = projects
           </div>
         )
       }
+      {
+        metrics.length > 0 && (
+          <dl class="project-metrics">
+            {metrics.map(({ value, label }) => (
+              <div class="project-metric card-border">
+                <dt class="project-metric__label">{label}</dt>
+                <dd class="project-metric__value">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        )
+      }
     </header>
+
+    {
+      cover && (
+        <figure class="project-cover">
+          <Image
+            src={cover.src}
+            alt={cover.alt}
+            class="card-border"
+            loading="eager"
+          />
+          {cover.caption && <figcaption>{cover.caption}</figcaption>}
+        </figure>
+      )
+    }
 
     <div class="doc-body">
       <aside class="doc-aside" aria-label="Project details">
         <div class="doc-panel card-border">
           <dl class="doc-facts">
+            {
+              role && (
+                <div class="doc-facts__wide">
+                  <dt class="doc-panel__label">Role</dt>
+                  <dd class="doc-facts__value">{role}</dd>
+                </div>
+              )
+            }
             <div>
               <dt class="doc-panel__label">Status</dt>
               <dd class="doc-facts__value">

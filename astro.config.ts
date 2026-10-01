@@ -1,6 +1,7 @@
 import { defineConfig, envField } from "astro/config";
 import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
+import mdx from "@astrojs/mdx";
 import { unified } from "@astrojs/markdown-remark";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
@@ -11,6 +12,7 @@ import {
 } from "@shikijs/transformers";
 import { transformerFileName } from "./src/utils/transformers/fileName";
 import rehypeHeadingText from "./src/utils/rehypeHeadingText";
+import remarkCallouts from "./src/utils/remarkCallouts";
 import { SITE } from "./src/config";
 
 // https://astro.build/config
@@ -22,7 +24,9 @@ export default defineConfig({
   },
   // Every internal link and canonical URL ends in "/"; see also vercel.json.
   trailingSlash: "always",
-  integrations: [sitemap()],
+  // MDX reuses the markdown config below, so .mdx posts get the same
+  // plugins and code highlighting as .md.
+  integrations: [sitemap(), mdx()],
   // Astro 7 strips whitespace between inline elements by default ("jsx");
   // keep the markup's spaces, which the templates rely on.
   compressHTML: true,
@@ -30,7 +34,7 @@ export default defineConfig({
     // remark/rehype, which Astro 7 no longer uses by default, for the math
     // and heading-text plugins.
     processor: unified({
-      remarkPlugins: [remarkMath],
+      remarkPlugins: [remarkMath, remarkCallouts],
       // rehypeHeadingText must run before KaTeX renders math in headings.
       rehypePlugins: [rehypeHeadingText, rehypeKatex],
     }),

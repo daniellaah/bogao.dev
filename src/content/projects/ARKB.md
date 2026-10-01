@@ -20,6 +20,13 @@ stack:
   - Ollama
   - MLX-LM
 repoUrl: "https://github.com/daniellaah/ARKB"
+metrics:
+  - value: "5"
+    label: "Agent tools: match, search, read, list, links"
+  - value: "4"
+    label: "Retrieval baselines, BM25 to hybrid + rerank"
+  - value: "3"
+    label: "Benchmarks: SciFact, Bright-Pro, MuSiQue"
 ---
 
 ## The problem

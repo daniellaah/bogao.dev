@@ -1,0 +1,37 @@
+---
+import { GISCUS } from "@/config";
+
+type Props = {
+  // Content language, e.g. "zh-CN"; picks the giscus interface language.
+  lang: string;
+};
+
+const { lang } = Astro.props;
+const enabled = Boolean(GISCUS.repoId && GISCUS.categoryId);
+const giscusLang = lang.toLowerCase().startsWith("zh") ? "zh-CN" : "en";
+---
+
+{
+  enabled && (
+    <section class="post-comments" aria-labelledby="comments-title">
+      <h2 id="comments-title" class="notebook-kicker">
+        Comments
+      </h2>
+      <div
+        class="giscus"
+        data-giscus-repo={GISCUS.repo}
+        data-giscus-repo-id={GISCUS.repoId}
+        data-giscus-category={GISCUS.category}
+        data-giscus-category-id={GISCUS.categoryId}
+        data-giscus-lang={giscusLang}
+      />
+    </section>
+  )
+}
+
+<script>
+  import { onEveryPage } from "@/scripts/lifecycle";
+  import { setupComments } from "@/scripts/comments";
+
+  onEveryPage(setupComments);
+</script>

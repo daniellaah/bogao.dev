@@ -197,6 +197,33 @@ describe("check-content", () => {
     expect(result.stderr).toContain('duplicate project slug "one"');
   });
 
+  it("checks case-study metrics and cover", () => {
+    const dir = createFixture();
+    write(
+      dir,
+      "src/content/projects/case.md",
+      [
+        "---",
+        'title: "Case"',
+        'description: "About it"',
+        'status: "active"',
+        "order: 1",
+        "metrics:",
+        '  - value: "+12%"',
+        '  - label: "No value"',
+        "cover:",
+        '  src: "./diagram.png"',
+        "---",
+      ].join("\n")
+    );
+
+    const result = checkContent(dir);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("metrics[0] needs a value and a label");
+    expect(result.stderr).toContain("metrics[1] needs a value and a label");
+    expect(result.stderr).toContain("cover needs a src and alt text");
+  });
+
   it("parses frontmatter as YAML", () => {
     const data = parseFrontmatter(
       "example.md",

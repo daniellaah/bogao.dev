@@ -2,8 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 import type { CollectionEntry } from "astro:content";
 import { getBreadcrumbList } from "@/utils/breadcrumb";
 import { formatDate, getYear, isSameDay } from "@/utils/date";
-import { getPostPath, sortPosts } from "@/utils/posts";
-import { getProjectPath, getProjectSlug, sortProjects } from "@/utils/projects";
+import sharp from "sharp";
+import { getPostOgImagePath, getPostPath, sortPosts } from "@/utils/posts";
+import {
+  getProjectOgImagePath,
+  getProjectPath,
+  getProjectSlug,
+  sortProjects,
+} from "@/utils/projects";
 import { getMergedPrsUrl, summarizeMergedPrs } from "@/utils/mergedPrs";
 import { transformerFileName } from "@/utils/transformers/fileName";
 import { codeToHtml } from "shiki";
@@ -15,6 +21,14 @@ import {
 import { resolveOgImage } from "@/utils/ogImage";
 import { getReadingMinutes } from "@/utils/readingTime";
 import rehypeHeadingText from "@/utils/rehypeHeadingText";
+import remarkCallouts, { parseCalloutMarker } from "@/utils/remarkCallouts";
+import { parseUnicodeRange, subsetsForText } from "@/utils/og/fonts";
+import {
+  OG_HEIGHT,
+  OG_WIDTH,
+  renderOgImage,
+  titleFontSize,
+} from "@/utils/og/render";
 import {
   buildSearchExcerpt,
   createSearchIndexLoader,
@@ -68,6 +82,17 @@ describe("content URLs", () => {
 
     expect(getPostPath(nested)).toBe("/posts/ml-notes/stable-custom-slug/");
     expect(getPostPath(nested, false)).toBe("ml-notes/stable-custom-slug");
+  });
+
+  it("puts social cards next to the content paths", () => {
+    const nested = post(
+      "rrf",
+      { slug: "rrf" },
+      "src/content/blog/ML Notes/rrf.md"
+    );
+
+    expect(getPostOgImagePath(nested)).toBe("/og/posts/ml-notes/rrf.png");
+    expect(getProjectOgImagePath("ARKB.md")).toBe("/og/projects/arkb.png");
   });
 
   it("falls back to the entry id and skips underscore folders", () => {
@@ -283,6 +308,19 @@ describe("search", () => {
     ).toBe("Heading Visible link text and . and html text");
   });
 
+  it("drops MDX imports and callout markers from the index", () => {
+    expect(
+      stripMarkdown(
+        [
+          'import Demo from "@/components/Demo.astro";',
+          "export const k = 60;",
+          "> [!TIP] Start here",
+          "> Important imports stay.",
+        ].join("\n")
+      )
+    ).toBe("Start here Important imports stay.");
+  });
+
   it("keeps hyphenated words and dollar amounts in the index", () => {
     expect(
       stripMarkdown("- LLM-as-judge costs $5 to $10 --- see $k$ and $$\\sum$$")
@@ -458,5 +496,109 @@ describe("merged PR preview", () => {
     expect(getMergedPrsUrl("o/r", "me")).toBe(
       "https://github.com/o/r/pulls?q=is%3Apr%20is%3Amerged%20author%3Ame"
     );
+  });
+});
+
+describe("callouts", () => {
+  type Node = Parameters<ReturnType<typeof remarkCallouts>>[0];
+  const blockquote = (...texts: string[]): Node => ({
+    type: "root",
+    children: [
+      {
+        type: "blockquote",
+        children: texts.map(value => ({
+          type: "paragraph",
+          children: [{ type: "text", value }],
+        })),
+      },
+    ],
+  });
+
+  it("reads the type and an optional custom title", () => {
+    expect(parseCalloutMarker("[!note]\nBody")).toEqual({
+      type: "note",
+      title: "Note",
+      rest: "Body",
+    });
+    expect(parseCalloutMarker("[!TIP] Start with k = 60")).toMatchObject({
+      type: "tip",
+      title: "Start with k = 60",
+      rest: "",
+    });
+    expect(parseCalloutMarker("[!DANGER] nope")).toBeUndefined();
+    expect(parseCalloutMarker("Text [!NOTE]")).toBeUndefined();
+  });
+
+  it("turns a marked blockquote into a titled callout", () => {
+    const tree = blockquote("[!WARNING]\nScores differ.", "Second paragraph.");
+    remarkCallouts()(tree);
+
+    const callout = tree.children![0];
+    expect(callout.data).toEqual({
+      hName: "div",
+      hProperties: { className: ["callout", "callout--warning"] },
+    });
+    expect(callout.children!.map(node => node.children?.[0]?.value)).toEqual([
+      "Warning",
+      "Scores differ.",
+      "Second paragraph.",
+    ]);
+  });
+
+  it("drops the marker paragraph when the body starts below it", () => {
+    const tree = blockquote("[!NOTE] Heads up", "Body.");
+    remarkCallouts()(tree);
+
+    expect(
+      tree.children![0].children!.map(node => node.children?.[0]?.value)
+    ).toEqual(["Heads up", "Body."]);
+  });
+
+  it("leaves plain blockquotes alone", () => {
+    const tree = blockquote("Just a quote.");
+    remarkCallouts()(tree);
+
+    expect(tree.children![0].data).toBeUndefined();
+  });
+});
+
+describe("social cards", () => {
+  it("picks the font subsets a text needs", () => {
+    const ranges = {
+      "[1]": "U+4e00-4e0f",
+      "[2]": "U+4e10-4e1f,U+4e30",
+      latin: "U+0000-00FF",
+    };
+
+    expect(parseUnicodeRange("U+0041,U+4e00-4e0f")).toEqual([
+      [0x41, 0x41],
+      [0x4e00, 0x4e0f],
+    ]);
+    expect(subsetsForText(ranges, "\u4e30")).toEqual(["2"]);
+    expect(subsetsForText(ranges, "A\u4e01")).toEqual(["1", "latin"]);
+  });
+
+  it("shrinks long titles, counting CJK characters double", () => {
+    expect(titleFontSize("Agentic RAG")).toBe(66);
+    expect(titleFontSize("Hybrid Retrieval with Reciprocal Rank Fusion")).toBe(
+      56
+    );
+    expect(titleFontSize("为什么".repeat(11))).toBe(46);
+  });
+
+  it("renders a 1200x630 PNG, CJK included", async () => {
+    const png = await renderOgImage({
+      title: "为什么 BM25 还没有过时",
+      description: "Vector search is strong, but BM25 is a hard baseline.",
+      tags: ["Retrieval"],
+      meta: "15 Jul 2026 · 1 min read",
+    });
+    const { format, width, height } = await sharp(png).metadata();
+
+    expect({ format, width, height }).toEqual({
+      format: "png",
+      width: OG_WIDTH,
+      height: OG_HEIGHT,
+    });
   });
 });

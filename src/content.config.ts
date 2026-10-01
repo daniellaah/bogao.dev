@@ -57,6 +57,20 @@ const projects = defineCollection({
       stack: z.array(z.string()).default([]),
       demoUrl: z.url().optional(),
       repoUrl: z.url().optional(),
+      // Case study: your part in the project, up to four headline results
+      // shown under the title, and an optional diagram or screenshot.
+      role: z.string().optional(),
+      metrics: z
+        .array(z.strictObject({ value: z.string(), label: z.string() }))
+        .max(4)
+        .default([]),
+      cover: z
+        .strictObject({
+          src: image(),
+          alt: z.string().min(1),
+          caption: z.string().optional(),
+        })
+        .optional(),
       ogImage: image().or(z.string()).optional(),
       canonicalURL: z.string().optional(),
     }),

@@ -15,22 +15,37 @@ stack:
   - TypeScript
 demoUrl: "https://example.com"
 repoUrl: "https://github.com/yourname/project"
+# Case study fields, all optional.
+role: "Solo: design, build and evaluation"
+metrics:
+  - value: "+12%"
+    label: "nDCG@10 over BM25"
+  - value: "180 ms"
+    label: "p95 latency"
+cover:
+  src: "./images/project-architecture.png"
+  alt: "Architecture diagram: query router, retrievers and reranker"
+  caption: "Optional caption"
 ---
 
 Set `order: -1` if you want this project to be sorted automatically by `startDate` instead of a fixed manual position.
 
-## What it is
-
-Describe the product or system in plain language.
+Write it as a case study: a reader should know the problem, your decisions
+and the results within a minute. Put the headline numbers in `metrics`.
 
 ## Problem
 
-Explain the real problem this project is solving.
+Who had the problem, why it mattered, and what made it hard.
 
 ## Approach
 
-Write about the architecture, workflow, or design choices that matter.
+The architecture and the key decisions, including the alternatives you
+rejected and why.
 
-## Outcome
+## Results
 
-Summarize what shipped, what worked, and what still needs work.
+What shipped and what it achieved, measured against a baseline.
+
+## What I learned
+
+What you would do differently, and what still needs work.

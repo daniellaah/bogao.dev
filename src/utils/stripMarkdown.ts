@@ -1,8 +1,11 @@
-// Plain text for the search index: drops code, images, math and HTML tags,
-// keeps link text and hyphenated words ("LLM-as-judge").
+// Plain text for the search index: drops code, images, math, HTML/JSX tags,
+// MDX imports/exports and callout markers, keeps link text and hyphenated
+// words ("LLM-as-judge").
 export const stripMarkdown = (value: string) =>
   value
     .replace(/```[\s\S]*?```/g, " ")
+    .replace(/^import\s.+\sfrom\s+["'].*$|^export\s+const\s.*$/gm, " ")
+    .replace(/\[!(?:note|tip|important|warning|caution)\]/gi, " ")
     .replace(/`[^`]*`/g, " ")
     .replace(/!\[[^\]]*\]\([^)]+\)/g, " ")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
