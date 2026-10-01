@@ -30,18 +30,7 @@
     var(--doc-marker, var(--marker-yellow)) calc(var(--marker-strength) * 0.8),
     transparent
   );
-  clip-path: polygon(
-    0 12%,
-    6% 0,
-    12% 14%,
-    100% 4%,
-    94% 30%,
-    100% 58%,
-    95% 100%,
-    8% 90%,
-    0 100%,
-    5% 56%
-  );
+  clip-path: var(--tape-shape);
   content: "";
   transform: rotate(-4deg);
 }

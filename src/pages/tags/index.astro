@@ -1,8 +1,6 @@
 ---
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
-import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
 import { getPosts } from "@/utils/posts";
 import { collectTagStats, getTagPath, type TagStat } from "@/utils/tags";
 import { SITE } from "@/config";
@@ -25,7 +23,6 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
 ---
 
 <Layout title={`Tags | ${SITE.title}`}>
-  <Header />
   <Main pageTitle="Tags">
     <section class="space-y-8" data-tags-index data-tags-entering>
       <section>
@@ -107,7 +104,6 @@ const tagsByPopularity = [...tags].sort(compareTagsByPopularity);
       </section>
     </section>
   </Main>
-  <Footer />
 </Layout>
 
 <script>

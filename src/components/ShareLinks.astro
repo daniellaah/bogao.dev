@@ -1,6 +1,8 @@
 ---
+import IconBrandX from "@/assets/icons/IconBrandX.svg";
 import IconLink from "@/assets/icons/IconLink.svg";
-import { SHARE_LINKS } from "@/constants";
+import IconLinkedIn from "@/assets/icons/IconLinkedIn.svg";
+import IconMail from "@/assets/icons/IconMail.svg";
 
 type Props = {
   title: string;
@@ -8,16 +10,41 @@ type Props = {
 
 const { title } = Astro.props;
 const url = Astro.url.href;
+const shareUrl = encodeURIComponent(url);
+const shareTitle = encodeURIComponent(title);
+
+// Where readers of an engineering post actually share it. "Copy link" is
+// rendered separately because it needs a script, not a URL.
+const shareLinks = [
+  {
+    label: "LinkedIn",
+    linkTitle: "Share this post on LinkedIn",
+    icon: IconLinkedIn,
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}`,
+  },
+  {
+    label: "X",
+    linkTitle: "Share this post on X",
+    icon: IconBrandX,
+    href: `https://x.com/intent/post?url=${shareUrl}&text=${shareTitle}`,
+  },
+  {
+    label: "Email",
+    linkTitle: "Share this post via email",
+    icon: IconMail,
+    href: `mailto:?subject=${shareTitle}&body=${shareUrl}`,
+  },
+];
 ---
 
 <div class="share-links">
   <span class="notebook-kicker">Share this post</span>
   <div class="share-links__list">
     {
-      SHARE_LINKS.map(social => (
+      shareLinks.map(social => (
         <a
           class="share-link chip"
-          href={social.href(url, title)}
+          href={social.href}
           title={social.linkTitle}
           rel="noreferrer"
           target="_blank"

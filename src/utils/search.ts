@@ -11,14 +11,32 @@ export type SearchRecord = {
 
 export type RankedSearchRecord = SearchRecord & { score: number };
 
-export type SearchKind = "all" | "posts" | "projects" | "tags";
-
-export type SearchKindEntry = {
-  filter: SearchKind;
+export type SearchKind = {
+  filter: string;
   label: string;
+  // The records the filter keeps; null keeps them all.
   recordKind: SearchRecordKind | null;
+  // Completes "Search …" and "… results in …".
   scope: string;
 };
+
+/** The search page's type filters; the first is the default. */
+export const SEARCH_KINDS: readonly SearchKind[] = [
+  {
+    filter: "all",
+    label: "All",
+    recordKind: null,
+    scope: "posts, projects, and tags",
+  },
+  { filter: "posts", label: "Posts", recordKind: "Post", scope: "posts" },
+  {
+    filter: "projects",
+    label: "Projects",
+    recordKind: "Project",
+    scope: "projects",
+  },
+  { filter: "tags", label: "Tags", recordKind: "Tag", scope: "tags" },
+];
 
 export const SEARCH_LOAD_ERROR_MESSAGE = "Search failed to load.";
 
@@ -36,12 +54,11 @@ const normalizeSearchText = (value: string) =>
 // Scripts written without spaces between words: a query in them is one term.
 const CJK =
   /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
-const isCjk = (value: string) => CJK.test(value);
 
 export const splitSearchTerms = (value: string) => {
   const normalized = normalizeSearchText(value);
   if (!normalized) return [];
-  return isCjk(normalized) && !normalized.includes(" ")
+  return CJK.test(normalized) && !normalized.includes(" ")
     ? [normalized]
     : normalized.split(" ").filter(Boolean);
 };
@@ -168,23 +185,18 @@ export const createSearchIndexLoader = (
   fetcher: typeof fetch = fetch,
   url = "/search-index.json"
 ) => {
-  let loadedRecords: SearchRecord[] | null = null;
-  let recordsPromise: Promise<SearchRecord[]> | null = null;
+  let records: Promise<SearchRecord[]> | undefined;
 
-  return async () => {
-    if (loadedRecords) return loadedRecords;
-
-    recordsPromise ??= fetcher(url).then(response => {
-      if (!response.ok) throw new Error("Search index request failed.");
-      return response.json() as Promise<SearchRecord[]>;
-    });
-
-    try {
-      loadedRecords = await recordsPromise;
-      return loadedRecords;
-    } catch (error) {
-      recordsPromise = null;
-      throw error;
-    }
-  };
+  // One request shared by every caller; a failed one is retried on the next
+  // call.
+  return async () =>
+    (records ??= fetcher(url)
+      .then(response => {
+        if (!response.ok) throw new Error("Search index request failed.");
+        return response.json() as Promise<SearchRecord[]>;
+      })
+      .catch(error => {
+        records = undefined;
+        throw error;
+      }));
 };

@@ -22,7 +22,6 @@
   color: var(--foreground);
 }
 
-.site-footer__lead svg,
 .site-footer__links svg {
   width: 1rem;
   height: 1rem;

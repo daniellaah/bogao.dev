@@ -8,6 +8,8 @@ import {
 } from "astro:env/client";
 import Analytics from "@vercel/analytics/astro";
 import CommandPalette from "@/components/CommandPalette.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
 import { SITE } from "@/config";
 import { getOgLocale } from "@/utils/contentLang";
 
@@ -22,13 +24,15 @@ type Props = {
   lang?: string;
   // schema.org JSON-LD for the page; defaults to a WebPage.
   structuredData?: Record<string, unknown>;
+  // For pages whose own content already pushes the footer to the bottom.
+  footerNoMarginTop?: boolean;
 };
 
 const {
   title = SITE.title,
   author = SITE.author,
   description = SITE.desc,
-  ogImage = SITE.ogImage ? `/${SITE.ogImage}` : "/og.png",
+  ogImage = `/${SITE.ogImage}`,
   canonicalURL = new URL(Astro.url.pathname, Astro.url),
   pubDatetime,
   modDatetime,
@@ -40,6 +44,7 @@ const {
     url: `${canonicalURL}`,
     inLanguage: lang,
   },
+  footerNoMarginTop,
 } = Astro.props;
 
 const socialImageURL = new URL(ogImage, Astro.url);
@@ -175,7 +180,9 @@ const jsonLd = JSON.stringify({
     <ClientRouter />
   </head>
   <body>
+    <Header />
     <slot />
+    <Footer noMarginTop={footerNoMarginTop} />
     <CommandPalette />
     {
       // Vercel Web Analytics: cookieless page views. In the body so the

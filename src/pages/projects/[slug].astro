@@ -3,8 +3,6 @@ import type { GetStaticPaths } from "astro";
 import { render } from "astro:content";
 import { Image } from "astro:assets";
 import Layout from "@/layouts/Layout.astro";
-import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
 import BackButton from "@/components/BackButton.astro";
 import TocList from "@/components/TocList.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
@@ -74,7 +72,6 @@ const relatedProjects = projects
   canonicalURL={canonicalURL}
   ogImage={ogImage}
 >
-  <Header />
   <BackButton href="/projects/" label="Projects" />
   <main
     id="main-content"
@@ -216,7 +213,6 @@ const relatedProjects = projects
       )
     }
   </main>
-  <Footer />
 </Layout>
 
 <script>

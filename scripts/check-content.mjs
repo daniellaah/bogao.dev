@@ -5,7 +5,6 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { parse } from "yaml";
 import {
-  ALLOWED_FRONTMATTER_FIELDS,
   COLLECTIONS,
   PROJECT_STATUSES,
   REPO_ROOT,
@@ -60,9 +59,7 @@ const requireFields = (file, data, fields) => {
   }
 };
 
-const validateKnownFields = (file, collection, data) => {
-  const allowedFields = ALLOWED_FRONTMATTER_FIELDS[collection];
-
+const validateKnownFields = (file, allowedFields, data) => {
   for (const field of Object.keys(data)) {
     if (!allowedFields.has(field)) {
       errors.push(`${file}: unknown frontmatter field ${field}`);
@@ -70,14 +67,9 @@ const validateKnownFields = (file, collection, data) => {
   }
 };
 
-const validateDate = (file, data, field, required = false) => {
+const validateDate = (file, data, field) => {
   const value = data[field];
-  if (!isPresent(value)) {
-    if (required) errors.push(`${file}: missing ${field}`);
-    return;
-  }
-
-  if (!DATE_PATTERN.test(String(value))) {
+  if (isPresent(value) && !DATE_PATTERN.test(String(value))) {
     errors.push(
       `${file}: ${field} must be YYYY-MM-DD or YYYY-MM-DDTHH:mm with a zone (Z or +08:00)`
     );
@@ -88,15 +80,9 @@ const validateStringArray = (file, data, field, required = false) => {
   const value = data[field];
   if (!Array.isArray(value)) {
     if (required) errors.push(`${file}: ${field} must be a YAML array`);
-    return [];
-  }
-
-  const invalidItems = value.filter(item => !isPresent(item));
-  if (invalidItems.length > 0) {
+  } else if (!value.every(isPresent)) {
     errors.push(`${file}: ${field} contains empty values`);
   }
-
-  return value.filter(isPresent).map(String);
 };
 
 const addSlug = (seenSlugs, collection, file, explicitSlug) => {
@@ -115,12 +101,6 @@ const addSlug = (seenSlugs, collection, file, explicitSlug) => {
   }
 };
 
-const warnImplicitSlug = (file, data) => {
-  if (!isPresent(data.slug)) {
-    warnings.push(`${file}: add an explicit slug to keep the URL stable`);
-  }
-};
-
 const validateUrl = (file, data, field) => {
   const value = data[field];
   if (!isPresent(value)) return;
@@ -134,11 +114,14 @@ const validateUrl = (file, data, field) => {
 
 const validateBlog = (file, data, seenSlugs) => {
   requireFields(file, data, ["pubDatetime", "title", "description"]);
-  validateDate(file, data, "pubDatetime", true);
+  validateDate(file, data, "pubDatetime");
   validateDate(file, data, "modDatetime");
   validateStringArray(file, data, "tags", true);
   addSlug(seenSlugs, "blog", file, data.slug);
-  warnImplicitSlug(file, data);
+
+  if (!isPresent(data.slug)) {
+    warnings.push(`${file}: add an explicit slug to keep the URL stable`);
+  }
 };
 
 const validateMetrics = (file, data) => {
@@ -199,21 +182,18 @@ const validateProject = (file, data, seenSlugs) => {
   }
 };
 
-const main = () => {
-  for (const collection of COLLECTIONS) {
-    const seenSlugs = new Map();
-    const files = listMarkdownFiles(collection.dir);
+const VALIDATORS = { blog: validateBlog, projects: validateProject };
 
-    for (const file of files) {
+const main = () => {
+  for (const { name, dir, fields } of COLLECTIONS) {
+    const seenSlugs = new Map();
+
+    for (const file of listMarkdownFiles(dir)) {
       const source = fs.readFileSync(path.join(REPO_ROOT, file), "utf8");
       const data = parseFrontmatter(file, source);
 
-      validateKnownFields(file, collection.name, data);
-
-      if (collection.name === "blog") validateBlog(file, data, seenSlugs);
-      if (collection.name === "projects") {
-        validateProject(file, data, seenSlugs);
-      }
+      validateKnownFields(file, fields, data);
+      VALIDATORS[name]?.(file, data, seenSlugs);
     }
   }
 

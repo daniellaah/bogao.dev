@@ -1,5 +1,4 @@
 ---
-import type { HTMLAttributes } from "astro/types";
 import IconGitHub from "@/assets/icons/IconGitHub.svg";
 import IconLinkedIn from "@/assets/icons/IconLinkedIn.svg";
 import { SITE } from "@/config";
@@ -9,15 +8,12 @@ const currentYear = new Date().getFullYear();
 
 type Props = {
   noMarginTop?: boolean;
-} & HTMLAttributes<"footer">;
+};
 
-const { noMarginTop = false, class: className, ...attrs } = Astro.props;
+const { noMarginTop = false } = Astro.props;
 ---
 
-<footer
-  class:list={["app-layout", { "mt-auto": !noMarginTop }, className]}
-  {...attrs}
->
+<footer class:list={["app-layout", { "mt-auto": !noMarginTop }]}>
   <div class="site-footer">
     <p class="site-footer__lead">Let's build something.</p>
 

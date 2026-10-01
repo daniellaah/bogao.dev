@@ -18,10 +18,6 @@
       font-family: var(--font-ui);
     }
 
-    h3 {
-      @apply italic;
-    }
-
     h2 {
       @apply mt-10;
       font-size: 1.45em;
@@ -29,7 +25,7 @@
     }
 
     h3 {
-      @apply mt-8;
+      @apply mt-8 italic;
       font-size: 1.22em;
       line-height: 1.35;
     }
@@ -186,11 +182,7 @@
     }
 
     .katex-display {
-      @apply max-w-full overflow-x-auto overflow-y-hidden text-foreground;
-    }
-
-    .katex-display {
-      @apply my-5 py-1;
+      @apply my-5 max-w-full overflow-x-auto overflow-y-hidden py-1 text-foreground;
     }
   }
 

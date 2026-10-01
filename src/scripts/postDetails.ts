@@ -113,15 +113,14 @@ const getIdFromHash = (hash: string) => {
 };
 
 function setupActiveToc(article: HTMLElement): Cleanup | undefined {
-  const links = Array.from(
-    document.querySelectorAll<HTMLAnchorElement>("[data-toc-link]")
+  // Each TOC link points at "#<heading id>" (TocList.astro).
+  const linkIds = new Map(
+    Array.from(
+      document.querySelectorAll<HTMLAnchorElement>("[data-toc-link]"),
+      link => [link, getIdFromHash(link.getAttribute("href") ?? "")] as const
+    )
   );
-  const linkedIds = new Set(
-    links.flatMap(link => {
-      const href = link.getAttribute("href");
-      return href?.startsWith("#") ? [getIdFromHash(href)] : [];
-    })
-  );
+  const linkedIds = new Set(linkIds.values());
   const headings = Array.from(
     article.querySelectorAll<HTMLElement>("h2[id], h3[id], h4[id]")
   ).filter(heading => linkedIds.has(heading.id));
@@ -133,10 +132,8 @@ function setupActiveToc(article: HTMLElement): Cleanup | undefined {
     if (!id || id === activeId) return;
     activeId = id;
 
-    for (const link of links) {
-      const href = link.getAttribute("href");
-      const isActive = href?.startsWith("#") && getIdFromHash(href) === id;
-      if (isActive) link.setAttribute("aria-current", "true");
+    for (const [link, linkId] of linkIds) {
+      if (linkId === id) link.setAttribute("aria-current", "true");
       else link.removeAttribute("aria-current");
     }
   };
@@ -165,12 +162,8 @@ function setupActiveToc(article: HTMLElement): Cleanup | undefined {
     });
   };
 
-  const handleLinkClick = (event: Event) => {
-    const hash = (event.currentTarget as HTMLAnchorElement).getAttribute(
-      "href"
-    );
-    if (hash?.startsWith("#")) setActiveLink(getIdFromHash(hash));
-  };
+  const handleLinkClick = (event: Event) =>
+    setActiveLink(linkIds.get(event.currentTarget as HTMLAnchorElement) ?? "");
 
   let hashTimer: number | undefined;
   const handleHashChange = () => {
@@ -188,7 +181,9 @@ function setupActiveToc(article: HTMLElement): Cleanup | undefined {
   window.addEventListener("hashchange", handleHashChange);
   // Images and fonts that finish loading later can move the headings.
   window.addEventListener("load", requestUpdate, { once: true });
-  for (const link of links) link.addEventListener("click", handleLinkClick);
+  for (const link of linkIds.keys()) {
+    link.addEventListener("click", handleLinkClick);
+  }
 
   if (window.location.hash) setActiveLink(getIdFromHash(window.location.hash));
   updateActiveLink();

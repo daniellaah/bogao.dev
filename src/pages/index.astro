@@ -1,7 +1,5 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
 import OpenSourceCard from "@/components/OpenSourceCard.astro";
 import PostRow from "@/components/PostRow.astro";
@@ -44,8 +42,8 @@ const structuredData = {
   title={`${PROFILE.name} — ${PROFILE.role} | ${SITE.title}`}
   description={`${PROFILE.summary} ${PROFILE.availability}`}
   structuredData={structuredData}
+  footerNoMarginTop
 >
-  <Header />
   <main
     id="main-content"
     data-layout="index"
@@ -185,7 +183,6 @@ const structuredData = {
       )
     }
   </main>
-  <Footer noMarginTop />
 </Layout>
 
 <script>

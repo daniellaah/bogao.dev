@@ -39,6 +39,19 @@ html[data-theme="light"] {
   --ink-green: #1b7040;
   --ink-red: #b02a1f;
   --marker-strength: 100%;
+  /* Torn-edged washi tape on cards and side panels. */
+  --tape-shape: polygon(
+    0 12%,
+    6% 0,
+    12% 14%,
+    100% 4%,
+    94% 30%,
+    100% 58%,
+    95% 100%,
+    8% 90%,
+    0 100%,
+    5% 56%
+  );
   --site-shell: 72rem;
   --site-shell-padding: 1rem;
   --reading-measure: 68ch;
@@ -242,7 +255,6 @@ mark {
 }
 
 .chip[data-active],
-.chip[aria-current="page"],
 .chip--filled {
   border-color: var(--control-border-color-strong);
   background-color: var(--foreground);

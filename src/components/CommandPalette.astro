@@ -1,11 +1,10 @@
 ---
 import IconSearch from "@/assets/icons/IconSearch.svg";
-import searchKinds from "@/data/search-kinds.json";
-import { formatSearchInputPlaceholder } from "@/utils/search";
+import { SEARCH_KINDS, formatSearchInputPlaceholder } from "@/utils/search";
 import "@/styles/command-palette.css";
 
 const searchInputPlaceholder = formatSearchInputPlaceholder(
-  searchKinds[0].scope
+  SEARCH_KINDS[0].scope
 );
 ---
 

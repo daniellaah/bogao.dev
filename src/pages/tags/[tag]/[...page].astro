@@ -2,8 +2,6 @@
 import type { GetStaticPathsOptions } from "astro";
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
-import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
 import Pagination from "@/components/Pagination.astro";
 import PostRow from "@/components/PostRow.astro";
 import { slugifyStr } from "@/utils/slugifyCore";
@@ -29,15 +27,16 @@ export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   });
 }
 
-const params = Astro.params;
-const { tag } = params;
+const { tag } = Astro.params;
 const { page, tagName } = Astro.props;
 ---
 
-<Layout title={`Tag: ${tagName} | ${SITE.title}`}>
-  <Header />
+<Layout
+  title={`Tag: ${tagName} | ${SITE.title}`}
+  footerNoMarginTop={page.lastPage > 1}
+>
   <Main
-    pageTitle={[`Tag:`, `${tagName}`]}
+    pageTitle={["Tag:", tagName]}
     titleTransition={tag}
     pageDesc={`All posts with the tag "${tagName}".`}
   >
@@ -47,6 +46,4 @@ const { page, tagName } = Astro.props;
   </Main>
 
   <Pagination {page} />
-
-  <Footer noMarginTop={page.lastPage > 1} />
 </Layout>

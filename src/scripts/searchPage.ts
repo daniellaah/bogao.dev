@@ -1,4 +1,5 @@
 import {
+  SEARCH_KINDS,
   SEARCH_LOAD_ERROR_MESSAGE,
   buildSearchExcerpt,
   escapeSearchHtml,
@@ -8,15 +9,18 @@ import {
   highlightSearchTerms,
   rankSearchRecords,
   splitSearchTerms,
-  type RankedSearchRecord,
   type SearchKind,
-  type SearchKindEntry,
   type SearchRecord,
-  type SearchRecordKind,
 } from "../utils/search";
-import searchKinds from "../data/search-kinds.json";
 import { loadSearchIndex } from "./searchIndex";
+import { setActiveToggleButton } from "./toggleControls";
 import { getCurrentUrlSearchParams, replaceCurrentUrlSearch } from "./urlState";
+
+const [DEFAULT_KIND] = SEARCH_KINDS;
+
+// Unknown values in a shared or stale URL fall back to the default.
+const findKind = (filter: string | null | undefined) =>
+  SEARCH_KINDS.find(kind => kind.filter === filter) ?? DEFAULT_KIND;
 
 export function setupSearchPage() {
   const input = document.querySelector<HTMLInputElement>("#search-input");
@@ -30,41 +34,10 @@ export function setupSearchPage() {
 
   if (!input || !clearButton || !status || !results) return;
 
-  const searchKindEntries = searchKinds as SearchKindEntry[];
-  const searchKindToRecordKind = Object.fromEntries(
-    searchKindEntries.map(kind => [kind.filter, kind.recordKind])
-  ) as Record<SearchKind, SearchRecordKind | null>;
-  const searchKindToScope = Object.fromEntries(
-    searchKindEntries.map(kind => [kind.filter, kind.scope])
-  ) as Record<SearchKind, string>;
-
-  const getSearchKind = () => {
-    const rawKind = getCurrentUrlSearchParams().get("type");
-    return rawKind &&
-      Object.prototype.hasOwnProperty.call(searchKindToRecordKind, rawKind)
-      ? (rawKind as SearchKind)
-      : "all";
-  };
-
-  const setSearchKind = (kind: SearchKind) => {
-    for (const button of kindButtons) {
-      const isActive = button.dataset.searchKind === kind;
-      button.toggleAttribute("data-active", isActive);
-      button.setAttribute("aria-pressed", String(isActive));
-    }
-  };
-
-  const getVisibleRecords = (records: SearchRecord[], kind: SearchKind) => {
-    const recordKind = searchKindToRecordKind[kind];
-    return recordKind
-      ? records.filter(record => record.kind === recordKind)
-      : records;
-  };
-
-  const getScopeText = (kind: SearchKind) => searchKindToScope[kind];
+  const getSearchKind = () => findKind(getCurrentUrlSearchParams().get("type"));
 
   const renderEmptyPrompt = (kind: SearchKind) => {
-    status.textContent = formatSearchEmptyPrompt(getScopeText(kind));
+    status.textContent = formatSearchEmptyPrompt(kind.scope);
     results.innerHTML = "";
   };
 
@@ -74,25 +47,26 @@ export function setupSearchPage() {
     kind: SearchKind
   ) => {
     const terms = splitSearchTerms(query);
-    const visibleRecords = getVisibleRecords(records, kind);
-
     if (!terms.length) {
       renderEmptyPrompt(kind);
       return;
     }
 
-    const sorted = rankSearchRecords(visibleRecords, terms);
-
-    if (!sorted.length) {
-      status.textContent = `${formatNoSearchResults(query)} in ${getScopeText(kind)}`;
+    const ranked = rankSearchRecords(
+      kind.recordKind
+        ? records.filter(record => record.kind === kind.recordKind)
+        : records,
+      terms
+    );
+    if (!ranked.length) {
+      status.textContent = `${formatNoSearchResults(query)} in ${kind.scope}`;
       results.innerHTML = "";
       return;
     }
 
-    status.textContent = `${formatSearchResultSummary(sorted.length, query)} in ${getScopeText(kind)}`;
-
-    results.innerHTML = sorted
-      .map((record: RankedSearchRecord) => {
+    status.textContent = `${formatSearchResultSummary(ranked.length, query)} in ${kind.scope}`;
+    results.innerHTML = ranked
+      .map(record => {
         // Body text only adds context when there is body text to show.
         const excerpt = record.content
           ? `<p class="mt-2 text-sm leading-6 text-graphite">${highlightSearchTerms(buildSearchExcerpt(record.content, terms), terms)}</p>`
@@ -115,75 +89,63 @@ export function setupSearchPage() {
       .join("");
   };
 
-  const updateUrl = (query: string, kind: SearchKind) => {
-    const params = getCurrentUrlSearchParams();
-    if (query.trim()) params.set("q", query);
-    else params.delete("q");
-    if (kind === "all") params.delete("type");
-    else params.set("type", kind);
-
-    replaceCurrentUrlSearch(params);
-  };
-
-  const loadRecords = async (showLoading = false) => {
-    if (showLoading) status.textContent = "Loading search index...";
-    return loadSearchIndex();
-  };
-
   const runSearch = async (query: string, kind: SearchKind) => {
     if (!splitSearchTerms(query).length) {
       renderEmptyPrompt(kind);
       return;
     }
 
+    status.textContent = "Loading search index...";
     try {
-      const records = await loadRecords(true);
-      renderResults(records, input.value, getSearchKind());
+      // The input and URL may have changed while the index loaded.
+      renderResults(await loadSearchIndex(), input.value, getSearchKind());
     } catch {
       status.textContent = SEARCH_LOAD_ERROR_MESSAGE;
     }
   };
 
-  const initialQuery = getCurrentUrlSearchParams().get("q") ?? "";
+  // Keeps the query and kind in the URL, then shows their results.
+  const search = (query: string, kind: SearchKind) => {
+    const params = getCurrentUrlSearchParams();
+    if (query.trim()) params.set("q", query);
+    else params.delete("q");
+    if (kind === DEFAULT_KIND) params.delete("type");
+    else params.set("type", kind.filter);
+    replaceCurrentUrlSearch(params);
+
+    void runSearch(query, kind);
+  };
+
   const initialKind = getSearchKind();
+  input.value = getCurrentUrlSearchParams().get("q") ?? "";
+  setActiveToggleButton(kindButtons, "searchKind", initialKind.filter, null);
 
-  input.value = initialQuery;
-  setSearchKind(initialKind);
-
+  // Warm the index before the first keystroke.
   input.addEventListener(
     "focus",
     () => {
-      void loadRecords().catch(() => {
-        // Retry state is reset inside createSearchIndexLoader.
+      void loadSearchIndex().catch(() => {
+        // The loader resets itself so the next search retries.
       });
     },
     { once: true }
   );
 
-  input.addEventListener("input", (event: Event) => {
-    const query = (event.currentTarget as HTMLInputElement).value;
-    const kind = getSearchKind();
-    updateUrl(query, kind);
-    void runSearch(query, kind);
-  });
+  input.addEventListener("input", () => search(input.value, getSearchKind()));
 
   for (const button of kindButtons) {
     button.addEventListener("click", () => {
-      const kind = (button.dataset.searchKind ?? "all") as SearchKind;
-      setSearchKind(kind);
-      updateUrl(input.value, kind);
-      void runSearch(input.value, kind);
+      const kind = findKind(button.dataset.searchKind);
+      setActiveToggleButton(kindButtons, "searchKind", kind.filter, null);
+      search(input.value, kind);
     });
   }
 
   clearButton.addEventListener("click", () => {
     input.value = "";
-    const kind = getSearchKind();
-    updateUrl("", kind);
-    renderEmptyPrompt(kind);
+    search("", getSearchKind());
     input.focus();
   });
 
-  if (initialQuery.trim()) void runSearch(initialQuery, initialKind);
-  else renderEmptyPrompt(initialKind);
+  void runSearch(input.value, initialKind);
 }

@@ -81,7 +81,7 @@ const tape = (color: string, side: "left" | "right", rotate: number) =>
       height: 36,
       backgroundColor: color,
       opacity: 0.92,
-      // The torn edges of the tape in doc-layout.css, scaled to 150×36.
+      // The torn edges of --tape-shape in global.css, scaled to 150×36.
       // Satori misreads percentages here, so the points are in pixels.
       clipPath:
         "polygon(0px 4px, 9px 0px, 18px 5px, 150px 1px, 141px 11px, 150px 21px, 142px 36px, 12px 32px, 0px 36px, 7px 20px)",

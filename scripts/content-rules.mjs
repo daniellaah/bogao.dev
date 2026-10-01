@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import {
+
+export {
   slugifyForContent,
   stripMarkdownExt,
 } from "../src/utils/slugifyCore.js";
@@ -10,40 +11,32 @@ export const REPO_ROOT = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
   ".."
 );
-const rulesPath = path.join(REPO_ROOT, "src/data/content-rules.json");
 
-const contentRules = JSON.parse(fs.readFileSync(rulesPath, "utf8"));
-
-export const COLLECTIONS = Object.entries(contentRules.collections).map(
-  ([name, config]) => ({ name, dir: config.dir })
+const rules = JSON.parse(
+  fs.readFileSync(path.join(REPO_ROOT, "src/data/content-rules.json"), "utf8")
 );
 
-export const ALLOWED_FRONTMATTER_FIELDS = Object.fromEntries(
-  Object.entries(contentRules.collections).map(([name, config]) => [
+/** Content collections: where their files live and the frontmatter they allow. */
+export const COLLECTIONS = Object.entries(rules.collections).map(
+  ([name, { dir, frontmatterFields }]) => ({
     name,
-    new Set(config.frontmatterFields),
-  ])
+    dir,
+    fields: new Set(frontmatterFields),
+  })
 );
 
-export const ALLOWED_OPTIONS = Object.fromEntries(
-  Object.entries(contentRules.contentKinds).map(([kind, config]) => [
-    kind,
-    new Set(config.allowedOptions),
-  ])
+/** What `new-content.mjs` can create ("post", "project") and how. */
+export const CONTENT_KINDS = Object.fromEntries(
+  Object.entries(rules.contentKinds).map(
+    ([kind, { collection, template, allowedOptions }]) => [
+      kind,
+      {
+        dir: rules.collections[collection].dir,
+        template,
+        allowedOptions: new Set(allowedOptions),
+      },
+    ]
+  )
 );
 
-export const TEMPLATE_FILES = Object.fromEntries(
-  Object.entries(contentRules.contentKinds).map(([kind, config]) => [
-    kind,
-    config.template,
-  ])
-);
-
-export const PROJECT_STATUSES = contentRules.projectStatuses;
-
-export const getContentDir = kind => {
-  const collection = contentRules.contentKinds[kind]?.collection;
-  return collection ? contentRules.collections[collection]?.dir : undefined;
-};
-
-export { slugifyForContent, stripMarkdownExt };
+export const PROJECT_STATUSES = rules.projectStatuses;

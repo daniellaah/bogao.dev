@@ -49,46 +49,34 @@ export function setupTagsIndexPage() {
     }, 0);
   };
 
-  const sortCards = (animate = false) => {
-    if (animate) {
-      root.removeAttribute("data-tags-entering");
-
-      for (const card of cards) {
-        for (const animation of card.getAnimations()) {
-          animation.cancel();
-        }
-      }
+  const sortCards = () => {
+    // A sort can interrupt the entrance animation.
+    root.removeAttribute("data-tags-entering");
+    for (const card of cards) {
+      for (const animation of card.getAnimations()) animation.cancel();
     }
 
-    const sortedCards = [...cards].sort((cardA, cardB) => {
-      if (currentSort === "popular") {
-        const countDiff =
-          Number(cardB.dataset.count ?? 0) - Number(cardA.dataset.count ?? 0);
-        if (countDiff !== 0) return countDiff;
-      }
+    const sortedCards = [...cards].sort(
+      (cardA, cardB) =>
+        (currentSort === "popular" &&
+          Number(cardB.dataset.count ?? 0) -
+            Number(cardA.dataset.count ?? 0)) ||
+        compareCardNames(cardA, cardB)
+    );
 
-      return compareCardNames(cardA, cardB);
-    });
-
-    if (!animate || reduceMotion.matches) {
-      for (const card of sortedCards) {
-        cardGrid.append(card);
-      }
+    if (reduceMotion.matches) {
+      cardGrid.append(...sortedCards);
       return;
     }
 
+    // FLIP: measure, reorder, then animate each card from its old position.
     const firstRects = new Map(
       cards.map(card => [card, card.getBoundingClientRect()] as const)
     );
-
-    for (const card of sortedCards) {
-      cardGrid.append(card);
-    }
+    cardGrid.append(...sortedCards);
 
     const animations = sortedCards.flatMap(card => {
-      const firstRect = firstRects.get(card);
-      if (!firstRect) return [];
-
+      const firstRect = firstRects.get(card)!;
       const lastRect = card.getBoundingClientRect();
       const deltaX = firstRect.left - lastRect.left;
       const deltaY = firstRect.top - lastRect.top;
@@ -98,15 +86,10 @@ export function setupTagsIndexPage() {
       return [
         card.animate(
           [
-            {
-              transform: `translate(${deltaX}px, ${deltaY}px)`,
-            },
+            { transform: `translate(${deltaX}px, ${deltaY}px)` },
             { transform: "translate(0, 0)" },
           ],
-          {
-            duration: 220,
-            easing: "cubic-bezier(0.22, 1, 0.36, 1)",
-          }
+          { duration: 220, easing: "cubic-bezier(0.22, 1, 0.36, 1)" }
         ),
       ];
     });
@@ -136,7 +119,7 @@ export function setupTagsIndexPage() {
       if (nextSort === currentSort) return;
 
       currentSort = nextSort;
-      sortCards(true);
+      sortCards();
       applyTagsState();
     });
   }

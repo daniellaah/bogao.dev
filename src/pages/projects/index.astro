@@ -1,8 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import Main from "@/layouts/Main.astro";
-import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
 import ProjectCard from "@/components/ProjectCard.astro";
 import OpenSourceCard from "@/components/OpenSourceCard.astro";
 import { OPEN_SOURCE } from "@/data/profile";
@@ -16,7 +14,6 @@ const projects = await getProjects();
   title={`Projects | ${SITE.title}`}
   description="Projects and open-source contributions by Bo Gao: agentic RAG, production recommender retrieval, and LLM tooling."
 >
-  <Header />
   <Main pageTitle="Projects">
     {
       projects.length > 0 ? (
@@ -45,5 +42,4 @@ const projects = await getProjects();
       </div>
     </section>
   </Main>
-  <Footer />
 </Layout>

@@ -1,22 +1,19 @@
 ---
 import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
-import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
-import searchKinds from "@/data/search-kinds.json";
 import { SITE } from "@/config";
 import "@/styles/search.css";
 import {
+  SEARCH_KINDS,
   formatSearchEmptyPrompt,
   formatSearchInputPlaceholder,
 } from "@/utils/search";
 
-const searchAllScope = searchKinds[0].scope;
+const searchAllScope = SEARCH_KINDS[0].scope;
 const searchInputPlaceholder = formatSearchInputPlaceholder(searchAllScope);
 ---
 
 <Layout title={`Search | ${SITE.title}`}>
-  <Header />
   <Main pageTitle="Search" pageDesc={`${searchInputPlaceholder}.`}>
     <section class="space-y-5">
       <div class="panel card-border search-box relative">
@@ -43,13 +40,13 @@ const searchInputPlaceholder = formatSearchInputPlaceholder(searchAllScope);
         aria-label="Filter search results by type"
       >
         {
-          searchKinds.map(kind => (
+          SEARCH_KINDS.map((kind, index) => (
             <button
               type="button"
               data-search-kind={kind.filter}
               class="chip inline-flex items-center px-3 py-1 text-sm font-medium text-graphite transition hover:bg-muted/70 hover:text-foreground"
-              aria-pressed={kind.filter === "all" ? "true" : "false"}
-              data-active={kind.filter === "all" ? true : undefined}
+              aria-pressed={index === 0 ? "true" : "false"}
+              data-active={index === 0 ? true : undefined}
             >
               {kind.label}
             </button>
@@ -64,7 +61,6 @@ const searchInputPlaceholder = formatSearchInputPlaceholder(searchAllScope);
       <ul id="search-results"></ul>
     </section>
   </Main>
-  <Footer />
 </Layout>
 
 <script>
