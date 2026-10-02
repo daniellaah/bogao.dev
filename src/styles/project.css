@@ -62,7 +62,7 @@
 .project-related {
   margin-top: 3rem;
   padding-top: 1.35rem;
-  border-top: 1px solid var(--foreground);
+  border-top: 1px solid var(--ink-line);
 }
 
 .project-related__title {

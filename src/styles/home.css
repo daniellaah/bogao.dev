@@ -113,7 +113,7 @@ body:has(.career-home) #top-nav-wrap {
 
 .career-section {
   padding-block: 1.35rem 2rem;
-  border-top: 1px solid var(--foreground);
+  border-top: 1px solid var(--ink-line);
   scroll-margin-top: 1rem;
 }
 
@@ -158,7 +158,7 @@ body:has(.career-home) #top-nav-wrap {
   position: relative;
   isolation: isolate;
   padding: 4px;
-  border: 1.5px solid var(--foreground);
+  border: 1.5px solid var(--ink-line);
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--avatar-paper);
 }

@@ -8,7 +8,7 @@
   grid-template-columns: minmax(0, 1fr);
   gap: 2rem;
   padding-top: 2rem;
-  border-top: 1px solid var(--foreground);
+  border-top: 1px solid var(--ink-line);
 }
 
 .doc-panel {

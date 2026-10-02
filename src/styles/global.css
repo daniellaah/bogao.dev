@@ -89,6 +89,11 @@ html[data-theme="light"] {
   --ink-green: #1b7040;
   --ink-red: #b02a1f;
   --marker-strength: 100%;
+  /* Ink-on-paper lines: full strength on light paper, softened on dark. */
+  --ink-line: var(--foreground);
+  --ink-line-card: color-mix(in srgb, var(--foreground) 78%, transparent);
+  /* Paper behind the avatar; matches the avatar's own background. */
+  --avatar-paper: #ffffff;
   /* Torn-edged washi tape on cards and side panels. */
   --tape-shape: polygon(
     0 12%,
@@ -147,17 +152,20 @@ html[data-theme="dark"] {
   --graphite: #a6abb8;
   --line-subtle: #2d3444;
   --card-shadow: 0 1px 2px rgb(0 0 0 / 30%), 0 10px 28px -14px rgb(0 0 0 / 70%);
-  --marker-yellow: #e0b53a;
-  --marker-blue: #5f9ee6;
-  --marker-pink: #e27aa2;
-  --marker-green: #5dbb82;
-  --marker-red: #e06b5f;
+  --marker-yellow: #f0b429;
+  --marker-blue: #4f96e8;
+  --marker-pink: #e8699a;
+  --marker-green: #4fc07a;
+  --marker-red: #e5604f;
   --ink-yellow: #f3cf62;
   --ink-blue: #93c1ff;
   --ink-pink: #ff9cc2;
   --ink-green: #86dba6;
   --ink-red: #ff9e94;
-  --marker-strength: 46%;
+  --marker-strength: 62%;
+  --ink-line: color-mix(in srgb, var(--foreground) 58%, transparent);
+  --ink-line-card: color-mix(in srgb, var(--foreground) 48%, transparent);
+  --avatar-paper: #ecebe5;
 }
 
 @theme inline {
@@ -313,7 +321,7 @@ mark {
 }
 
 .card-border {
-  border: 1px solid color-mix(in srgb, var(--foreground) 78%, transparent);
+  border: 1px solid var(--ink-line-card);
   border-radius: 8px;
 }
 

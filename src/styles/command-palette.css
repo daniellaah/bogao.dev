@@ -40,7 +40,7 @@
 .command-palette__input-wrap {
   position: relative;
   margin-top: 1rem;
-  border: 2px solid var(--foreground);
+  border: 2px solid var(--ink-line);
   border-radius: 8px;
   background: var(--background);
 }
@@ -66,7 +66,7 @@
 
 .command-palette__results-panel {
   margin-top: 0.75rem;
-  border: 1.5px solid color-mix(in srgb, var(--foreground) 82%, transparent);
+  border: 1.5px solid var(--ink-line-card);
   border-radius: 8px;
   background: color-mix(in srgb, var(--background) 94%, var(--surface));
   padding: 0.7rem 0.85rem 0.78rem;

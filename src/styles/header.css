@@ -63,7 +63,7 @@ html[data-theme="dark"] .theme-icon--sun {
   overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--foreground) 52%, transparent);
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--avatar-paper);
 }
 
 .site-avatar__image {
