@@ -2,8 +2,11 @@ import { copyText } from "./clipboard";
 
 type Cleanup = () => void;
 
-// A heading becomes the current TOC entry once its top scrolls above this line.
-const TOC_ACTIVATION_LINE = 120;
+// A heading becomes the current TOC entry once its top scrolls above this
+// line: a share of the viewport, so the section filling the screen is the one
+// highlighted, not the one whose heading already left it.
+const TOC_ACTIVATION_SHARE = 0.3;
+const tocActivationLine = () => window.innerHeight * TOC_ACTIVATION_SHARE;
 const COPY_LABEL = "Copy";
 const COPY_FEEDBACK_MS = 1200;
 
@@ -141,7 +144,7 @@ function setupActiveToc(article: HTMLElement): Cleanup | undefined {
   const updateActiveLink = () => {
     let current = headings[0];
     for (const heading of headings) {
-      if (heading.getBoundingClientRect().top > TOC_ACTIVATION_LINE) break;
+      if (heading.getBoundingClientRect().top > tocActivationLine()) break;
       current = heading;
     }
 

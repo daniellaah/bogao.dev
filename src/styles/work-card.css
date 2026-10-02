@@ -68,7 +68,7 @@
 
 .work-card__kicker {
   font-family: var(--font-code);
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.14em;
   color: var(--card-ink);
@@ -110,7 +110,7 @@
   gap: 0.25rem 0.75rem;
   color: var(--graphite);
   font-family: var(--font-code);
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   letter-spacing: 0.04em;
 }
 
@@ -145,7 +145,7 @@
   );
   border-radius: 4px;
   padding: 0.25rem 0.5rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1;
 }
 
@@ -158,6 +158,53 @@
 
 .work-card:hover .work-card__arrow {
   transform: translateX(0.18rem);
+}
+
+/* Featured: the full grid width, with a row of results under the text. */
+.work-card--featured {
+  grid-column: 1 / -1;
+}
+
+.work-card--featured .work-card__title {
+  font-size: 1.5rem;
+}
+
+.work-card--featured .work-card__description {
+  font-size: 1rem;
+}
+
+.work-card__metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: 0.6rem;
+  margin-block: 0.3rem 0.2rem;
+}
+
+.work-card__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.7rem 0.8rem;
+  border-left: 3px solid var(--card-marker);
+  background: color-mix(
+    in srgb,
+    var(--card-marker) calc(var(--marker-strength) * 0.2),
+    var(--surface)
+  );
+}
+
+.work-card__metric-value {
+  color: var(--card-ink);
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.work-card__metric-label {
+  color: var(--graphite);
+  font-size: 0.8rem;
+  line-height: 1.4;
 }
 
 .work-grid {

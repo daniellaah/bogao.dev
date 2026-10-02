@@ -3,6 +3,56 @@
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
+/* Latin body text, so the site looks the same on every platform; CJK and
+   other scripts still come from the system fonts in the stacks below. */
+@font-face {
+  font-family: "Figtree";
+  src: url("/fonts/Figtree-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Figtree";
+  src: url("/fonts/Figtree-500.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Figtree";
+  src: url("/fonts/Figtree-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Figtree";
+  src: url("/fonts/Figtree-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
 @font-face {
   font-family: "Handlee";
   src: url("/fonts/Handlee-Regular.woff2") format("woff2");
@@ -54,7 +104,7 @@ html[data-theme="light"] {
   );
   --site-shell: 72rem;
   --site-shell-padding: 1rem;
-  --reading-measure: 68ch;
+  --reading-measure: 62ch; /* ~75 characters per line in Figtree */
   --control-height: 2rem;
   --control-border-width: 1px;
   --control-border-color: color-mix(
@@ -111,13 +161,14 @@ html[data-theme="dark"] {
 }
 
 @theme inline {
-  /* System fonts only: nothing to download for body text, CJK included. */
+  /* Figtree (self-hosted, Latin only) also sets the social cards, so the
+     site and its previews match; CJK stays on system fonts. */
   --font-body:
-    "Avenir Next", Avenir, -apple-system, "Segoe UI", "PingFang SC",
+    "Figtree", "Avenir Next", Avenir, -apple-system, "Segoe UI", "PingFang SC",
     "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
   --font-ui:
-    "Avenir Next", Avenir, "PingFang SC", "Hiragino Sans GB", "Segoe UI",
-    "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+    "Figtree", "Avenir Next", Avenir, "PingFang SC", "Hiragino Sans GB",
+    "Segoe UI", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
   --font-display:
     "Handlee", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
     "Noto Sans CJK SC", "Segoe UI", sans-serif;
