@@ -12,9 +12,6 @@ type Props = {
   external?: boolean;
   preview?: { label: string; meta: string; title: string };
   accent?: Accent;
-  // The headline card: spans the grid, with its results beside the text.
-  featured?: boolean;
-  metrics?: readonly { value: string; label: string }[];
 };
 
 const {
@@ -26,16 +23,11 @@ const {
   external = false,
   preview,
   accent = "yellow",
-  featured = false,
-  metrics = [],
 } = Astro.props;
 ---
 
 <a
-  class:list={[
-    `work-card work-card--${accent} card-border hover-underline-trigger`,
-    { "work-card--featured": featured },
-  ]}
+  class={`work-card work-card--${accent} card-border hover-underline-trigger`}
   href={href}
   rel={external ? "noreferrer" : undefined}
   target={external ? "_blank" : undefined}
@@ -51,18 +43,6 @@ const {
           <span>{preview.meta}</span>
         </span>
         <span class="work-card__preview-title">{preview.title}</span>
-      </span>
-    )
-  }
-  {
-    featured && metrics.length > 0 && (
-      <span class="work-card__metrics">
-        {metrics.map(({ value, label }) => (
-          <span class="work-card__metric">
-            <span class="work-card__metric-value">{value}</span>
-            <span class="work-card__metric-label">{label}</span>
-          </span>
-        ))}
       </span>
     )
   }
