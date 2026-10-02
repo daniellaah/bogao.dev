@@ -68,7 +68,7 @@
 
 .work-card__kicker {
   font-family: var(--font-code);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   letter-spacing: 0.14em;
   color: var(--card-ink);
@@ -79,15 +79,15 @@
   width: fit-content;
   font-family: var(--font-ui);
   font-weight: 600;
-  font-size: 1.2rem;
-  line-height: 1.2;
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
 }
 
 .work-card__description {
   max-width: 52rem;
   color: var(--graphite);
-  font-size: 0.93rem;
-  line-height: 1.6;
+  font-size: var(--text-md);
+  line-height: var(--leading-relaxed);
 }
 
 .work-card__preview {
@@ -110,14 +110,14 @@
   gap: 0.25rem 0.75rem;
   color: var(--graphite);
   font-family: var(--font-code);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   letter-spacing: 0.04em;
 }
 
 .work-card__preview-title {
-  font-size: 0.88rem;
+  font-size: var(--text-md);
   font-weight: 500;
-  line-height: 1.45;
+  line-height: var(--leading-normal);
 }
 
 /* Tags wrap in their own column so the arrow stays pinned bottom-right. */
@@ -145,7 +145,7 @@
   );
   border-radius: 4px;
   padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   line-height: 1;
 }
 

@@ -89,7 +89,7 @@ html[data-theme="light"] .tags-tag-card:hover .tag-count-badge {
   border-radius: var(--control-border-radius);
   color: var(--graphite);
   font-family: var(--font-code);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   line-height: 1;
   transform-origin: center;
   transition:

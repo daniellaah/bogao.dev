@@ -41,10 +41,24 @@
     U+2215, U+FEFF, U+FFFD;
 }
 
+/* Mono is the label voice (kickers, dates, tags, facts) as well as code,
+   so it is self-hosted too. Latin only; 400 and 600. */
 @font-face {
-  font-family: "Figtree";
-  src: url("/fonts/Figtree-700.woff2") format("woff2");
-  font-weight: 700;
+  font-family: "JetBrains Mono";
+  src: url("/fonts/JetBrainsMono-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212,
+    U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/fonts/JetBrainsMono-600.woff2") format("woff2");
+  font-weight: 600;
   font-style: normal;
   font-display: swap;
   unicode-range:
@@ -181,8 +195,40 @@ html[data-theme="dark"] {
     "Handlee", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
     "Noto Sans CJK SC", "Segoe UI", sans-serif;
   --font-code:
-    "SFMono-Regular", "JetBrains Mono", "Cascadia Code", "Fira Code",
-    ui-monospace, monospace;
+    "JetBrains Mono", ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas,
+    monospace;
+
+  /* Type scale. Sizes are the only font sizes used outside code blocks;
+     the responsive ones are for headings and lead paragraphs. */
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1.5;
+  --text-sm: 0.8125rem;
+  --text-sm--line-height: 1.5;
+  --text-md: 0.875rem;
+  --text-md--line-height: 1.5;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.3;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.3;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 1.3;
+  --text-heading: clamp(1.3rem, 2.2vw, 1.6rem);
+  --text-heading--line-height: 1.3;
+  --text-title: clamp(1.9rem, 3.6vw, 2.6rem);
+  --text-title--line-height: 1.15;
+  --text-display: clamp(2.5rem, 4.6vw, 3.5rem);
+  --text-display--line-height: 1.15;
+  --text-lead: clamp(1.02rem, 1.5vw, 1.2rem);
+  --text-lead--line-height: 1.6;
+  --leading-tight: 1.15;
+  --leading-snug: 1.3;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.6;
+  /* Latin prose, and the looser setting CJK needs. */
+  --leading-prose: 1.7;
+  --leading-prose-cjk: 1.85;
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-strong: var(--surface-strong);
@@ -293,7 +339,7 @@ mark {
   align-items: center;
   gap: 0.35rem;
   color: var(--graphite);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   white-space: nowrap;
 }
 
@@ -342,7 +388,7 @@ mark {
   padding: 0.45rem 0.95rem;
   border: var(--control-border-width) solid var(--control-border-color);
   border-radius: var(--control-border-radius);
-  font-size: 0.92rem;
+  font-size: var(--text-md);
   font-weight: 500;
   transition:
     background-color var(--motion-duration-base) var(--motion-ease-standard),

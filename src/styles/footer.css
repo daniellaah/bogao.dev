@@ -6,7 +6,7 @@
   border-top: 1px solid var(--border);
   padding-block: 1.25rem;
   color: var(--graphite);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
 }
 
 .site-footer__lead,

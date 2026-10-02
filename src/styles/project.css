@@ -29,7 +29,7 @@
 .project-hero__kicker {
   color: var(--project-ink);
   font-family: var(--font-code);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -37,18 +37,18 @@
 
 .project-hero__title {
   margin-top: 0.7rem;
-  font-size: clamp(2rem, 4vw, 2.75rem);
+  font-size: var(--text-title);
   font-weight: 600;
   letter-spacing: -0.02em;
-  line-height: 1.15;
+  line-height: var(--leading-tight);
 }
 
 .project-hero__description {
   max-width: 46rem;
   margin-top: 1rem;
   color: var(--graphite);
-  font-size: clamp(1rem, 1.5vw, 1.12rem);
-  line-height: 1.7;
+  font-size: var(--text-lead);
+  line-height: var(--leading-relaxed);
   text-wrap: pretty;
 }
 
@@ -66,7 +66,7 @@
 }
 
 .project-related__title {
-  font-size: clamp(1.3rem, 2.2vw, 1.6rem);
+  font-size: var(--text-heading);
   font-weight: 600;
   letter-spacing: -0.015em;
 }
@@ -94,17 +94,16 @@
 
 .project-metric__value {
   color: var(--project-ink);
-  font-family: var(--font-ui);
-  font-size: clamp(1.45rem, 2.6vw, 1.8rem);
+  font-family: var(--font-code);
+  font-size: var(--text-2xl);
   font-weight: 600;
-  letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: var(--leading-tight);
 }
 
 .project-metric__label {
   color: var(--graphite);
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-size: var(--text-md);
+  line-height: var(--leading-normal);
 }
 
 .project-cover {
@@ -119,6 +118,6 @@
 .project-cover figcaption {
   margin-top: 0.6rem;
   color: var(--graphite);
-  font-size: 0.85rem;
+  font-size: var(--text-md);
   text-align: center;
 }

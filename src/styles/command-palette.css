@@ -60,7 +60,7 @@
   border: 0;
   background: transparent;
   padding: 0.9rem 3.25rem 0.9rem 3rem;
-  font-size: 1.15rem;
+  font-size: var(--text-lg);
   outline: 0;
 }
 
