@@ -34,7 +34,7 @@ const navItems = [
 </a>
 
 <header
-  class="app-layout flex flex-col items-center justify-between lg:flex-row"
+  class="app-layout flex flex-col items-center justify-between md:flex-row"
 >
   <div
     id="top-nav-wrap"
@@ -46,25 +46,14 @@ const navItems = [
   >
     <a
       href="/"
-      class="site-brand site-wordmark absolute top-[1.125rem] py-1 text-xl leading-none font-semibold whitespace-nowrap sm:top-[1.625rem] lg:static lg:my-auto lg:text-2xl"
+      class="site-brand site-wordmark absolute top-[1.125rem] py-1 text-xl leading-none font-semibold whitespace-nowrap sm:top-[1.625rem] md:static md:my-auto md:text-2xl"
     >
       <span class="site-avatar" aria-hidden="true">
-        {
-          /* Lazy: only the image for the active theme is rendered, so only it loads. */
-        }
+        {/* Ink only; the paper color behind it comes from the theme. */}
         <img
-          loading="lazy"
           src="/images/site/avatar.svg"
           alt=""
-          class="site-avatar__image dark:hidden"
-          width="32"
-          height="32"
-        />
-        <img
-          loading="lazy"
-          src="/images/site/avatar-dark.svg"
-          alt=""
-          class="site-avatar__image hidden dark:block"
+          class="site-avatar__image"
           width="32"
           height="32"
         />
@@ -73,11 +62,11 @@ const navItems = [
     </a>
     <nav
       id="nav-menu"
-      class="flex w-full flex-col items-center lg:ms-2 lg:flex-row lg:justify-end lg:space-x-2 lg:py-0"
+      class="flex w-full flex-col items-center md:ms-2 md:flex-row md:justify-end md:space-x-2 md:py-0"
     >
       <button
         id="menu-btn"
-        class="focus-outline min-h-11 min-w-11 self-end p-2 lg:hidden"
+        class="focus-outline min-h-11 min-w-11 self-end p-2 md:hidden"
         aria-label="Open Menu"
         aria-expanded="false"
         aria-controls="menu-items"
@@ -89,10 +78,10 @@ const navItems = [
         id="menu-items"
         class:list={[
           "mt-4 grid w-full max-w-xs grid-cols-2 place-content-center gap-1",
-          "rule-y mobile-menu py-3 lg:py-0",
-          "[&>li>a]:flex [&>li>a]:min-h-11 [&>li>a]:items-center [&>li>a]:justify-center [&>li>a]:px-3 [&>li>a]:py-2 [&>li>a]:text-center [&>li>a]:text-base [&>li>a]:font-medium lg:[&>li>a]:min-h-0 lg:[&>li>a]:px-2 lg:[&>li>a]:py-1 lg:[&>li>a]:text-sm",
+          "rule-y mobile-menu py-3 md:py-0",
+          "[&>li>a]:flex [&>li>a]:min-h-11 [&>li>a]:items-center [&>li>a]:justify-center [&>li>a]:px-3 [&>li>a]:py-2 [&>li>a]:text-center [&>li>a]:text-base [&>li>a]:font-medium md:[&>li>a]:min-h-0 md:[&>li>a]:px-2 md:[&>li>a]:py-1 md:[&>li>a]:text-sm",
           "hidden",
-          "lg:mt-0 lg:flex lg:w-auto lg:max-w-none lg:gap-x-2 lg:gap-y-0",
+          "md:mt-0 md:flex md:w-auto md:max-w-none md:gap-x-2 md:gap-y-0",
         ]}
       >
         {
@@ -118,23 +107,23 @@ const navItems = [
         }
 
         <li
-          class="col-span-2 mt-2 grid grid-cols-2 gap-2 border-t border-border pt-2 first:mt-0 first:border-t-0 first:pt-0 lg:mt-0 lg:flex lg:items-center lg:gap-1 lg:border-0 lg:pt-0"
+          class="col-span-2 mt-2 grid grid-cols-2 gap-2 border-t border-border pt-2 first:mt-0 first:border-t-0 first:pt-0 md:mt-0 md:flex md:items-center md:gap-1 md:border-0 md:pt-0"
         >
           <LinkButton
             href="/search/"
             data-command-open
-            class="search-nav-link hover-underline-trigger flex min-h-11 items-center justify-center px-2 py-2 lg:min-h-0 lg:p-1"
+            class="search-nav-link hover-underline-trigger flex min-h-11 items-center justify-center px-2 py-2 md:min-h-0 md:p-1"
             title="Search (⌘K / Ctrl+K)"
             aria-label="Search. Press Command K or Control K to open quick search."
             aria-current={ariaCurrent("/search/")}
             disableHoverOpacity
           >
             <span class="search-nav-mark" aria-hidden="true">
-              <IconSearch class="search-nav-icon size-5 lg:size-6" />
+              <IconSearch class="search-nav-icon size-5 md:size-6" />
             </span>
             <span
               class:list={[
-                "hover-underline ms-1 lg:sr-only",
+                "hover-underline ms-1 md:sr-only",
                 { "active-nav": isActive("/search/") },
               ]}>Search</span
             >
@@ -143,11 +132,11 @@ const navItems = [
           <button
             id="theme-btn"
             type="button"
-            class="focus-outline flex min-h-11 items-center justify-center px-2 py-2 lg:min-h-0 lg:p-1"
+            class="focus-outline flex min-h-11 items-center justify-center px-2 py-2 md:min-h-0 md:p-1"
             aria-label="Switch to dark mode"
             title="Switch to dark mode"
           >
-            <span class="relative block size-5 lg:size-6" aria-hidden="true">
+            <span class="relative block size-5 md:size-6" aria-hidden="true">
               <IconMoon
                 class="theme-icon theme-icon--moon absolute inset-0 size-full"
               />
@@ -155,7 +144,7 @@ const navItems = [
                 class="theme-icon theme-icon--sun absolute inset-0 size-full"
               />
             </span>
-            <span data-theme-label class="ms-1 lg:sr-only">Dark</span>
+            <span data-theme-label class="ms-1 md:sr-only">Dark</span>
           </button>
         </li>
       </ul>

@@ -104,7 +104,7 @@ const newerPost = postIndex > 0 ? toLink(posts[postIndex - 1]) : undefined;
 ---
 
 <Layout {...layoutProps}>
-  <BackButton href="/posts/" label="Posts" />
+  <BackButton href="/posts/" label="Posts" scope="posts" />
   <main
     id="main-content"
     class:list={[

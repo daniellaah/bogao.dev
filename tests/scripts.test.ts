@@ -132,18 +132,38 @@ describe("back navigation", () => {
     createDom("https://bogao.dev/tags/retrieval/?page=2");
     const { setupBackNavigation } = await import("@/scripts/backNavigation");
 
-    document.body.innerHTML = `<main id="main-content" data-back-label="Tag: Retrieval"></main>`;
+    document.body.innerHTML = `<main id="main-content" data-back-label="Tag: Retrieval" data-back-scope="posts"></main>`;
     setupBackNavigation();
 
     document.body.innerHTML = await renderComponent(BackButton, {
       href: "/posts/",
       label: "Posts",
+      scope: "posts",
     });
     setupBackNavigation();
 
     const button = document.querySelector<HTMLAnchorElement>("#back-button");
     expect(button?.getAttribute("href")).toBe("/tags/retrieval/?page=2");
     expect(button?.textContent?.trim()).toBe("Tag: Retrieval");
+  });
+
+  it("ignores a stored list page from another section", async () => {
+    createDom("https://bogao.dev/tags/retrieval/");
+    const { setupBackNavigation } = await import("@/scripts/backNavigation");
+
+    document.body.innerHTML = `<main id="main-content" data-back-label="Tag: Retrieval" data-back-scope="posts"></main>`;
+    setupBackNavigation();
+
+    document.body.innerHTML = await renderComponent(BackButton, {
+      href: "/projects/",
+      label: "Projects",
+      scope: "projects",
+    });
+    setupBackNavigation();
+
+    const button = document.querySelector<HTMLAnchorElement>("#back-button");
+    expect(button?.getAttribute("href")).toBe("/projects/");
+    expect(button?.textContent?.trim()).toBe("Projects");
   });
 
   it("keeps the server-rendered fallback without a stored page", async () => {
@@ -153,6 +173,7 @@ describe("back navigation", () => {
     document.body.innerHTML = await renderComponent(BackButton, {
       href: "/projects/",
       label: "Projects",
+      scope: "projects",
     });
     setupBackNavigation();
 

@@ -1,5 +1,6 @@
 const BACK_URL_KEY = "backUrl";
 const BACK_LABEL_KEY = "backLabel";
+const BACK_SCOPE_KEY = "backScope";
 
 const readStorage = (key: string) => {
   try {
@@ -19,9 +20,11 @@ const writeStorage = (key: string, value: string) => {
 
 /**
  * Remember the current page as the target of detail-page back links, if it is
- * one: list pages mark their <main> with `data-back-label`. The URL keeps the
- * query string, so filters set on the page survive the round trip. Call again
- * whenever the page rewrites its own URL.
+ * one: list pages mark their <main> with `data-back-label` and, in
+ * `data-back-scope`, the detail sections they can be a back link for
+ * ("posts projects"). The URL keeps the query string, so filters set on the
+ * page survive the round trip. Call again whenever the page rewrites its own
+ * URL.
  */
 export function storeBackUrl() {
   const main = document.querySelector<HTMLElement>(
@@ -31,13 +34,22 @@ export function storeBackUrl() {
 
   writeStorage(BACK_URL_KEY, `${location.pathname}${location.search}`);
   writeStorage(BACK_LABEL_KEY, main.dataset.backLabel ?? "");
+  writeStorage(BACK_SCOPE_KEY, main.dataset.backScope ?? "");
 }
 
-/** Point the back button at the last list page the reader came from. */
+/**
+ * Point the back button at the last list page the reader came from, if that
+ * page lists this kind of detail page: a project page never points back at a
+ * tag page.
+ */
 export function updateBackButton() {
   const button = document.querySelector<HTMLAnchorElement>("#back-button");
   const backUrl = readStorage(BACK_URL_KEY);
   if (!button || !backUrl) return;
+
+  const scope = button.dataset.backScope;
+  const storedScopes = readStorage(BACK_SCOPE_KEY)?.split(" ") ?? [];
+  if (scope && !storedScopes.includes(scope)) return;
 
   button.href = backUrl;
 

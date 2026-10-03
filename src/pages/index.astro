@@ -48,30 +48,22 @@ const structuredData = {
     id="main-content"
     data-layout="index"
     data-back-label={SITE.showBackButton ? "Home" : undefined}
+    data-back-scope={SITE.showBackButton ? "posts projects" : undefined}
     class="career-home app-layout"
   >
     <section class="career-hero" aria-labelledby="career-hero-title">
       <div class="hero-avatar career-hero__avatar">
         {
-          /* Lazy: only the image for the active theme is rendered, so only it loads. */
+          /* The largest thing above the fold: ink only, the theme supplies
+             the paper color behind it. */
         }
         <img
-          loading="lazy"
           src="/images/site/avatar.svg"
           alt={`Illustrated portrait of ${PROFILE.name}`}
           width="1254"
           height="1254"
-          decoding="async"
-          class="hero-avatar__image h-full w-full rounded-full object-cover dark:hidden"
-        />
-        <img
-          loading="lazy"
-          src="/images/site/avatar-dark.svg"
-          alt={`Illustrated portrait of ${PROFILE.name}`}
-          width="1254"
-          height="1254"
-          decoding="async"
-          class="hero-avatar__image hidden h-full w-full rounded-full object-cover dark:block"
+          fetchpriority="high"
+          class="hero-avatar__image h-full w-full rounded-full object-cover"
         />
       </div>
 

@@ -1,5 +1,6 @@
 ---
 import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
+import IconArrowUpRight from "@/assets/icons/IconArrowUpRight.svg";
 import type { Accent } from "@/utils/projects";
 import "@/styles/work-card.css";
 
@@ -50,6 +51,15 @@ const {
     <span class="work-card__tags">
       {tags.map(tag => <span>{tag}</span>)}
     </span>
-    <IconArrowRight class="work-card__arrow" aria-hidden="true" />
+    {
+      external ? (
+        <>
+          <span class="sr-only">(opens GitHub in a new tab)</span>
+          <IconArrowUpRight class="work-card__arrow" aria-hidden="true" />
+        </>
+      ) : (
+        <IconArrowRight class="work-card__arrow" aria-hidden="true" />
+      )
+    }
   </span>
 </a>

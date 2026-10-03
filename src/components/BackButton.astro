@@ -6,12 +6,14 @@ import { SITE } from "@/config";
 type Props = {
   layoutClass?: string;
   // Where the link goes when the reader did not arrive from a list page.
-  // backNavigation.ts replaces both with the last list page visited.
+  // backNavigation.ts replaces both with the last list page visited, if
+  // that page lists this section's pages.
   href: string;
   label: string;
+  scope: "posts" | "projects";
 };
 
-const { layoutClass = "app-layout", href, label } = Astro.props;
+const { layoutClass = "app-layout", href, label, scope } = Astro.props;
 ---
 
 {
@@ -20,6 +22,7 @@ const { layoutClass = "app-layout", href, label } = Astro.props;
       <LinkButton
         id="back-button"
         href={href}
+        data-back-scope={scope}
         class="focus-outline -ms-2 mt-8 mb-2 hover:text-foreground/75"
       >
         <IconChevronLeft class="inline-block size-6 rtl:rotate-180" />

@@ -13,12 +13,25 @@ const title =
   typeof props.pageTitle === "string"
     ? props.pageTitle
     : props.pageTitle.join(" ");
-// Marks this page as a target for detail-page back links (backNavigation.ts).
+// Marks this page as a target for detail-page back links (backNavigation.ts):
+// post and tag lists for posts, the projects list for projects, search for both.
+const section = Astro.url.pathname.split("/")[1];
+const backScope =
+  section === "projects"
+    ? "projects"
+    : section === "posts" || section === "tags"
+      ? "posts"
+      : "posts projects";
 const backLabel = SITE.showBackButton ? title : undefined;
 ---
 
 <Breadcrumb />
-<main data-back-label={backLabel} id="main-content" class="app-layout pb-4">
+<main
+  data-back-label={backLabel}
+  data-back-scope={backLabel && backScope}
+  id="main-content"
+  class="app-layout pb-4"
+>
   <div
     class:list={[
       "inline-flex max-w-full flex-col",
