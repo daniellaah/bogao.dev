@@ -44,10 +44,13 @@ function addHeadingLinks(article: HTMLElement) {
   )) {
     if (!heading.id || heading.querySelector(".heading-link")) continue;
 
-    heading.classList.add("group");
+    heading.classList.add("group", "relative");
     const link = document.createElement("a");
+    // Tailwind's hover variants only apply where hovering exists, so on touch
+    // screens the "#" stays hidden; there the link covers the heading instead,
+    // so a tap on the heading sets the anchor.
     link.className =
-      "heading-link ms-2 no-underline opacity-75 md:opacity-0 md:group-hover:opacity-100 md:focus:opacity-100";
+      "heading-link ms-2 no-underline opacity-0 group-hover:opacity-100 focus-visible:opacity-100 pointer-coarse:absolute pointer-coarse:inset-0 pointer-coarse:ms-0";
     link.href = `#${heading.id}`;
     link.setAttribute(
       "aria-label",

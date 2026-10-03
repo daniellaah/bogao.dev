@@ -61,7 +61,7 @@ export function setupCommandPalettePage() {
         record => `
             <li class="command-palette__result">
               <a href="${escapeSearchHtml(record.url)}" class="hover-underline-trigger block">
-                <div class="flex items-baseline justify-between gap-4">
+                <div class="flex items-baseline gap-3">
                   <span class="hover-underline min-w-0 truncate text-base font-medium">
                     ${highlightSearchTerms(record.title, terms)}
                   </span>

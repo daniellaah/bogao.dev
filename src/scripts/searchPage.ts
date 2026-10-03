@@ -74,7 +74,7 @@ export function setupSearchPage() {
         return `
             <li class="list-row py-5">
               <a href="${escapeSearchHtml(record.url)}" class="hover-underline-trigger block">
-                <div class="flex items-baseline justify-between gap-4">
+                <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <span class="hover-underline min-w-0 text-lg font-medium">
                     ${highlightSearchTerms(record.title, terms)}
                   </span>
