@@ -1,16 +1,16 @@
 ---
 title: "Agentic RAG"
-description: "An agentic RAG system where the agent decides how to search, what to read, and when to stop, instead of following a fixed retrieve-then-generate pipeline."
-kicker: "Featured project"
+description: "Post-training a small local model to work as a retrieval agent, with SFT and LoRA."
+kicker: "LLM post-training"
 tags:
-  - Agentic RAG
-  - Hybrid retrieval
-  - MCP
-  - Evaluation
   - SFT / LoRA
+  - Distillation
+  - MLX-LM
+  - Agentic RAG
+  - Evaluation
 status: "active"
-order: 1
-featured: true
+order: 2
+featured: false
 year: 2026
 stack:
   - Python

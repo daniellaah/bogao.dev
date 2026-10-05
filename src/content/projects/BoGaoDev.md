@@ -1,14 +1,13 @@
 ---
 title: "BoGao.Dev"
-description: "This site: an Astro portfolio with content collections, site-wide search, RSS, and light/dark themes, deployed on Vercel."
+description: "Let's Build Something."
 kicker: "Personal site"
 tags:
-  - Astro
-  - TypeScript
-  - Tailwind CSS
-  - Vercel
+  - Learning
+  - Building
+  - Writing
 status: "shipping"
-order: 10
+order: 3
 startDate: 2026-02-04
 featured: false
 year: 2026

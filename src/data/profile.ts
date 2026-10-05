@@ -18,7 +18,7 @@ export const PROFILE = {
 
 // Projects shown on the homepage, by file name. Card label and tags come from
 // each project's frontmatter.
-export const HOMEPAGE_PROJECTS = ["arkb", "bogaodev"] as const;
+export const HOMEPAGE_PROJECTS = ["zettel-agent", "arkb", "bogaodev"] as const;
 
 export const GITHUB_USERNAME = "daniellaah";
 

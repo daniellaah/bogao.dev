@@ -44,7 +44,7 @@ const projects = defineCollection({
     z.strictObject({
       title: z.string(),
       description: z.string(),
-      // Small label above the card title, e.g. "Featured project".
+      // Small label above the card title, e.g. "Obsidian plugin".
       kicker: z.string().optional(),
       // Highlights shown on project cards; `stack` lists the full tech stack.
       tags: z.array(z.string()).default([]),
